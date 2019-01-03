@@ -38,4 +38,8 @@ const getStatusesAndEmit = async socket => {
     console.error('Error: ${error.code}');
   }
 };
-server.listen(port, () => console.log(`Listening on port ${port}`));
+server.listen(port, () => 
+server.close(),
+console.log(`Listening on port ${port}`)
+
+);
