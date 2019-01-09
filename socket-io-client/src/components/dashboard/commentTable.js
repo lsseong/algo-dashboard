@@ -52,6 +52,7 @@ export default class CommentTable extends Component {
       <div  className="col-md-3 small">
        <ReactTable
      data={this.storecommentarr}
+     //pageSize={this.storecommentarr.length}
      columns={[
        {
         Header: this.props.children.toUpperCase(),
@@ -75,9 +76,10 @@ export default class CommentTable extends Component {
            
            ]}
      ]}
-     defaultPageSize={3}
+   
      className="-striped -highlight table border round"
      showPageSizeOptions={false}
+     defaultPageSize={3}
      style={{
       height: "190px" // This will force the table body to overflow and scroll, since there is not enough room
     }}

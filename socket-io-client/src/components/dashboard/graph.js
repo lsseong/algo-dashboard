@@ -61,8 +61,8 @@ class Graph extends Component {
     }
   
     if(this.props.bardata.length!==0){
-      console.log(oldProps.bardata);
-      console.log(this.props.bardata);
+      //console.log(oldProps.bardata);
+      //console.log(this.props.bardata);
       var pt = this.storefirstcol.findIndex(i => i === this.props.bardata.symbol); 
       //console.log("pt "+pt);
       //console.log("current symbol "+this.props.bardata.symbol);

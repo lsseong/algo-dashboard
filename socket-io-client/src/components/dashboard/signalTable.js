@@ -50,6 +50,7 @@ export default class SignalTable extends Component {
       <div  className="col-md-3 small">
        <ReactTable
      data={this.storesignalarr}
+
      columns={[
        {
         Header: this.props.children.toUpperCase(),
@@ -120,6 +121,7 @@ export default class SignalTable extends Component {
          ]
        },
      ]}
+ 
      defaultPageSize={3}
      className="-striped -highlight table border round"
      showPageSizeOptions={false}

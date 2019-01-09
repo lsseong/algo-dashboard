@@ -10,13 +10,14 @@
     "server": "nodemon app.js",
     "client": "npm start --prefix socket-io-client",
     "dev": "concurrently \"npm run server\" \"npm run client\""
-    
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.18.0",
+    "bootstrap": "^4.2.1",
     "concurrently": "^4.1.0",
+    "cors": "^2.8.5",
     "express": "^4.16.4",
     "nodemon": "^1.18.9",
     "socket.io": "^2.2.0"

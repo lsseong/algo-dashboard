@@ -3,7 +3,6 @@ import PortfolioTable from './portfolioTable';
 import QuoteTable from './quoteTable';
 import CommentTable from './commentTable';
 import Graph from './graph';
-//import BarTable from './barTable';
 import OrderTable from './orderTable';
 import PositionTable from './positionTable';
 import SignalTable from './signalTable';
@@ -22,12 +21,16 @@ class StrategyListEvent extends Component {
         perfdata:[],
         order:[],
         currenturl:this.props.url,
+        initstrat:"",
+        serverconnect:true,
+    
+        
       }
-      //console.log(this.props.url);
+      
       //open eventsource base on current url
-      this.eventSource = new EventSource("http://localhost:2222/service/"+this.props.url);
+      this.eventSource = new EventSource("http://"+this.props.host+":"+this.props.port+"/service/"+this.props.url);
     }
-   //on change 
+   //on drop down change 
     change =(event)=>{
       //close current eventsource
       this.eventSource.close();
@@ -43,7 +46,7 @@ class StrategyListEvent extends Component {
         currenturl:event.target.value,
                      });
       //open eventsource base on new event 
-      this.eventSource = new EventSource("http://localhost:2222/service/"+event.target.value);
+      this.eventSource = new EventSource("http://"+this.props.host+":"+this.props.port+"/service/"+event.target.value);
       console.log(event.target.value);
       //set eventlistener to current event
       this.allEvent();
@@ -51,6 +54,20 @@ class StrategyListEvent extends Component {
 
      //all the eventlisteners for current events
      allEvent=()=>{
+       this.eventSource.onopen=function(e) {
+        console.log("EventSource started.");
+        this.setState({
+          serverconnect:true,
+        })
+
+      }.bind(this);
+      this.eventSource.onerror=function(e) {
+        console.log("EventSource failed.");
+        this.setState({
+          serverconnect:false,
+        })
+
+      }.bind(this);
        this.eventSource.addEventListener('quote', quote => this.setState({quote:JSON.parse(quote.data)}));
        this.eventSource.addEventListener('commentary', commentary => this.setState({commentary:JSON.parse(commentary.data)}));
        //this.eventSource.addEventListener('portfolio', portfolio => this.setState({portfolio:JSON.parse(portfolio.data)}));
@@ -61,16 +78,33 @@ class StrategyListEvent extends Component {
      }
      //when component mount initalise 
     componentDidMount () {
+    
+      
       this.allEvent();
-      this.fetchPerfURL();
-   
+      
+  
     }
     //fetch list of current strategy
     fetchPerfURL(){
-      const perfURL ='http://localhost:2222/service/strategy/performances';
+       
+    try {
+      console.log("try connect");
+      const perfURL ='http://'+this.props.host+':'+this.props.port+'/service/strategy/performances';
       fetch(perfURL)
      .then(response => response.json())
-     .then(perfdata => this.setState({ perfdata }));
+     .then(perfdata => this.setState({perfdata},()=>console.log("perdataconnect")));
+    } catch (error) {
+      console.error('Errorrrrrrrrr}');
+      console.log("strategy down");
+      }
+    }
+    
+    clearEventListener(){
+      this.eventSource.removeEventListener(null,null);
+    }
+    componentWillUnmount(){
+      this.clearEventListener();
+      this.eventSource.close();
     }
     //render DOM set all the components here
     render () {
@@ -81,50 +115,78 @@ class StrategyListEvent extends Component {
        const{bar}=this.state;
        const{currenturl} =this.state;
        const{commentary} =this.state;
+       const{serverconnect}=this.state;
        const dropdown = this.state.perfdata.map((object,i)=>
           <option key={i} value={object.id}>{object.id}</option>
          )
-      
+
       return (  
-        <div className="small">  
+        <div>
+         
+        <div className="small container-fluid ">  
         <div className="row">
-         <div className="col-md-12 small">
-         <h6>List of Stock</h6>  
-         </div>
+          <div className="col-md-12">
+              <div className="row ">
+                <div className="col-md-12 small">
+                {serverconnect
+                  ?<div>Connection Status : <span style={{color:'#03c03c'}}>Connected</span> </div>
+                  :<div>Connection Status : <span style={{color:'red'}}>Disconnected</span></div>
+                  }
+                 <h6>List of Stock</h6>  
+                
+                </div>
+              </div>
+             </div>
          </div>
         
          <div className="row ">
-       
+        <div className="col-md-12">
+          <div className="row ">
             <div className="col-md-6">
-            
               <Graph bardata={bar} currentStrat={currenturl}></Graph>
            </div>
+         
+           <PortfolioTable connection ={this.props.connection}></PortfolioTable>
           
-           <PortfolioTable></PortfolioTable>
-       
-          
-
+          </div>
+           </div>
          </div>
          <div className="row">
-         <div className="col-md-12 small">
-              <h6>List of Portfolio</h6>
-              <select id="lang" onChange={this.change}>
-              {dropdown}
-              </select>
+         <div className="col-md-12">
+              <div className="row ">
+                <div className="col-md-12 small">
+                  <h6>List of Portfolio</h6>
+                  <select id="lang" onChange={this.change}>
+                    {dropdown}
+                  </select>
+                </div>
+               
+
             </div>
-            </div>
+            </div></div>
+            
           <div className="row ">
-           
+          <div className="col-md-12">
+              <div className="row ">
             <PositionTable className="container " type={position} currentStrat={currenturl} >position</PositionTable>
             <QuoteTable className="container " type={quote} currentStrat={currenturl}>quote</QuoteTable>
           </div>
-
-          <div className="row ">
+          </div> 
+          </div>
+          <div className="row">
+          <div className="col-md-12">
+              <div className="row ">
             <OrderTable className="container" type={order} currentStrat={currenturl} >order</OrderTable>
             <SignalTable className="container" type={signal} currentStrat={currenturl}>signal</SignalTable>
             <CommentTable className="container" type={commentary} currentStrat={currenturl}>Comment</CommentTable>
           </div>
+          </div>
+          </div>
+            
+        
         </div>
+       
+      </div>
             );
       }
     }

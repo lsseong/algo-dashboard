@@ -50,7 +50,7 @@ export default class OrderTable extends Component {
         <div  className="col-md-6 small">
             <ReactTable
           data={this.storeorderarr}
-          
+    
           columns={[
             {
             Header: this.props.children.toUpperCase(),
@@ -106,9 +106,10 @@ export default class OrderTable extends Component {
               ]
             },
           ]}
-          //pageSizeOptions = {[3, 5, 10, 20, 50, 100]}
-          showPageSizeOptions={false}
+          //pageSizeOptions = {[100]}
+          
           defaultPageSize={3}
+          showPageSizeOptions={false}
           className="-striped -highlight table border round"
           style={{
             height: "190px" // This will force the table body to overflow and scroll, since there is not enough room

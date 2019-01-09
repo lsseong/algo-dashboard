@@ -48,6 +48,7 @@ export default class PositionTable extends Component {
       <div  className="col-md-6 small">
        <ReactTable
      data={this.storeposarr}
+     pageSize={this.storeposarr.length}
      columns={[
        {
         Header: this.props.children.toUpperCase(),
@@ -116,11 +117,12 @@ export default class PositionTable extends Component {
          ]
        },
      ]}
-     defaultPageSize={3}
+     showPagination ={false}
+     //defaultPageSize={2}
      className="-striped -highlight table border round"
      showPageSizeOptions={false}
      style={{
-      height: "190px" // This will force the table body to overflow and scroll, since there is not enough room
+      height: "160px" // This will force the table body to overflow and scroll, since there is not enough room
     }}
    />
    </div>

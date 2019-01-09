@@ -11,13 +11,20 @@ class PorfolioTable extends Component {
       perfdata:[],
       stratstatuses:[],
     };
+    this.socket = socketIOClient(this.state.endpoint);
   }
-componentWillMount() {
-    const { endpoint } = this.state;
-    const socket = socketIOClient(endpoint);
-    socket.on("FromStratPerf", perfdata => this.setState({perfdata}));
+componentDidMount() {
+ // console.log(this.props.connection);
+    this.socket.on("FromStratPerf", perfdata => this.setState({perfdata}));
    //socket.on("FromStrategyStatuses", statusesdata => this.setState({stratstatuses:statusesdata}));
-    
+   this.socket.on("disconnect", () => 
+    console.log("Ct disconnected")
+
+  );
+  }
+  componentWillUnmount(){
+      this.socket.disconnect();
+      console.log("disconnect");
   }
 render() {
 
@@ -110,6 +117,7 @@ render() {
          ]
        },
      ]}
+    
      defaultPageSize={3}
      className="-striped -highlight table border round"
      showPageSizeOptions={false}

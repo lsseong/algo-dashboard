@@ -52,6 +52,7 @@ export default class QuoteTable extends Component {
       <div  className="col-md-6 small ">
        <ReactTable
      data={this.storequotearr}
+    pageSize={this.storequotearr.length}
      columns={[
        {
         Header: this.props.children.toUpperCase(),
@@ -110,11 +111,12 @@ export default class QuoteTable extends Component {
          ]
        },
      ]}
-     defaultPageSize={3}
+     showPagination ={false}
+     //defaultPageSize={3}
      className="-striped -highlight table border round"
      showPageSizeOptions={false}
      style={{
-        height: "190px" // This will force the table body to overflow and scroll, since there is not enough room
+        height: "160px" // This will force the table body to overflow and scroll, since there is not enough room
       }}
    />
    </div>
