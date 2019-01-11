@@ -3,49 +3,37 @@ import ReactTable from "react-table";
 export default class PositionTable extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-           storepos:[],
-            
-        };
+
          this.storeposarr= [];
       }
       componentWillMount(){
         if(this.props.type.length!==0){
         this.storeposarr.unshift(this.props.type);
-        this.setState({
-            storepos:this.storeposarr,
-        })
+      
       }
       }
       componentWillReceiveProps(nextProps){
         if(this.props.currentStrat!==nextProps.currentStrat){
           this.storeposarr=[];
-          this.setState({
-            storepos:[],
-          })
+       
         }
         var pt = this.storeposarr.findIndex(i => i.symbol === nextProps.type.symbol); 
         if(this.props.type!==nextProps.type){
           if(pt!==-1){
             this.storeposarr.splice(pt, 1, nextProps.type);
-            this.setState({
-                storepos:this.storeposarr,
-            })
+          
           }else if(pt<0){
-            console.log("pushposition");
+       
             this.storeposarr.unshift(nextProps.type);
-            this.setState({
-              storepos:this.storeposarr,
-          })
+         
           }
         }
       }
      
       render() {
-     //console.log("comment"+this.props.type);  
-   // console.log(this.storeposarr);
+
     return (
-      <div  className="col-md-6 small">
+      <div  className="small">
        <ReactTable
      data={this.storeposarr}
      pageSize={this.storeposarr.length}
@@ -118,11 +106,11 @@ export default class PositionTable extends Component {
        },
      ]}
      showPagination ={false}
-     //defaultPageSize={2}
+     defaultPageSize={this.props.numofRows}
      className="-striped -highlight table border round"
      showPageSizeOptions={false}
      style={{
-      height: "160px" // This will force the table body to overflow and scroll, since there is not enough room
+      height: this.props.height  // This will force the table body to overflow and scroll, since there is not enough room
     }}
    />
    </div>

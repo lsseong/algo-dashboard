@@ -4,50 +4,38 @@ export default class SignalTable extends Component {
     constructor(props) {
         super(props);
         //state and variable initalisation
-        this.state = {
-           storesignal:[],
-            
-        };
+  
            this.storesignalarr= [];
       }
       //when component 1st mount store the var in the array and set the state of the storesignal
       componentWillMount(){
         if(this.props.type.length!==0){
         this.storesignalarr.unshift(this.props.type);
-        this.setState({
-            storesignal:this.storesignalarr,
-        })
+   
         }
       }
       componentWillReceiveProps(nextProps){
         if(this.props.currentStrat!==nextProps.currentStrat){
             this.storesignalarr=[];
-            this.setState({
-                storesignal:[],
-            })
+         
           }
         var pt = this.storesignalarr.findIndex(i => i.symbol === nextProps.type.symbol); 
         if(this.props.type!==nextProps.type){
           if(pt!==-1){
             this.storesignalarr.splice(pt, 1, nextProps.type);
-            this.setState({
-                storesignal:this.storesignalarr,
-            })
+        
           }else if(pt<0){
-            console.log("pushsignal");
+   
             this.storesignalarr.unshift(nextProps.type);
-            this.setState({
-              storesignal:this.storesignalarr,
-          })
+        
           }
         }
       }
      
       render() {
-     //console.log("comment"+this.props.type);  
-   // console.log(this.storesignalarr);
+
     return (
-      <div  className="col-md-3 small">
+      <div  className="small">
        <ReactTable
      data={this.storesignalarr}
 

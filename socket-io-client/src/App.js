@@ -10,7 +10,7 @@ class App extends Component {
       host:"",
       port:"",
       disabled:false,
-     
+      initData:false,
    };
    this.conStatus=false;
   }
@@ -20,7 +20,7 @@ class App extends Component {
     const URL ='http://'+host+':'+port+'/service/strategy/performances';
     fetch(URL)
    .then(response => response.json())
-   .then(data => this.setState({ initStrat:data[0].id },()=>console.log(data[0].id)));
+   .then(data => this.setState({ initStrat:data[0].id,initData:true }));
   }
 //when clicked connection
   handleConnection=(event)=>{
@@ -61,7 +61,7 @@ class App extends Component {
       this.setState({
         connectstatus:"Connect",
         disabled:false,
-        initStrat:'',
+        initData:false,
       })
     //send connection status to server side
         fetch('http://localhost:4001/url', {
@@ -97,7 +97,7 @@ class App extends Component {
     const{initStrat} =this.state;
     const{host}=this.state;
     const{port}= this.state;
-  
+    const{initData}=this.state
     return (
       <div className="App col-md-12">
       <div className="row">
@@ -126,7 +126,7 @@ class App extends Component {
     
       <div className="row">
       <div className="col-md-12">
-      {initStrat
+      {initData
        ? <StrategyList url ={initStrat} host={host} port={port} ></StrategyList>
       :<div></div>
       }

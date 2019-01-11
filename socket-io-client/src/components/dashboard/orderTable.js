@@ -4,19 +4,14 @@ export default class OrderTable extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-           storeorder:[],
-            
-        };
+   
           this.storeorderarr= [];
         
       }
       componentWillMount(){
         if(this.props.type.length!==0){
         this.storeorderarr.unshift(this.props.type);
-        this.setState({
-            storeorder:this.storeorderarr,
-        })
+    
         }
       }
     
@@ -24,30 +19,27 @@ export default class OrderTable extends Component {
       componentWillReceiveProps(nextProps){
         if(this.props.currentStrat!==nextProps.currentStrat){
             this.storeorderarr=[];
-            this.setState({
-                storeorderarr:[],
-            })
+        
+          }
+          if(this.storeorderarr.length>80){
+            this.storeorderarr.pop();
           }
         var pt = this.storeorderarr.findIndex(i => i.clientOrderId === nextProps.type.clientOrderId); 
         if(this.props.type!==nextProps.type){
           if(pt!==-1){
             this.storeorderarr.splice(pt, 1, nextProps.type);
-            this.setState({
-                storeorder:this.storeorderarr,
-            })
+       
           }else if(pt<0){
-            console.log("pushorder");
+    
             this.storeorderarr.unshift(nextProps.type);
-            this.setState({
-                storeorder:this.storeorderarr,
-          })
+       
           }
         }
       }
      
       render() {
     return (
-        <div  className="col-md-6 small">
+        <div  className="small">
             <ReactTable
           data={this.storeorderarr}
     
@@ -99,20 +91,25 @@ export default class OrderTable extends Component {
                     minWidth: '10%',
                 },
                 {
-                    Header: "LimitPrice",
+                    Header: "Limit Price",
                     accessor: "order.limitPrice",
                     minWidth: '10%',
                 },
+                {
+                  Header: "Avg Price",
+                  accessor: "avgPrice",
+                  minWidth: '10%',
+              },
               ]
             },
           ]}
           //pageSizeOptions = {[100]}
           
-          defaultPageSize={3}
+          defaultPageSize={this.props.numofRows}
           showPageSizeOptions={false}
           className="-striped -highlight table border round"
           style={{
-            height: "190px" // This will force the table body to overflow and scroll, since there is not enough room
+            height: this.props.height // This will force the table body to overflow and scroll, since there is not enough room
           }}
         />
         </div>

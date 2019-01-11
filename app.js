@@ -23,10 +23,7 @@ io.on("connection", socket => {
   console.log("New client connected"); 
   var interval = setInterval(() => getApiAndEmit(socket),1000);
   socket.on("disconnect", () => {
-    host =  '',
-    portNumber = '',
     console.log("Client disconnected");
-   clearInterval(interval);
   });
   if(conStatus===false){
     host =  '',
@@ -50,11 +47,6 @@ const getApiAndEmit = async socket => {
       
     } catch (error) {
       console.error('Error: ${error.code}');
-      app.get('/url', async (req, res)=>{
-        res.send({ response: "dc" });
-      });
-  
-
     }
 };    
 

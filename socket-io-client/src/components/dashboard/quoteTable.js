@@ -3,18 +3,13 @@ import ReactTable from "react-table";
 export default class QuoteTable extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-           storequote:[],
-            
-        };
+      
         this.storequotearr=[];
       }
       componentWillMount(){
         if(this.props.type.length!==0){
           this.storequotearr.unshift(this.props.type);
-          this.setState({
-              storequote:this.storequotearr,
-          })
+      
         }
       
       }
@@ -22,34 +17,27 @@ export default class QuoteTable extends Component {
       componentWillReceiveProps(nextProps){
         if(this.props.currentStrat!==nextProps.currentStrat){
           this.storequotearr=[];
-          this.setState({
-              storequote:[],
-          })
+       
         }
         var pt = this.storequotearr.findIndex(i => i.security === nextProps.type.security); 
         if(this.props.type!==nextProps.type){
           if(pt!==-1){
        
             this.storequotearr.splice(pt, 1, nextProps.type);
-            this.setState({
-                storequote:this.storequotearr,
-            })
+        
           }else if(pt<0){
     
             this.storequotearr.unshift(nextProps.type);
-            this.setState({
-              storequote:this.storequotearr,
-          })
+     
           }
         }
       }
      
       render() {
-     //console.log("comment"+this.props.type);  
-   // console.log(this.storequotearr);
+
     return (
       
-      <div  className="col-md-6 small ">
+      <div  className="small ">
        <ReactTable
      data={this.storequotearr}
     pageSize={this.storequotearr.length}
@@ -112,11 +100,11 @@ export default class QuoteTable extends Component {
        },
      ]}
      showPagination ={false}
-     //defaultPageSize={3}
+     defaultPageSize={3}
      className="-striped -highlight table border round"
      showPageSizeOptions={false}
      style={{
-        height: "160px" // This will force the table body to overflow and scroll, since there is not enough room
+        height: "140px" // This will force the table body to overflow and scroll, since there is not enough room
       }}
    />
    </div>

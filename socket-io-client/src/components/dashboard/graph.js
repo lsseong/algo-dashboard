@@ -5,8 +5,8 @@ import am4themes_animated from "@amcharts/amcharts4/themes/animated";
 
 
 am4core.useTheme(am4themes_animated);
-
-class Graph extends Component {
+//**Need Bar Data and current strategy to work
+export default class Graph extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -46,7 +46,7 @@ class Graph extends Component {
    
     this.chart = chart;
     
-    console.log('mounted');
+
   
   }
 
@@ -61,11 +61,7 @@ class Graph extends Component {
     }
   
     if(this.props.bardata.length!==0){
-      //console.log(oldProps.bardata);
-      //console.log(this.props.bardata);
       var pt = this.storefirstcol.findIndex(i => i === this.props.bardata.symbol); 
-      //console.log("pt "+pt);
-      //console.log("current symbol "+this.props.bardata.symbol);
       if(this.storefirstcol.length===0){
         this.storefirstcol.unshift(this.props.bardata.symbol);
         var newDate = new Date(this.props.bardata.time);
@@ -86,9 +82,9 @@ class Graph extends Component {
         if(pt===-1){
           this.storefirstcol.push(this.props.bardata.symbol);
         }
-        //console.log("data stored "+this.storefirstcol);
+
       }
-      //console.log("current graph bar data "+this.state.graphbar);
+
     if(this.props.bardata!==oldProps.bardata&&this.props.bardata.symbol===this.state.graphbar){
      
         if(this.chart.data.length>30){
@@ -108,7 +104,7 @@ class Graph extends Component {
         this.chart.validateData();
      
         
-      //console.log("current chart data "+this.chart.data);
+
       }
     }
   }
@@ -153,5 +149,3 @@ class Graph extends Component {
     );
   }
 }
-
-export default Graph;
