@@ -7,16 +7,16 @@ class PnLPanel extends React.Component {
     const realizedPnl = this.props.data.realizedPnl;
 
     return (
-      <div class="row">
-        <div class="col">
+      <div className="row">
+        <div className="col">
           <h4 style={this.getNumberStyle(totalValue)}>{totalValue}</h4>
           <h6>Total</h6>
         </div>
-        <div class="col">
+        <div className="col">
           <h4 style={this.getNumberStyle(realizedPnl)}>{realizedPnl}</h4>
           <h6>Realized PnL</h6>
         </div>
-        <div class="col">
+        <div className="col">
           <h4 style={this.getNumberStyle(unrealizedPnl)}>{unrealizedPnl}</h4>
           <h6>Unreal PnL</h6>
         </div>
