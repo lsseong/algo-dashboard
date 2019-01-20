@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import StrategyList from "./components/dashboard/strategyListEvent";
+import Dashboard from "./components/dashboard/Dashboard";
 
 class App extends Component {
   constructor(props) {
@@ -152,7 +152,7 @@ class App extends Component {
         <div className="row">
           <div className="col-md-12">
             {initData ? (
-              <StrategyList url={initStrat} host={host} port={port} />
+              <Dashboard url={initStrat} host={host} port={port} />
             ) : (
               <div />
             )}

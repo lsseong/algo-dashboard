@@ -9,8 +9,9 @@ import SignalTable from "./signalTable";
 import OrderPositionTable from "./orderPositionTable";
 import StackedBarGraph from "./statckBarGraph";
 import PositionCSGraph from "./positionCandleStick";
+import PnLPanel from "./PnlPanel";
 
-class StrategyListEvent extends Component {
+class Dashboard extends Component {
   constructor(props) {
     super(props);
     //initalise current state
@@ -169,9 +170,10 @@ class StrategyListEvent extends Component {
           </div>
         </div>
 
+        {/* First row */}
         <div className="row small">
           <div className="col-md-12">
-            <div className="row ">
+            <div className="row justify-content-between">
               <div className="col-md-2">
                 <h6>List of Strategies</h6>
                 <select onChange={this.change}>{dropdown}</select>
@@ -189,10 +191,15 @@ class StrategyListEvent extends Component {
                   </div>
                 )}
               </div>
+              <div className="col-md-4">
+                <PnLPanel data={portfolio} />
+              </div>
             </div>
           </div>
         </div>
         <br />
+
+        {/* Tabs */}
         <ul className="nav nav-tabs">
           <li className="nav-item">
             <a
@@ -218,6 +225,7 @@ class StrategyListEvent extends Component {
           </li>
         </ul>
 
+        {/* First summary tab */}
         <div className="tab-content">
           <div className="tab-pane active" id="portfolio">
             {currenttab === "portfolio" ? (
@@ -225,79 +233,40 @@ class StrategyListEvent extends Component {
                 <br />
                 <div className="row">
                   <div className="col-md-6">
-                    <h6>List of Stock</h6>
+                    <Graph bardata={bar} currentStrat={currenturl} />
+                    <OrderTable
+                      className="container"
+                      type={order}
+                      currentStrat={currenturl}
+                      numofRows={10}
+                    />
                   </div>
-                </div>
 
-                <div className="row ">
-                  <div className="col-md-12">
-                    <div className="row ">
-                      <div className="col-md-6">
-                        <Graph bardata={bar} currentStrat={currenturl} />
-                      </div>
-
-                      <div className="col-md-6">
-                        <PortfolioTable data={portfolio} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="row ">
-                  <div className="col-md-12">
-                    <div className="row ">
-                      <div className="col-md-6">
-                        <PositionTable
-                          className="container"
-                          type={position}
-                          currentStrat={currenturl}
-                          numofRows={3}
-                        />
-                      </div>
-                      <div className="col-md-6">
-                        <QuoteTable
-                          className="container "
-                          type={quote}
-                          currentStrat={currenturl}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="row">
-                  <div className="col-md-12">
-                    <div className="row ">
-                      <div className="col-md-6">
-                        <OrderTable
-                          className="container"
-                          type={order}
-                          currentStrat={currenturl}
-                          numofRows={3}
-                        />
-                      </div>
-                      <div className="col-md-3">
-                        <SignalTable
-                          className="container"
-                          type={signal}
-                          currentStrat={currenturl}
-                        />
-                      </div>
-                      <div className="col-md-3">
-                        <CommentTable
-                          className="container"
-                          type={commentary}
-                          currentStrat={currenturl}
-                          numofRows={3}
-                        />
-                      </div>
-                    </div>
+                  <div className="col-md-6">
+                    <PositionTable
+                      className="container"
+                      type={position}
+                      currentStrat={currenturl}
+                      numofRows={3}
+                    />
+                    <SignalTable
+                      className="container"
+                      type={signal}
+                      currentStrat={currenturl}
+                    />
+                    <CommentTable
+                      className="container"
+                      type={commentary}
+                      currentStrat={currenturl}
+                      numofRows={3}
+                    />
                   </div>
                 </div>
               </div>
             ) : null}
           </div>
 
+          {/* Second position tab */}
           <div className="tab-pane" id="position">
             {currenttab === "position" ? (
               <div>
@@ -343,4 +312,4 @@ class StrategyListEvent extends Component {
   }
 }
 
-export default StrategyListEvent;
+export default Dashboard;
