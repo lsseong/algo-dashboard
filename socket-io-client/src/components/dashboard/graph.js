@@ -35,9 +35,6 @@ export default class Graph extends Component {
     series.dataFields.highValueY = "high";
     series.simplifiedProcessing = true;
 
-    series.tooltipText =
-      "Open:${openValueY.value}\nLow:${lowValueY.value}\nHigh:${highValueY.value}\nClose:${valueY.value}";
-
     this.chart = chart;
   }
 
@@ -78,6 +75,9 @@ export default class Graph extends Component {
     if (array == null) {
       // first time seeing this security
       array = [];
+
+      // initialize array with empty data
+
       this.dataCache.set(bar.name, array);
 
       // update state
@@ -145,7 +145,7 @@ export default class Graph extends Component {
         <div
           className="small"
           id="chartdiv"
-          style={{ width: "100%", height: "210px" }}
+          style={{ width: "100%", height: "300px" }}
         />
       </div>
     );

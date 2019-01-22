@@ -197,7 +197,6 @@ class Dashboard extends Component {
             </div>
           </div>
         </div>
-        <br />
 
         {/* Tabs */}
         <ul className="nav nav-tabs">
