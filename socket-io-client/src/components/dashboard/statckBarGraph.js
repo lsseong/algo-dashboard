@@ -42,6 +42,24 @@ export default class StackedBarGraph extends Component {
     valueAxis.renderer.ticks.template.disabled = false;
     valueAxis.renderer.ticks.template.strokeOpacity = 0.4;
 
+    // fix the range
+    valueAxis.min = -100000;
+    valueAxis.max = 100000;
+    valueAxis.strictMinMax = true;
+
+    // guide lines
+    var range = valueAxis.axisRanges.create();
+    range.value = 50000;
+    range.grid.stroke = am4core.color("#A96478");
+    range.grid.strokeWidth = 2;
+    range.grid.strokeOpacity = 1;
+
+    var range2 = valueAxis.axisRanges.create();
+    range2.value = -50000;
+    range2.grid.stroke = am4core.color("#A96478");
+    range2.grid.strokeWidth = 2;
+    range2.grid.strokeOpacity = 1;
+
     // Create series
     var series = chart.series.push(new am4charts.ColumnSeries());
     series.dataFields.valueX = "position";
@@ -113,7 +131,7 @@ export default class StackedBarGraph extends Component {
     return (
       <div>
         <div className="small">
-          <div id="barchartdiv" style={{ width: "100%", height: "300px" }} />
+          <div id="barchartdiv" style={{ width: "100%", height: "400px" }} />
         </div>
       </div>
     );

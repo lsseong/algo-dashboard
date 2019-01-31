@@ -271,7 +271,7 @@ class Dashboard extends Component {
               <div>
                 <br />
                 <div className="row">
-                  <div className="col-md-5 ">
+                  <div className="col-md-4 ">
                     <PositionTable
                       className="container"
                       type={position}
@@ -293,7 +293,7 @@ class Dashboard extends Component {
                     />
                     <PositionCSGraph bardata={bar} currentStrat={currenturl} />
                   </div>
-                  <div className="col-md-3">
+                  <div className="col-md-4">
                     <CommentTable
                       className="container"
                       type={commentary}
