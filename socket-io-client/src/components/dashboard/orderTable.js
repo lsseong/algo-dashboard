@@ -19,9 +19,7 @@ export default class OrderTable extends Component {
     if (this.storeorderarr.length > 80) {
       this.storeorderarr.pop();
     }
-    var pt = this.storeorderarr.findIndex(
-      i => i.clientOrderId === nextProps.type.clientOrderId
-    );
+    var pt = this.storeorderarr.findIndex(i => i.clientOrderId === nextProps.type.clientOrderId);
     if (this.props.type !== nextProps.type) {
       if (pt !== -1) {
         this.storeorderarr.splice(pt, 1, nextProps.type);

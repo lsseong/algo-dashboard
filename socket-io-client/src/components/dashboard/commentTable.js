@@ -20,9 +20,7 @@ export default class CommentTable extends Component {
     if (this.storecommentarr.length > 80) {
       this.storecommentarr.pop();
     }
-    var pt = this.storecommentarr.findIndex(
-      i => i.time === nextProps.type.time
-    );
+    var pt = this.storecommentarr.findIndex(i => i.time === nextProps.type.time);
     if (this.props.type !== nextProps.type) {
       if (pt !== -1) {
         this.storecommentarr.splice(pt, 1, nextProps.type);
@@ -51,12 +49,11 @@ export default class CommentTable extends Component {
                 {
                   Header: "Time",
                   accessor: "time",
-                  minWidth: "1"
+                  width: 100
                 },
                 {
                   Header: "Comment",
-                  accessor: "comment",
-                  minWidth: "2.5"
+                  accessor: "comment"
                 }
               ]
             }

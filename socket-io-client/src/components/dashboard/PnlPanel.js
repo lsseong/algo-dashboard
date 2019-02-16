@@ -2,9 +2,13 @@ import React from "react";
 
 class PnLPanel extends React.Component {
   render() {
-    const totalValue = this.props.data.totalValue;
-    const unrealizedPnl = this.props.data.unrealizedPnl;
-    const realizedPnl = this.props.data.realizedPnl;
+    var totalValue = this.props.data.totalValue;
+    var unrealizedPnl = this.props.data.unrealizedPnl;
+    var realizedPnl = this.props.data.realizedPnl;
+
+    totalValue = Number(totalValue).toFixed(2);
+    unrealizedPnl = Number(unrealizedPnl).toFixed(2);
+    realizedPnl = Number(realizedPnl).toFixed(2);
 
     return (
       <div className="row">

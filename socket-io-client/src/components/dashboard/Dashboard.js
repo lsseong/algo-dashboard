@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import PortfolioTable from "./portfolioTable";
 import QuoteTable from "./quoteTable";
-import CommentTable from "./commentTable";
+import CommentTable from "./CommentTable";
 import Graph from "./graph";
-import OrderTable from "./orderTable";
-import PositionTable from "./positionTable";
+import OrderTable from "./OrderTable";
+import PositionTable from "./PositionTable";
 import SignalTable from "./signalTable";
 import OrderPositionTable from "./orderPositionTable";
 import StackedBarGraph from "./statckBarGraph";
@@ -32,12 +32,7 @@ class Dashboard extends Component {
 
     //open eventsource base on current url
     this.eventSource = new EventSource(
-      "http://" +
-        this.props.host +
-        ":" +
-        this.props.port +
-        "/service/" +
-        this.props.url
+      "http://" + this.props.host + ":" + this.props.port + "/service/" + this.props.url
     );
   }
 
@@ -59,12 +54,7 @@ class Dashboard extends Component {
     });
     //open eventsource base on new event
     this.eventSource = new EventSource(
-      "http://" +
-        this.props.host +
-        ":" +
-        this.props.port +
-        "/service/" +
-        event.target.value
+      "http://" + this.props.host + ":" + this.props.port + "/service/" + event.target.value
     );
     console.log(event.target.value);
     //set eventlistener to current event
@@ -98,15 +88,17 @@ class Dashboard extends Component {
     this.eventSource.addEventListener("portfolio", portfolio =>
       this.setState({ portfolio: JSON.parse(portfolio.data) })
     );
-    this.eventSource.addEventListener("position", position =>
-      this.setState({ position: JSON.parse(position.data) })
-    );
+    this.eventSource.addEventListener("position", position => {
+      var inputPosition = JSON.parse(position.data);
+      inputPosition.unrealizedPnl = Number(inputPosition.unrealizedPnl).toFixed(2);
+      inputPosition.realizedPnl = Number(inputPosition.realizedPnl).toFixed(2);
+
+      this.setState({ position: inputPosition });
+    });
     this.eventSource.addEventListener("order", order =>
       this.setState({ order: JSON.parse(order.data) })
     );
-    this.eventSource.addEventListener("bar", bar =>
-      this.setState({ bar: JSON.parse(bar.data) })
-    );
+    this.eventSource.addEventListener("bar", bar => this.setState({ bar: JSON.parse(bar.data) }));
     this.eventSource.addEventListener("signal", signal =>
       this.setState({ signal: JSON.parse(signal.data) })
     );
@@ -119,11 +111,7 @@ class Dashboard extends Component {
   //fetch list of current strategy
   fetchPerfURL() {
     const perfURL =
-      "http://" +
-      this.props.host +
-      ":" +
-      this.props.port +
-      "/service/strategy/performances";
+      "http://" + this.props.host + ":" + this.props.port + "/service/strategy/performances";
     fetch(perfURL)
       .then(response => response.json())
       .then(perfdata => this.setState({ perfdata }));
@@ -181,13 +169,11 @@ class Dashboard extends Component {
               <div className="col-md-2">
                 {serverconnect ? (
                   <div>
-                    Connection Status :{" "}
-                    <span style={{ color: "#03c03c" }}>Connected</span>{" "}
+                    Connection Status : <span style={{ color: "#03c03c" }}>Connected</span>{" "}
                   </div>
                 ) : (
                   <div>
-                    Connection Status :{" "}
-                    <span style={{ color: "red" }}>Disconnected</span>
+                    Connection Status : <span style={{ color: "red" }}>Disconnected</span>
                   </div>
                 )}
               </div>
@@ -248,11 +234,7 @@ class Dashboard extends Component {
                       currentStrat={currenturl}
                       numofRows={3}
                     />
-                    <SignalTable
-                      className="container"
-                      type={signal}
-                      currentStrat={currenturl}
-                    />
+                    <SignalTable className="container" type={signal} currentStrat={currenturl} />
                     <CommentTable
                       className="container"
                       type={commentary}

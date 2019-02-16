@@ -19,11 +19,11 @@ export default class StackedBarGraph extends Component {
 
     chart.paddingRight = 40;
 
-    let title = chart.titles.create();
-    title.text = "POSITION GRAPH";
-    title.fontSize = 12;
-    title.marginBottom = 10;
-    title.fontWeight = 600;
+    //let title = chart.titles.create();
+    //title.text = "POSITION GRAPH";
+    //title.fontSize = 12;
+    //title.marginBottom = 10;
+    //title.fontWeight = 600;
 
     // Use only absolute numbers
     chart.numberFormatter.numberFormat = "#.#";
@@ -95,9 +95,7 @@ export default class StackedBarGraph extends Component {
     }
 
     if (this.props.type.length !== 0) {
-      var pt = this.storefirstcol.findIndex(
-        i => i.symbol === this.props.type.symbol
-      );
+      var pt = this.storefirstcol.findIndex(i => i.symbol === this.props.type.symbol);
 
       if (this.props.type !== oldProps.type) {
         if (pt !== -1) {

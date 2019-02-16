@@ -15,9 +15,7 @@ export default class PositionTable extends Component {
     if (this.props.currentStrat !== nextProps.currentStrat) {
       this.storeposarr = [];
     }
-    var pt = this.storeposarr.findIndex(
-      i => i.symbol === nextProps.type.symbol
-    );
+    var pt = this.storeposarr.findIndex(i => i.symbol === nextProps.type.symbol);
     if (this.props.type !== nextProps.type) {
       if (pt !== -1) {
         this.storeposarr.splice(pt, 1, nextProps.type);
@@ -46,12 +44,26 @@ export default class PositionTable extends Component {
                 {
                   Header: "Time",
                   accessor: "time",
-                  minWidth: "10%"
+                  minWidth: "10%",
+                  getProps: (state, row, column) => {
+                    return {
+                      style: {
+                        textAlign: "right"
+                      }
+                    };
+                  }
                 },
                 {
                   Header: "Symbol",
                   accessor: "symbol",
-                  minWidth: "10%"
+                  minWidth: "10%",
+                  getProps: (state, row, column) => {
+                    return {
+                      style: {
+                        textAlign: "right"
+                      }
+                    };
+                  }
                 },
                 {
                   Header: "Position",
@@ -61,7 +73,8 @@ export default class PositionTable extends Component {
                     if (row)
                       return {
                         style: {
-                          color: row.row.position >= 0 ? "#03c03c" : "red"
+                          color: row.row.position >= 0 ? "#03c03c" : "#ff6666",
+                          textAlign: "right"
                         }
                       };
                     else
@@ -78,7 +91,8 @@ export default class PositionTable extends Component {
                     if (row)
                       return {
                         style: {
-                          color: row.row.unrealizedPnl >= 0 ? "#03c03c" : "red"
+                          color: row.row.unrealizedPnl >= 0 ? "#03c03c" : "#ff6666",
+                          textAlign: "right"
                         }
                       };
                     else
@@ -95,7 +109,8 @@ export default class PositionTable extends Component {
                     if (row)
                       return {
                         style: {
-                          color: row.row.realizedPnl >= 0 ? "#03c03c" : "red"
+                          color: row.row.realizedPnl >= 0 ? "#03c03c" : "#ff6666",
+                          textAlign: "right"
                         }
                       };
                     else
