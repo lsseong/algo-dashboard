@@ -1,15 +1,40 @@
 import React, { Component } from "react";
 import PortfolioTable from "./portfolioTable";
 import QuoteTable from "./quoteTable";
-import CommentTable from "./CommentTable";
+import CommentTable from "./commentTable";
 import Graph from "./graph";
-import OrderTable from "./OrderTable";
-import PositionTable from "./PositionTable";
+import OrderTable from "./orderTable";
+import PositionTable from "./positionTable";
 import SignalTable from "./signalTable";
 import OrderPositionTable from "./orderPositionTable";
 import StackedBarGraph from "./statckBarGraph";
 import PositionCSGraph from "./positionCandleStick";
 import PnLPanel from "./PnlPanel";
+
+import {withStyles,Tabs,Grid,Tab,AppBar, Typography} from '@material-ui/core';
+import PropTypes from 'prop-types';
+
+const styles = theme => ({
+  root:{
+    width:"98%",
+    fontSize:"12px",
+    marginLeft:"auto",
+    marginRight:"auto",
+  },
+  appbar:{
+    backgroundColor:"#484848",
+  },
+  firstrow:{
+    color:"white",
+  },
+  text:{
+    marginLeft:"8px",
+  },
+  tab:{
+    backgroundColor:"#383838",
+  }
+ 
+ });
 
 class Dashboard extends Component {
   constructor(props) {
@@ -124,9 +149,10 @@ class Dashboard extends Component {
     this.clearEventListener();
     this.eventSource.close();
   }
-  checkSelectedTab = event => {
+  checkSelectedTab =(event,newValue) => {
+    console.log(newValue);
     this.setState({
-      currenttab: event.target.name
+      currenttab: newValue
     });
   };
 
@@ -142,6 +168,7 @@ class Dashboard extends Component {
     const { commentary } = this.state;
     const { serverconnect } = this.state;
     const { currenttab } = this.state;
+    const { classes } = this.props;
     const dropdown = this.state.perfdata.map((object, i) => (
       <option key={i} value={object.id}>
         {object.id}
@@ -149,148 +176,206 @@ class Dashboard extends Component {
     ));
 
     return (
-      <div className="small container-fluid ">
-        <div className="row">
-          <div className="col-md-12">
-            <div className="row ">
-              <div className="col-md-12 small" />
-            </div>
-          </div>
-        </div>
+      <div className={classes.root}>
+       
 
         {/* First row */}
-        <div className="row small">
-          <div className="col-md-12">
-            <div className="row justify-content-between">
-              <div className="col-md-2">
-                <h6>List of Strategies</h6>
+        <Grid container spacing={0} justify="space-between"  className={classes.firstrow}>
+          <Grid item xs={6} >
+        
+            <Grid container spacing={0} className={classes.text}>
+
+              <Grid item xs={12}  >
+              <Typography variant="h6">
+                List of Strategies
+              </Typography>
+
+              </Grid>
+
+               
+              <Grid item xs={12}>
+
+                <Grid container spacing={8}>
+                <Grid item xs={4}>
                 <select onChange={this.change}>{dropdown}</select>
-              </div>
-              <div className="col-md-2">
-                {serverconnect ? (
-                  <div>
-                    Connection Status : <span style={{ color: "#03c03c" }}>Connected</span>{" "}
-                  </div>
-                ) : (
-                  <div>
-                    Connection Status : <span style={{ color: "red" }}>Disconnected</span>
-                  </div>
-                )}
-              </div>
-              <div className="col-md-4">
-                <PnLPanel data={portfolio} />
-              </div>
-            </div>
-          </div>
-        </div>
+                </Grid>
+                <Grid item>
+             
+                    {serverconnect ? (
+                      <Typography variant="caption">
+                        Connection Status : <span style={{ color: "#03c03c" }}>Connected</span>{" "}
+                      </Typography>
+                    ) : (
+                      <Typography variant="caption">
+                        Connection Status : <span style={{ color: "red" }}>Disconnected</span>
+                      </Typography>
+                    )}
+                
+                </Grid>
+                </Grid>
+               
+             
+              </Grid>
+                      
+            </Grid>
+        
+          </Grid>
+         
+          
+            <Grid item xs={6}>
+        
+              <Grid container>
+                <Grid item xs={12}>
+                <PnLPanel data={portfolio}/>
+                </Grid>
+              </Grid>
 
+          
+            </Grid>
+     
+
+        </Grid>
+      
+        <br/>
         {/* Tabs */}
-        <ul className="nav nav-tabs">
-          <li className="nav-item">
-            <a
-              className="nav-link active"
-              data-toggle="tab"
-              href="#portfolio"
-              name="portfolio"
-              onClick={this.checkSelectedTab}
-            >
-              Portfolio
-            </a>
-          </li>
-          <li className="nav-item">
-            <a
-              className="nav-link"
-              data-toggle="tab"
-              href="#position"
-              name="position"
-              onClick={this.checkSelectedTab}
-            >
-              Positions
-            </a>
-          </li>
-        </ul>
+      <AppBar position="static" className={classes.appbar}>
+        <Tabs 
+        value={currenttab} 
+        onChange={this.checkSelectedTab}
+        textColor="inherit"
 
+        >
+          <Tab label="portfolio" value="portfolio" />
+          <Tab label="position" value="position" />
+        </Tabs>
+      </AppBar>
+      
+      <br/>
         {/* First summary tab */}
-        <div className="tab-content">
-          <div className="tab-pane active" id="portfolio">
+               
             {currenttab === "portfolio" ? (
-              <div>
-                <br />
-                <div className="row">
-                  <div className="col-md-6">
-                    <Graph bardata={bar} currentStrat={currenturl} />
-                    <OrderTable
-                      className="container"
-                      type={order}
-                      currentStrat={currenturl}
-                      numofRows={10}
-                    />
-                  </div>
+               <div className={classes.tab}>
+              <Grid container spacing={4} >
+          
+                <Grid item xs={6}>
+                  <Grid container spacing={1}>
 
-                  <div className="col-md-6">
-                    <PositionTable
-                      className="container"
-                      type={position}
+                    <Grid item xs={12}>
+                      <Graph bardata={bar} currentStrat={currenturl} />
+                    </Grid>
+                    
+                    <Grid item xs={12}>
+                      <OrderTable
+                      
+                        type={order}
+                        currentStrat={currenturl}
+                        numofRows={10}
+                      />
+                    </Grid>
+
+                  </Grid>
+                </Grid>
+                <Grid item xs={6}>
+                  <Grid container spacing={1}>
+                    <Grid item xs={12}>
+                      <PositionTable
+                        
+                        type={position}
+                        currentStrat={currenturl}
+                        numofRows={3}
+                      />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <SignalTable 
+                      
+                      type={signal} 
                       currentStrat={currenturl}
-                      numofRows={3}
-                    />
-                    <SignalTable className="container" type={signal} currentStrat={currenturl} />
+                      numofRows={4}
+                      />
+                    </Grid>
+
+                    <Grid item xs={12}>
                     <CommentTable
-                      className="container"
+                   
                       type={commentary}
                       currentStrat={currenturl}
-                      numofRows={3}
+                      numofRows={4}
+                      height="200px"
                     />
-                  </div>
-                </div>
+                    </Grid>
+
+                  </Grid>
+                </Grid>
+
+              </Grid>
               </div>
             ) : null}
-          </div>
+      
 
           {/* Second position tab */}
-          <div className="tab-pane" id="position">
+
             {currenttab === "position" ? (
-              <div>
-                <br />
-                <div className="row">
-                  <div className="col-md-4 ">
-                    <PositionTable
-                      className="container"
-                      type={position}
-                      currentStrat={currenturl}
-                      numofRows={5}
-                    />
-                    <OrderPositionTable
-                      className="container"
-                      type={order}
-                      currentStrat={currenturl}
-                      numofRows={5}
-                    />
-                  </div>
-                  <div className="col-md-4 small">
-                    <StackedBarGraph
-                      className="container"
-                      type={position}
-                      currentStrat={currenturl}
-                    />
-                    <PositionCSGraph bardata={bar} currentStrat={currenturl} />
-                  </div>
-                  <div className="col-md-4">
-                    <CommentTable
-                      className="container"
-                      type={commentary}
-                      currentStrat={currenturl}
-                      numofRows={10}
-                    />
-                  </div>
-                </div>
+              <div className={classes.tab}>
+                <Grid container spacing={4}>
+                  <Grid item xs={5}>
+                    <Grid container spacing={1}>
+                        <Grid item xs={12}>
+                        <PositionTable
+                          type={position}
+                          currentStrat={currenturl}
+                          numofRows={5}
+                        />
+                        </Grid>
+
+                        <Grid item xs={12}>
+                        <OrderPositionTable
+                          type={order}
+                          currentStrat={currenturl}
+                          numofRows={5}
+                        />
+                        </Grid>
+                    </Grid>
+                  </Grid>
+
+                  <Grid item xs={4}>
+                    <Grid container spacing={1}>
+                          <Grid item xs={12}>
+                            <StackedBarGraph
+                              type={position}
+                              currentStrat={currenturl}
+                            />
+                          </Grid>
+
+                          <Grid item xs={12}>
+                            <PositionCSGraph bardata={bar} currentStrat={currenturl} />
+                          </Grid>
+                      </Grid>
+                  </Grid>
+
+                  <Grid item xs={3}>
+                      <Grid container spacing={1}>
+                          <Grid item xs={12}>
+                            <CommentTable
+                              type={commentary}
+                              currentStrat={currenturl}
+                              numofRows={10}
+                              height="90vh"
+                            />
+                          </Grid>
+                      </Grid>
+                    </Grid>
+                </Grid>
               </div>
             ) : null}
-          </div>
-        </div>
+     
       </div>
     );
   }
 }
 
-export default Dashboard;
+Dashboard.propTypes = {
+  classes: PropTypes.object.isRequired,
+};
+
+export default withStyles(styles)(Dashboard);

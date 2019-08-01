@@ -1,12 +1,24 @@
 import React, { Component } from 'react';
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
-import am4themes_animated from "@amcharts/amcharts4/themes/animated";
+
+import { withStyles ,Grid } from '@material-ui/core';
+import PropTypes from 'prop-types';
+
+const styles = theme => ({
+  graph:{
+    backgroundColor:"#404040",
+  },
+  dropdown:{
+ 
+    padding:"10px",
+  }
+ 
+ });
 
 
-am4core.useTheme(am4themes_animated);
 //**Need Bar Data and current strategy to work
-export default class Graph extends Component {
+class Graph extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -16,15 +28,31 @@ export default class Graph extends Component {
     this.storefirstcol = [];
   }
 
+  mytheme = (target) =>{
+    if(target instanceof am4core.InterfaceColorSet){
+      target.setFor("text" ,am4core.color("white"));
+      target.setFor("grid" ,am4core.color("white"));
+      target.setFor("fill" ,am4core.color("#202020").lighten(-0.5));
+      target.setFor("background" ,am4core.color("#202020").lighten(-0.5));
+      target.setFor("secondaryButton" ,am4core.color("#202020").lighten(-0.5));
+      target.setFor("primaryButton" ,am4core.color("#202020").lighten(-0.5));
+  
+    }
+  }
+
   componentDidMount() {
    
+    am4core.useTheme(this.mytheme);
     let chart = am4core.create("chartdiv2", am4charts.XYChart);
 
-    chart.paddingRight = 40;
-  
+    
+    am4core.options.minPolylineStep = 5;
 
     let dateAxis = chart.xAxes.push(new am4charts.DateAxis());
     dateAxis.renderer.grid.template.location = 0;
+    dateAxis.renderer.minGridDistance =50;
+    dateAxis.renderer.minLabelPosition = 0.01;
+    dateAxis.renderer.maxLabelPosition = 0.99;
 
 
     let valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
@@ -124,12 +152,14 @@ export default class Graph extends Component {
    
    }
   render() {
+    const { classes } = this.props;
     const dropdown = this.storefirstcol.map((object,i)=>
     <option key={i} value={object}>{object}</option>
    )
    
     return (
-      <div className="small">
+      <Grid container className={classes.graph} spacing={0}>
+        <Grid item xs={12} className={classes.dropdown}>
     
       {dropdown.length!==0
       ? <div className="col-md-12">
@@ -138,15 +168,21 @@ export default class Graph extends Component {
        {dropdown}
       </select>
       </div>
-      :<div><br/></div>
+      :null
       }
-     
-      <div className="small">
+       </Grid>
+       <Grid item xs={12}>
     
       <div className="small" id="chartdiv2" style={{ width: "100%", height: "280px" }}></div>
-      </div>
- 
-      </div>
+      </Grid>
+
+      </Grid>
     );
   }
 }
+
+Graph.propTypes = {
+  classes: PropTypes.object.isRequired,
+};
+
+export default withStyles(styles)(Graph);

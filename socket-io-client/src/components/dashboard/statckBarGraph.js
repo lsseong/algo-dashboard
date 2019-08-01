@@ -1,11 +1,21 @@
 import React, { Component } from "react";
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
-import am4themes_animated from "@amcharts/amcharts4/themes/animated";
 
-am4core.useTheme(am4themes_animated);
+
+import { withStyles ,Grid } from '@material-ui/core';
+import PropTypes from 'prop-types';
+
+const styles = theme => ({
+  graph:{
+    backgroundColor:"#404040",
+  },
+ 
+ });
+
+
 //**Need Position Data and current strategy to work
-export default class StackedBarGraph extends Component {
+class StackedBarGraph extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -14,7 +24,22 @@ export default class StackedBarGraph extends Component {
     this.storefirstcol = [];
   }
 
+  mytheme = (target) =>{
+    if(target instanceof am4core.InterfaceColorSet){
+      target.setFor("text" ,am4core.color("white"));
+      target.setFor("grid" ,am4core.color("white"));
+      target.setFor("fill" ,am4core.color("#202020").lighten(-0.5));
+      target.setFor("background" ,am4core.color("#202020").lighten(-0.5));
+      target.setFor("secondaryButton" ,am4core.color("#202020").lighten(-0.5));
+      target.setFor("primaryButton" ,am4core.color("#202020").lighten(-0.5));
+  
+    }
+  }
+
   componentDidMount() {
+
+    am4core.useTheme(this.mytheme);
+
     let chart = am4core.create("barchartdiv", am4charts.XYChart);
 
     chart.paddingRight = 40;
@@ -126,12 +151,19 @@ export default class StackedBarGraph extends Component {
   }
 
   render() {
+    const { classes } = this.props;
+
     return (
-      <div>
-        <div className="small">
+      <Grid container className={classes.graph} spacing={0}>
+      <Grid item xs={12}>
           <div id="barchartdiv" style={{ width: "100%", height: "400px" }} />
-        </div>
-      </div>
+          </Grid>
+      </Grid>
     );
   }
 }
+StackedBarGraph.propTypes = {
+  classes: PropTypes.object.isRequired,
+};
+
+export default withStyles(styles)(StackedBarGraph);

@@ -1,9 +1,30 @@
 import React, { Component } from "react";
 import ReactTable from "react-table";
-export default class PositionTable extends Component {
+import {withStyles} from '@material-ui/core';
+import PropTypes from 'prop-types';
+
+const styles = theme => ({
+  root:{
+    backgroundColor:"#404040",
+    fontSize:"12px",
+    color:"white",
+    border:"1px",
+    borderColor:"white",
+  }
+ 
+ });
+
+
+
+class PositionTable extends Component {
   constructor(props) {
     super(props);
-
+    this.state = {
+      positiveColor:"#00FF00",
+      negativeColor:"#ff0000",
+      rowBackgroundColor:"#484848",
+      headerBackgroundColor:"#303030"
+    }
     this.storeposarr = [];
   }
   componentWillMount() {
@@ -26,29 +47,38 @@ export default class PositionTable extends Component {
   }
 
   render() {
+    const {classes} = this.props;
     return (
-      <div className="small">
+      <div className={classes.root}>
         <ReactTable
           data={this.storeposarr}
           pageSize={this.storeposarr.length}
+          
           columns={[
             {
               Header: "POSITIONS",
-              getHeaderProps: (state, rowInfo, column, instance) => ({
+              getHeaderProps: () => ({
                 style: {
                   fontWeight: "600",
-                  textAlign: "center"
+                  textAlign: "center",
+                  color:"white",
+                  backgroundColor:this.state.headerBackgroundColor,
                 }
               }),
               columns: [
                 {
                   Header: "Time",
+
                   accessor: "time",
                   minWidth: "10%",
                   getProps: (state, row, column) => {
                     return {
                       style: {
-                        textAlign: "right"
+                        textAlign: "right",
+                        color:"white",
+                        backgroundColor:this.state.rowBackgroundColor,
+                        fontSize:"15px",
+                       
                       }
                     };
                   }
@@ -57,10 +87,14 @@ export default class PositionTable extends Component {
                   Header: "Symbol",
                   accessor: "symbol",
                   minWidth: "10%",
+
                   getProps: (state, row, column) => {
                     return {
                       style: {
-                        textAlign: "right"
+                        textAlign: "right",
+                        color:"white",
+                        backgroundColor:this.state.rowBackgroundColor,
+                        fontSize:"15px",
                       }
                     };
                   }
@@ -69,12 +103,15 @@ export default class PositionTable extends Component {
                   Header: "Position",
                   accessor: "position",
                   minWidth: "10%",
+
                   getProps: (state, row, column) => {
                     if (row)
                       return {
                         style: {
-                          color: row.row.position >= 0 ? "#03c03c" : "#ff6666",
-                          textAlign: "right"
+                          color: row.row.position >= 0 ? this.state.positiveColor : this.state.negativeColor,
+                          textAlign: "right",
+                          backgroundColor:this.state.rowBackgroundColor,
+                          fontSize:"15px",
                         }
                       };
                     else
@@ -87,12 +124,15 @@ export default class PositionTable extends Component {
                   Header: "Unrealized Pnl",
                   accessor: "unrealizedPnl",
                   minWidth: "10%",
+
                   getProps: (state, row, column) => {
                     if (row)
                       return {
                         style: {
-                          color: row.row.unrealizedPnl >= 0 ? "#03c03c" : "#ff6666",
-                          textAlign: "right"
+                          color: row.row.unrealizedPnl >= 0 ? this.state.positiveColor : this.state.negativeColor,
+                          textAlign: "right",
+                          backgroundColor:this.state.rowBackgroundColor,
+                          fontSize:"15px",
                         }
                       };
                     else
@@ -105,12 +145,15 @@ export default class PositionTable extends Component {
                   Header: "RealizedPnl",
                   accessor: "realizedPnl",
                   minWidth: "10%",
+
                   getProps: (state, row, column) => {
                     if (row)
                       return {
                         style: {
-                          color: row.row.realizedPnl >= 0 ? "#03c03c" : "#ff6666",
-                          textAlign: "right"
+                          color: row.row.realizedPnl >= 0 ? this.state.positiveColor : this.state.negativeColor,
+                          textAlign: "right",
+                          backgroundColor:this.state.rowBackgroundColor,
+                          fontSize:"15px",
                         }
                       };
                     else
@@ -122,12 +165,23 @@ export default class PositionTable extends Component {
               ]
             }
           ]}
-          showPagination={false}
+          
           defaultPageSize={this.props.numofRows}
           className="-striped -highlight table border round"
+          showPagination={false}
+          style={{
+            height: "300px" // This will force the table body to overflow and scroll, since there is not enough room
+          }}
           showPageSizeOptions={false}
         />
       </div>
     );
   }
 }
+
+PositionTable.propTypes = {
+  classes: PropTypes.object.isRequired,
+};
+
+export default withStyles(styles)(PositionTable);
+

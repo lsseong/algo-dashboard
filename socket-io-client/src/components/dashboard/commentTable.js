@@ -1,9 +1,27 @@
 import React, { Component } from "react";
 import ReactTable from "react-table";
 
-export default class CommentTable extends Component {
+import {withStyles} from '@material-ui/core';
+import PropTypes from 'prop-types';
+
+const styles = theme => ({
+  root:{
+    backgroundColor:"#404040",
+    fontSize:"12px",
+    color:"white",
+    border:"1px",
+    borderColor:"white",
+  }
+ 
+ });
+
+class CommentTable extends Component {
   constructor(props) {
     super(props);
+    this.state={
+      rowBackgroundColor:"#484848",
+      headerBackgroundColor:"#303030",
+    }
     this.storecommentarr = [];
   }
 
@@ -31,38 +49,64 @@ export default class CommentTable extends Component {
   }
 
   render() {
+    const {classes} = this.props;
     return (
-      <div className="small">
+      <div className={classes.root}>
         <ReactTable
           data={this.storecommentarr}
-          //pageSize={this.storecommentarr.length}
+          pageSize={this.storecommentarr.length}
           columns={[
             {
               Header: "COMMENTS",
               getHeaderProps: (state, rowInfo, column, instance) => ({
                 style: {
                   fontWeight: "600",
-                  textAlign: "center"
+                  textAlign: "center",
+                  backgroundColor:this.state.headerBackgroundColor,
                 }
               }),
               columns: [
                 {
                   Header: "Time",
                   accessor: "time",
-                  width: 100
+                  width: 100,
+                  getProps: (state, row, column) => {
+                    return {
+                      style: {
+                        backgroundColor:this.state.rowBackgroundColor,                  
+                      }
+                    };
+                  }
                 },
                 {
                   Header: "Comment",
-                  accessor: "comment"
+                  accessor: "comment",
+                  getProps: (state, row, column) => {
+                    return {
+                      style: {
+                        backgroundColor:this.state.rowBackgroundColor,                  
+                      }
+                    };
+                  }
                 }
               ]
             }
           ]}
           className="-striped -highlight table border round"
           showPageSizeOptions={false}
+          showPagination={false}
+          style={{
+            height: this.props.height // This will force the table body to overflow and scroll, since there is not enough room
+          }}
           defaultPageSize={this.props.numofRows}
         />
       </div>
     );
   }
 }
+
+CommentTable.propTypes = {
+  classes: PropTypes.object.isRequired,
+};
+
+export default withStyles(styles)(CommentTable);

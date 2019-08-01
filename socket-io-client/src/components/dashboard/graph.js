@@ -1,11 +1,22 @@
 import React, { Component } from "react";
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
-import am4themes_animated from "@amcharts/amcharts4/themes/animated";
+import { withStyles ,Grid } from '@material-ui/core';
+import PropTypes from 'prop-types';
 
-am4core.useTheme(am4themes_animated);
+const styles = theme => ({
+  graph:{
+    backgroundColor:"#404040",
+  },
+  dropdown:{
+ 
+    padding:"10px",
+  }
+ 
+ });
+
 //**Need Bar Data and current strategy to work
-export default class Graph extends Component {
+class Graph extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -17,11 +28,32 @@ export default class Graph extends Component {
     this.MAX_DATA_POINTS = 30;
   }
 
+  mytheme = (target) =>{
+    if(target instanceof am4core.InterfaceColorSet){
+      target.setFor("text" ,am4core.color("white"));
+      target.setFor("grid" ,am4core.color("white"));
+      target.setFor("fill" ,am4core.color("#202020").lighten(-0.5));
+      target.setFor("background" ,am4core.color("#202020").lighten(-0.5));
+      target.setFor("secondaryButton" ,am4core.color("#202020").lighten(-0.5));
+      target.setFor("primaryButton" ,am4core.color("#202020").lighten(-0.5));
+  
+    }
+  }
+
   componentDidMount() {
+    am4core.useTheme(this.mytheme);
     let chart = am4core.create("chartdiv", am4charts.XYChart);
+
+    am4core.options.minPolylineStep = 5;
+
+    
+    chart.data = [];
 
     let dateAxis = chart.xAxes.push(new am4charts.DateAxis());
     dateAxis.renderer.grid.template.location = 0;
+    dateAxis.renderer.minGridDistance =50;
+    dateAxis.renderer.minLabelPosition = 0.01;
+    dateAxis.renderer.maxLabelPosition = 0.99;
 
     let valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
     valueAxis.tooltip.disabled = true;
@@ -122,6 +154,8 @@ export default class Graph extends Component {
 
   render() {
     // create a drop down menu
+    const {classes} = this.props;
+
     const dropdown = this.state.selections.map((object, i) => (
       <option key={i} value={object}>
         {object}
@@ -129,25 +163,33 @@ export default class Graph extends Component {
     ));
 
     return (
-      <div className="small">
+
+      <Grid container className={classes.graph} spacing={0}>
+        <Grid item xs={12} className={classes.dropdown}>
         {dropdown.length !== 0 ? (
           <div className="col-md-12">
             <select id="stock" onChange={this.change}>
               {dropdown}
             </select>
           </div>
-        ) : (
-          <div>
-            <br />
-          </div>
-        )}
+        ) : null
+        }
+        </Grid>
 
+        <Grid item xs={12}>
         <div
-          className="small"
           id="chartdiv"
           style={{ width: "100%", height: "300px" }}
         />
-      </div>
+        </Grid>
+
+      </Grid>
     );
   }
 }
+
+Graph.propTypes = {
+  classes: PropTypes.object.isRequired,
+};
+
+export default withStyles(styles)(Graph);

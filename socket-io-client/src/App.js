@@ -1,5 +1,58 @@
 import React, { Component } from "react";
 import Dashboard from "./components/dashboard/Dashboard";
+import {withStyles,TextField,Grid,Button,AppBar,Toolbar} from '@material-ui/core';
+import PropTypes from 'prop-types';
+
+const CssTextField = withStyles({
+  root: {
+    '& label.Mui-focused': {
+      color: 'white',
+    },
+    '& .MuiInput-underline:after': {
+      borderBottomColor: 'white',
+    },
+    '& .MuiOutlinedInput-root': {
+      '& fieldset': {
+        borderColor: 'white',
+      },
+      '&:hover fieldset': {
+        borderColor: 'white',
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: 'white',
+      },
+    },
+  },
+})(TextField);
+
+
+
+const styles = theme => ({
+ formgroup:{
+   marginTop:"5px",
+   marginBottom:"5px",
+ },
+
+ appbar:{
+  backgroundColor:"#404040"
+ },
+
+ textfield:{
+  minWidth:"120px",
+ },
+
+ button:{
+   fontSize:"15px",
+   color:"white",
+   borderColor:"white",
+   marginTop:"2px",
+ },
+ 
+ labelProps:{
+   color:"white",
+ },
+
+});
 
 class App extends Component {
   constructor(props) {
@@ -16,16 +69,17 @@ class App extends Component {
   }
 
   //when component mount fetch 1st strategy name
-  initConnection(host, port) {
+  initConnection=(host, port)=>{
     const URL =
       "http://" + host + ":" + port + "/service/strategy/performances";
     fetch(URL)
       .then(response => response.json())
-      .then(data => this.setState({ initStrat: data[0].id, initData: true }));
+      .then(data => this.setState({ initStrat: data[0].id, initData: true }),()=>console.log(this.state.initData));
   }
 
   //when clicked connection
-  handleConnection = event => {
+  handleConnection =() => {
+
     //when host and port is not empty
     if (this.state.host !== "" && this.state.port !== "") {
       //when the status button is connect
@@ -84,11 +138,10 @@ class App extends Component {
       alert("Please Enter the Host And Port");
     }
 
-    event.preventDefault();
   };
 
   //change the textfields state
-  connectionInput = event => {
+  connectionInput = (event) => {
     this.setState({
       [event.target.name]: event.target.value
     });
@@ -100,66 +153,106 @@ class App extends Component {
     const { host } = this.state;
     const { port } = this.state;
     const { initData } = this.state;
+    const { classes } = this.props;
     return (
-      <div className="App col-md-12">
-        <div className="row">
-          <div className="col-md-4">
-            <form
-              onSubmit={this.handleConnection.bind(this)}
-              className="form-control-sm"
-            >
-              <div className="form-row">
-                <div className="col">
-                  <input
-                    type="text"
-                    name="host"
-                    className="form-control form-control-sm"
-                    placeholder="Hostname"
-                    value={this.state.host}
-                    onChange={this.connectionInput}
-                    disabled={this.state.disabled ? "disabled" : ""}
-                    required
-                  />
-                </div>
-                <div className="col">
-                  <input
-                    type="text"
-                    name="port"
-                    className="form-control form-control-sm"
-                    placeholder="Port"
-                    value={this.state.port}
-                    onChange={this.connectionInput}
-                    disabled={this.state.disabled ? "disabled" : ""}
-                    required
-                  />
-                </div>
-                <div className="col">
-                  <button
-                    type="submit"
-                    className="btn btn-outline-primary btn-sm btn-block"
-                    value={this.state.connectstatus}
-                  >
-                    {this.state.connectstatus}
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
+      <div>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+            <AppBar position="static" color="inherit" className={classes.appbar}>
+               <Toolbar  variant="dense">
+              {/* First Row - input fields and buttons */}
 
-        <br />
+              <Grid container spacing={2} className={classes.formgroup}>
 
-        <div className="row">
-          <div className="col-md-12">
-            {initData ? (
-              <Dashboard url={initStrat} host={host} port={port} />
-            ) : (
-              <div />
-            )}
-          </div>
-        </div>
+              {/* The local host text field */}
+                <Grid item className={classes.textfield}>
+                <CssTextField
+                required
+                id="outlined-required"
+                label="Hostname"
+                variant="outlined"
+                name="host"
+                value={this.state.host}
+                onChange={this.connectionInput}
+                disabled={this.state.disabled}
+
+                InputLabelProps={{                
+                  shrink:true,
+                  className:classes.labelProps
+                }}
+                InputProps={{
+                  style:{
+                    fontSize:12,
+                    color:"white",
+                  }
+                }}
+                />
+                </Grid>
+
+                {/* The port text field */}
+                <Grid item className={classes.textfield}>
+                <CssTextField
+                required
+                id="outlined-required"
+                label="Port"
+                color="inherit"
+                name="port"
+                variant="outlined"
+                value={this.state.port}
+                onChange={this.connectionInput}
+                disabled={this.state.disabled}
+                InputLabelProps={{
+                  shrink:true,
+                  className:classes.labelProps
+                }}
+
+                InputProps={{
+                  style:{
+                    fontSize:12,
+                    color:"white",
+                  }
+                }}
+                />
+                </Grid>
+
+                {/* Connect Button */}
+                <Grid item >
+                <Button 
+                size="large"
+                className={classes.button}
+                variant="outlined" color="inherit" 
+                onClick={this.handleConnection}>
+                
+                {this.state.connectstatus}
+                </Button>
+                </Grid>
+               
+              </Grid>
+              </Toolbar>
+              </AppBar>
+              
+            </Grid>
+                {/* Second Row - Main Body */}
+              <Grid item xs={12}>
+                  <div>
+                    {initData 
+                    ? (
+                      <Dashboard url={initStrat} host={host} port={port} />
+                    ) :null
+                    
+                    }
+                    </div>
+              </Grid>
+            </Grid>
+            
+  
+         
       </div>
     );
   }
 }
-export default App;
+App.propTypes = {
+  classes: PropTypes.object.isRequired,
+};
+
+export default withStyles(styles)(App);
