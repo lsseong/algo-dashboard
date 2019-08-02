@@ -1,5 +1,10 @@
 import React, { Component } from "react";
-import ReactTable from "react-table";
+import  { AgGridReact } from 'ag-grid-react';
+import "ag-grid-community/dist/styles/ag-grid.css";
+import "ag-grid-community/dist/styles/ag-theme-balham-dark.css";
+
+import "../dashboard/styling/css/Table.css";
+
 import {withStyles} from '@material-ui/core';
 import PropTypes from 'prop-types';
 
@@ -22,158 +27,114 @@ class PositionTable extends Component {
     this.state = {
       positiveColor:"#00FF00",
       negativeColor:"#ff0000",
-      rowBackgroundColor:"#484848",
-      headerBackgroundColor:"#303030"
+
+      columnDefs: [
+        { headerName:"POSITIONS", 
+          children:[
+        {headerName: 'Time', field: 'time',type:'numericColumn'},
+        {headerName: 'Symbol', field: 'symbol',type:'numericColumn'},
+        {headerName: 'Position', field: 'position',type:'numericColumn',cellStyle:this.setColumnColorStyle},
+        {headerName: 'Unrealized Pnl', field: 'unrealizedPnl',type:'numericColumn',cellStyle:this.setColumnColorStyle},
+        {headerName: 'Realized Pnl', field: 'realizedPnl',type:'numericColumn',cellStyle:this.setColumnColorStyle},
+          ]
+        }
+        
+      ],
+      rowData: [],
+      defaultColDef:{ resizeable:true, sortable:true},
+      gridReady:false,
+      getRowNodeId:function(data){
+        return data.symbol
+      },
     }
-    this.storeposarr = [];
   }
-  componentWillMount() {
-    if (this.props.type.length !== 0) {
-      this.storeposarr.unshift(this.props.type);
+
+  componentDidUpdate(prevProps){
+    if(this.state.gridReady){
+      if(this.props.currentStrat!==prevProps.currentStrat){
+        this.gridApi.setRowData([]);
+      }
+    
+      if (this.props.type !== prevProps.type) {
+        let rowNode = this.gridApi.getRowNode(this.props.type.symbol);
+        let storerowNode = [];
+        storerowNode.push(this.props.type);
+     
+            if(rowNode!==undefined){
+              var data = rowNode.data;
+              data.time = storerowNode[0].time;
+              data.symbol = storerowNode[0].symbol;
+              data.position = storerowNode[0].position;
+              data.realizedPnl = storerowNode[0].realizedPnl;
+              data.unrealizedPnl = storerowNode[0].unrealizedPnl;
+              this.gridApi.batchUpdateRowData({update:[data]});
+              this.gridApi.refreshCells();
+            }else{
+              var newdata = storerowNode[0];
+              this.gridApi.updateRowData({ add: [newdata] });
+            }
+      }
     }
+ 
   }
-  componentWillReceiveProps(nextProps) {
-    if (this.props.currentStrat !== nextProps.currentStrat) {
-      this.storeposarr = [];
-    }
-    var pt = this.storeposarr.findIndex(i => i.symbol === nextProps.type.symbol);
-    if (this.props.type !== nextProps.type) {
-      if (pt !== -1) {
-        this.storeposarr.splice(pt, 1, nextProps.type);
-      } else if (pt < 0) {
-        this.storeposarr.unshift(nextProps.type);
+  onGridReady=(params)=>{
+    this.setState({
+      gridReady:true,
+    })
+    this.gridApi = params.api;
+    this.gridColumnApi = params.columnApi;
+    params.api.sizeColumnsToFit();
+  }
+
+  setColumnColorStyle=(params)=>{
+    if(params.value>0){
+      return{
+        color:this.state.positiveColor,
+      }
+    }else if(params.value===0){
+      return{
+        color:"black",
+      }
+    }else{
+      return{
+        color:this.state.negativeColor,
       }
     }
   }
+  
 
   render() {
     const {classes} = this.props;
     return (
       <div className={classes.root}>
-        <ReactTable
-          data={this.storeposarr}
-          pageSize={this.storeposarr.length}
-          
-          columns={[
-            {
-              Header: "POSITIONS",
-              getHeaderProps: () => ({
-                style: {
-                  fontWeight: "600",
-                  textAlign: "center",
-                  color:"white",
-                  backgroundColor:this.state.headerBackgroundColor,
-                }
-              }),
-              columns: [
-                {
-                  Header: "Time",
+        <div style = {{width:"100%",height:"100%"}}>
+          <div style = {{display: "flex", flexDirection:"row"}}>
+            <div style = {{overflow:"hidden",flexGrow:"1"}}>
+              <div
+              id="myGrid"
+              style={{
+                height:"50vh",
+                width:"100%",
+                fontSize:"15px",
+                fontFamily:"TitilliumWeb_Regular",
+              }}
+              className="ag-theme-balham-dark"
+              >
+                <AgGridReact
+                columnDefs={this.state.columnDefs}
+                rowData={this.state.rowData}
+                onGridReady={this.onGridReady}
+                defaultColDef ={this.state.defaultColDef}
+                getRowNodeId = {this.state.getRowNodeId}
+                >
+                </AgGridReact>
 
-                  accessor: "time",
-                  minWidth: "10%",
-                  getProps: (state, row, column) => {
-                    return {
-                      style: {
-                        textAlign: "right",
-                        color:"white",
-                        backgroundColor:this.state.rowBackgroundColor,
-                        fontSize:"15px",
-                       
-                      }
-                    };
-                  }
-                },
-                {
-                  Header: "Symbol",
-                  accessor: "symbol",
-                  minWidth: "10%",
+              </div>
+            </div>
+          </div>
+        </div>
 
-                  getProps: (state, row, column) => {
-                    return {
-                      style: {
-                        textAlign: "right",
-                        color:"white",
-                        backgroundColor:this.state.rowBackgroundColor,
-                        fontSize:"15px",
-                      }
-                    };
-                  }
-                },
-                {
-                  Header: "Position",
-                  accessor: "position",
-                  minWidth: "10%",
 
-                  getProps: (state, row, column) => {
-                    if (row)
-                      return {
-                        style: {
-                          color: row.row.position >= 0 ? this.state.positiveColor : this.state.negativeColor,
-                          textAlign: "right",
-                          backgroundColor:this.state.rowBackgroundColor,
-                          fontSize:"15px",
-                        }
-                      };
-                    else
-                      return {
-                        style: { className: "-striped -highlight" }
-                      };
-                  }
-                },
-                {
-                  Header: "Unrealized Pnl",
-                  accessor: "unrealizedPnl",
-                  minWidth: "10%",
-
-                  getProps: (state, row, column) => {
-                    if (row)
-                      return {
-                        style: {
-                          color: row.row.unrealizedPnl >= 0 ? this.state.positiveColor : this.state.negativeColor,
-                          textAlign: "right",
-                          backgroundColor:this.state.rowBackgroundColor,
-                          fontSize:"15px",
-                        }
-                      };
-                    else
-                      return {
-                        style: { className: "-striped -highlight" }
-                      };
-                  }
-                },
-                {
-                  Header: "RealizedPnl",
-                  accessor: "realizedPnl",
-                  minWidth: "10%",
-
-                  getProps: (state, row, column) => {
-                    if (row)
-                      return {
-                        style: {
-                          color: row.row.realizedPnl >= 0 ? this.state.positiveColor : this.state.negativeColor,
-                          textAlign: "right",
-                          backgroundColor:this.state.rowBackgroundColor,
-                          fontSize:"15px",
-                        }
-                      };
-                    else
-                      return {
-                        style: { className: "-striped -highlight" }
-                      };
-                  }
-                }
-              ]
-            }
-          ]}
-          
-          defaultPageSize={this.props.numofRows}
-          className="-striped -highlight table border round"
-          showPagination={false}
-          style={{
-            height: "300px" // This will force the table body to overflow and scroll, since there is not enough room
-          }}
-          showPageSizeOptions={false}
-        />
       </div>
     );
   }

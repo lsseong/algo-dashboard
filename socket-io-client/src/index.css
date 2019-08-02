@@ -23,3 +23,8 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+@font-face{
+  font-family: TitilliumWeb_Regular;
+  src:url("../src/components/dashboard/styling/fonts/Titillium_Web/TitilliumWeb-Regular.ttf");
+}
+

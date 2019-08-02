@@ -1,5 +1,7 @@
 import React, { Component } from "react";
-import ReactTable from "react-table";
+import  { AgGridReact } from 'ag-grid-react';
+import "ag-grid-community/dist/styles/ag-grid.css";
+import "ag-grid-community/dist/styles/ag-theme-balham-dark.css";
 
 import {withStyles} from '@material-ui/core';
 import PropTypes from 'prop-types';
@@ -19,175 +21,104 @@ class OrderTable extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      rowBackgroundColor:"#484848",
-      headerBackgroundColor:"#303030"
-    }
-    this.storeorderarr = [];
-  }
-  componentWillMount() {
-    if (this.props.type.length !== 0) {
-      this.storeorderarr.unshift(this.props.type);
+      columnDefs: [
+        { headerName:"ORDERS", marryChildren:true,
+          children:[
+        {headerName: 'Time', field: 'time'},
+        {headerName: 'Order Id', field: 'clientOrderId',},
+        {headerName: 'State', field: 'state',},
+        {headerName: 'Symbol', field: 'order.symbol',},
+        {headerName: 'Side', field: 'order.side',},
+        {headerName: 'Qty', field: 'order.qty',},
+        {headerName: 'Type', field: 'order.type',},
+        {headerName: 'Limit Price', field: 'order.limitPrice',},
+        {headerName: 'Avg Price', field: 'avgPrice',},
+        
+          ]
+        }
+        
+      ],
+      rowData: [],
+      gridReady:false,
+      defaultColDef:{ resizeable:true, sortable:true},
+      getRowNodeId:function(data){
+        return data.clientOrderId
+      },
     }
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (this.props.currentStrat !== nextProps.currentStrat) {
-      this.storeorderarr = [];
-    }
-    if (this.storeorderarr.length > 80) {
-      this.storeorderarr.pop();
-    }
-    var pt = this.storeorderarr.findIndex(i => i.clientOrderId === nextProps.type.clientOrderId);
-    if (this.props.type !== nextProps.type) {
-      if (pt !== -1) {
-        this.storeorderarr.splice(pt, 1, nextProps.type);
-      } else if (pt < 0) {
-        this.storeorderarr.unshift(nextProps.type);
+  onGridReady=(params)=>{
+    this.setState({
+      gridReady:true,
+    })
+    this.gridApi = params.api;
+    this.gridColumnApi = params.columnApi;
+    params.api.sizeColumnsToFit();
+  }
+
+  componentDidUpdate(prevProps){
+
+    if(this.state.gridReady){
+      if(this.props.currentStrat!==prevProps.currentStrat){
+        this.gridApi.setRowData([]);
+      }
+      if (this.props.type !== prevProps.type) {
+        let rowNode = this.gridApi.getRowNode(this.props.type.clientOrderId);
+        let storerowNode = [];
+        storerowNode.push(this.props.type);
+     
+            if(rowNode!==undefined){
+              var data = rowNode.data;
+              data.time = storerowNode[0].time;
+              data.clientOrderId = storerowNode[0].clientOrderId;
+              data.state = storerowNode[0].state;
+              data.order.symbol = storerowNode[0].order.symbol;
+              data.order.side = storerowNode[0].order.side;
+              data.order.qty = storerowNode[0].order.qty;
+              data.order.limitPrice = storerowNode[0].order.limitPrice;
+              data.avgPrice = storerowNode[0].avgPrice;
+  
+              this.gridApi.batchUpdateRowData({update:[data]});
+              this.gridApi.refreshCells();
+            }else{
+              var newdata = storerowNode[0];
+              this.gridApi.updateRowData({ add: [newdata] });
+            }
       }
     }
+    
   }
 
   render() {
     const {classes} = this.props;
     return (
       <div className={classes.root}>
-        <ReactTable
-          data={this.storeorderarr}
-          pageSize={this.storeorderarr.length}
-          columns={[
-          
+      <div style = {{width:"100%",height:"100%"}}>
+          <div style = {{display: "flex", flexDirection:"row"}}>
+            <div style = {{overflow:"hidden",flexGrow:"1"}}>
+              <div
+              id="myGrid"
+              style={{
+                height:"50vh",
+                width:"100%",
+                fontFamily:"TitilliumWeb_Regular",
+              }}
+              className="ag-theme-balham-dark"
+              >
+                <AgGridReact
+                columnDefs={this.state.columnDefs}
+                rowData={this.state.rowData}
+                onGridReady={this.onGridReady}
+                defaultColDef ={this.state.defaultColDef}
+                getRowNodeId = {this.state.getRowNodeId}
+                >
+                </AgGridReact>
 
-            {
-              Header: "ORDERS",
-              getHeaderProps: (state, rowInfo, column, instance) => ({
-                style: {
-                  fontWeight: "600",
-                  textAlign: "center",
-                  backgroundColor:this.state.headerBackgroundColor,
-                }
-              }),
-              columns: [
-                {
-                  Header: "Time",
-                  accessor: "time",
-                  minWidth: "10%",
-                  getProps: (state, row, column) => {
-                    return {
-                      style: {
-                        backgroundColor:this.state.rowBackgroundColor,                  
-                      }
-                    };
-                  }
-                },
-                {
-                  Header: "Client Order Id",
-                  accessor: "clientOrderId",
-                  minWidth: "10%",
-                  getProps: (state, row, column) => {
-                    return {
-                      style: {
-                        backgroundColor:this.state.rowBackgroundColor,                  
-                      }
-                    };
-                  }
-                },
-                {
-                  Header: "State",
-                  accessor: "state",
-                  minWidth: "10%",
-                  getProps: (state, row, column) => {
-                    return {
-                      style: {
-                        backgroundColor:this.state.rowBackgroundColor,                  
-                      }
-                    };
-                  }
-                },
-                {
-                  Header: "Symbol",
-                  accessor: "order.symbol",
-                  minWidth: "10%",
-                  getProps: (state, row, column) => {
-                    return {
-                      style: {
-                        backgroundColor:this.state.rowBackgroundColor,                  
-                      }
-                    };
-                  }
-                },
-                {
-                  Header: "Side",
-                  accessor: "order.side",
-                  minWidth: "10%",
-                  getProps: (state, row, column) => {
-                    return {
-                      style: {
-                        backgroundColor:this.state.rowBackgroundColor,                  
-                      }
-                    };
-                  }
-                },
-                {
-                  Header: "Quantity",
-                  accessor: "order.qty",
-                  minWidth: "10%",
-                  getProps: (state, row, column) => {
-                    return {
-                      style: {
-                        backgroundColor:this.state.rowBackgroundColor,                  
-                      }
-                    };
-                  }
-                },
-                {
-                  Header: "Type",
-                  accessor: "order.type",
-                  minWidth: "10%",
-                  getProps: (state, row, column) => {
-                    return {
-                      style: {
-                        backgroundColor:this.state.rowBackgroundColor,                  
-                      }
-                    };
-                  }
-                },
-                {
-                  Header: "Limit Price",
-                  accessor: "order.limitPrice",
-                  minWidth: "10%",
-                  getProps: (state, row, column) => {
-                    return {
-                      style: {
-                        backgroundColor:this.state.rowBackgroundColor,                  
-                      }
-                    };
-                  }
-                },
-                {
-                  Header: "Avg Price",
-                  accessor: "avgPrice",
-                  minWidth: "10%",
-                  getProps: (state, row, column) => {
-                    return {
-                      style: {
-                        backgroundColor:this.state.rowBackgroundColor,                  
-                      }
-                    };
-                  }
-                  
-                }
-              ]
-            }
-          ]}
-          //pageSizeOptions = {[100]}
-          defaultPageSize={this.props.numofRows}
-          showPageSizeOptions={false}
-          showPagination={false}
-          style={{
-            height: "400px" // This will force the table body to overflow and scroll, since there is not enough room
-          }}
-          className="-striped -highlight table border round"
-        />
+              </div>
+            </div>
+          </div>
+        </div>    
+
       </div>
     );
   }

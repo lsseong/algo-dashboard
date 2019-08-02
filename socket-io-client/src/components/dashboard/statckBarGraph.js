@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 const styles = theme => ({
   graph:{
     backgroundColor:"#404040",
+    minHeight:"50vh",
   },
  
  });
@@ -66,11 +67,13 @@ class StackedBarGraph extends Component {
     valueAxis.renderer.ticks.template.length = 5;
     valueAxis.renderer.ticks.template.disabled = false;
     valueAxis.renderer.ticks.template.strokeOpacity = 0.4;
+    valueAxis.renderer.minGridDistance =50;
+    valueAxis.renderer.minLabelPosition = 0.01;
+    valueAxis.renderer.maxLabelPosition = 0.99;
 
     // fix the range
     valueAxis.min = -100000;
     valueAxis.max = 100000;
-    valueAxis.strictMinMax = true;
 
     // guide lines
     var range = valueAxis.axisRanges.create();
@@ -108,7 +111,7 @@ class StackedBarGraph extends Component {
         return am4core.color("#a8b3b7");
       }
     });
-
+    this.valueAxis= valueAxis;
     this.chart = chart;
 
     console.log("bar graph mounted");
@@ -136,6 +139,27 @@ class StackedBarGraph extends Component {
           });
           this.chart.data = this.storefirstcol;
         }
+        let maxvalue = this.storefirstcol[0].position;
+        let minvalue = this.storefirstcol[0].position;
+        this.storefirstcol.map((item,index)=>{
+          if(item.position>maxvalue){
+            maxvalue = item.position;
+          }
+          if(item.position<minvalue){
+            minvalue = item.position;
+          }
+        })
+
+        let maxAbs = Math.abs(maxvalue);
+        let minAbs = Math.abs(minvalue);
+
+        if(maxAbs>minAbs){
+          this.valueAxis.min = -Math.abs(maxAbs);
+          this.valueAxis.max = maxAbs;
+        }else{
+          this.valueAxis.min = -Math.abs(minAbs);
+          this.valueAxis.max = minAbs;
+        }
 
         this.chart.validateData();
 
@@ -156,7 +180,7 @@ class StackedBarGraph extends Component {
     return (
       <Grid container className={classes.graph} spacing={0}>
       <Grid item xs={12}>
-          <div id="barchartdiv" style={{ width: "100%", height: "400px" }} />
+          <div id="barchartdiv" style={{ width: "100%", height: "50vh" }} />
           </Grid>
       </Grid>
     );

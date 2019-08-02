@@ -6,7 +6,8 @@ import PropTypes from 'prop-types';
 
 const styles = theme => ({
   graph:{
-    backgroundColor:"#404040",
+    backgroundColor:"#303030",
+    minHeight:"50vh",
   },
   dropdown:{
  
@@ -25,7 +26,7 @@ class Graph extends Component {
     };
 
     this.dataCache = new Map();
-    this.MAX_DATA_POINTS = 30;
+    this.MAX_DATA_POINTS = 50;
   }
 
   mytheme = (target) =>{
@@ -66,6 +67,11 @@ class Graph extends Component {
     series.dataFields.lowValueY = "low";
     series.dataFields.highValueY = "high";
     series.simplifiedProcessing = true;
+
+    series.tooltipText = "Open:${openValueY.value}\nLow:${lowValueY.value}\nHigh:${highValueY.value}\nClose:${valueY.value}";
+
+    chart.cursor = new am4charts.XYCursor();
+
 
     this.chart = chart;
   }
@@ -132,14 +138,12 @@ class Graph extends Component {
     if (bar.name === this.state.selectedSymbol) {
       // add to chart
       if (this.chart.data.length > this.MAX_DATA_POINTS) {
-        this.chart.data.shift();
+        this.chart.addData(bar,1);
+      }else{
+        this.chart.addData(bar);
       }
-
-      this.chart.data.push(bar);
-      this.chart.validateData();
-    }
   }
-
+}
   componentWillUnmount() {
     if (this.chart) {
       this.chart.dispose();
@@ -166,7 +170,7 @@ class Graph extends Component {
 
       <Grid container className={classes.graph} spacing={0}>
         <Grid item xs={12} className={classes.dropdown}>
-        {dropdown.length !== 0 ? (
+        {dropdown.length !== 0 && this.chart.data.length!==0  ? (
           <div className="col-md-12">
             <select id="stock" onChange={this.change}>
               {dropdown}
@@ -179,7 +183,7 @@ class Graph extends Component {
         <Grid item xs={12}>
         <div
           id="chartdiv"
-          style={{ width: "100%", height: "300px" }}
+          style={{ width: "100%", height: "50vh" }}
         />
         </Grid>
 

@@ -1,8 +1,13 @@
 import React, { Component } from "react";
-import ReactTable from "react-table";
+import  { AgGridReact } from 'ag-grid-react';
+import "ag-grid-community/dist/styles/ag-grid.css";
+import "ag-grid-community/dist/styles/ag-theme-balham-dark.css";
 
 import {withStyles} from '@material-ui/core';
 import PropTypes from 'prop-types';
+
+
+import "../dashboard/styling/css/Table.css";
 
 const styles = theme => ({
   root:{
@@ -21,144 +26,119 @@ class SignalTable extends Component {
     super(props);
     //state and variable initalisation
     this.state = {
-      rowBackgroundColor:"#484848",
-      headerBackgroundColor:"#303030",
       positiveColor:"#00FF00",
       negativeColor:"#ff0000",
+
+      columnDefs: [
+        { headerName:"SIGNALS", 
+          children:[
+        {headerName: 'Time', field: 'time',type:'numericColumn'},
+        {headerName: 'Symbol', field: 'symbol',type:'numericColumn'},
+        {headerName: 'Signal', field: 'signal',type:'numericColumn',cellStyle:this.setColumnColorStyle},
+        {headerName: 'SMA 10', field: 'analytics.sma10',type:'numericColumn',cellStyle:this.setColumnColorStyle},
+        {headerName: 'SMA 20', field: 'analytics.sma20',type:'numericColumn',cellStyle:this.setColumnColorStyle},
+          ]
+        }
+        
+      ],
+      rowData: [],
+      gridReady:false,
+      defaultColDef:{ resizeable:true, sortable:true},
+      getRowNodeId:function(data){
+        return data.symbol
+      },
     }
-    this.storesignalarr = [];
   }
-  //when component 1st mount store the var in the array and set the state of the storesignal
-  componentWillMount() {
-    if (this.props.type.length !== 0) {
-      this.storesignalarr.unshift(this.props.type);
-    }
+
+  
+  onGridReady=(params)=>{
+    this.setState({
+      gridReady:true,
+    })
+    this.gridApi = params.api;
+    this.gridColumnApi = params.columnApi;
+    params.api.sizeColumnsToFit();
   }
-  componentWillReceiveProps(nextProps) {
-    if (this.props.currentStrat !== nextProps.currentStrat) {
-      this.storesignalarr = [];
-    }
-    var pt = this.storesignalarr.findIndex(
-      i => i.symbol === nextProps.type.symbol
-    );
-    if (this.props.type !== nextProps.type) {
-      if (pt !== -1) {
-        this.storesignalarr.splice(pt, 1, nextProps.type);
-      } else if (pt < 0) {
-        this.storesignalarr.unshift(nextProps.type);
+
+  setColumnColorStyle=(params)=>{
+    if(params.value>0){
+      return{
+        color:this.state.positiveColor,
+      }
+    }else if(params.value===0){
+      return{
+        color:"black",
+      }
+    }else{
+      return{
+        color:this.state.negativeColor,
       }
     }
+  }
+
+  //when component 1st mount store the var in the array and set the state of the storesignal
+  componentDidUpdate(prevProps){
+    if(this.state.gridReady){
+      if(this.props.currentStrat!==prevProps.currentStrat){
+        this.gridApi.setRowData([]);
+      }
+      if (this.props.type !== prevProps.type) {
+        let rowNode = this.gridApi.getRowNode(this.props.type.symbol);
+        let storerowNode = [];
+        storerowNode.push(this.props.type);
+        console.log(storerowNode);
+     
+            if(rowNode!==undefined){
+              var data = rowNode.data;
+              console.log(data);
+              data.time = storerowNode[0].time;
+              data.symbol = storerowNode[0].symbol;
+              data.signal = storerowNode[0].signal;
+              data.analytics.sma10 = storerowNode[0].analytics.sma10;
+              data.analytics.sma20 = storerowNode[0].analytics.sma20;
+  
+              this.gridApi.batchUpdateRowData({update:[data]});
+              this.gridApi.refreshCells();
+            }else{
+              var newdata = storerowNode[0];
+              this.gridApi.updateRowData({ add: [newdata] });
+            }
+      }
+    }
+    
   }
 
   render() {
     const {classes} = this.props;
     return (
       <div className={classes.root}>
-        <ReactTable
-          data={this.storesignalarr}
-          pageSize={this.storesignalarr.length}
-          columns={[
-            {
-              Header: "SIGNALS",
-              getHeaderProps: (state, rowInfo, column, instance) => ({
-                style: {
-                  fontWeight: "600",
-                  textAlign: "center",
-                  backgroundColor:this.state.headerBackgroundColor,
-                }
-              }),
-              columns: [
-                {
-                  Header: "Time",
-                  accessor: "time",
-                  minWidth: "30%",
-                  getProps: (state, row, column) => {
-                    return {
-                      style: {
-                        backgroundColor:this.state.rowBackgroundColor,                  
-                      }
-                    };
-                  }
-                },
-                {
-                  Header: "Symbol",
-                  accessor: "symbol",
-                  minWidth: "10%",
-                  getProps: (state, row, column) => {
-                    return {
-                      style: {
-                        backgroundColor:this.state.rowBackgroundColor,                  
-                      }
-                    };
-                  }
-                },
-                {
-                  Header: "Signal",
-                  accessor: "signal",
-                  minWidth: "20%",
-                  getProps: (state, rowInfo, column) => {
-                    if (rowInfo)
-                      return {
-                        style: {
-                          color: rowInfo.row.signal >= 0 ? this.state.positiveColor : this.state.negativeColor,
-                          backgroundColor:this.state.rowBackgroundColor,  
-                        }
-                      };
-                    else
-                      return {
-                        style: { className: "-striped -highlight" }
-                      };
-                  }
-                },
-                {
-                  Header: "SMA 10",
-                  id: "sma10",
-                  accessor: "analytics.sma10",
-                  minWidth: "20%",
-                  getProps: (state, rowInfo, column) => {
-                    if (rowInfo && rowInfo.row)
-                      return {
-                        style: {
-                          color: rowInfo.row.sma10 >= 0 ? this.state.positiveColor : this.state.negativeColor,
-                          backgroundColor:this.state.rowBackgroundColor,  
-                        }
-                      };
-                    else
-                      return {
-                        style: { className: "-striped -highlight" }
-                      };
-                  }
-                },
-                {
-                  Header: "SMA 20",
-                  id: "sma20",
-                  accessor: "analytics.sma20",
-                  minWidth: "20%",
-                  getProps: (state, rowInfo, column) => {
-                    if (rowInfo)
-                      return {
-                        style: {
-                          color: rowInfo.row.sma20 >= 0 ? this.state.positiveColor : this.state.negativeColor,
-                          backgroundColor:this.state.rowBackgroundColor,  
-                        }
-                      };
-                    else
-                      return {
-                        style: { className: "-striped -highlight" }
-                      };
-                  }
-                }
-              ]
-            }
-          ]}
-          showPagination={false}
-          defaultPageSize={this.props.numofRows}
-          className="-striped -highlight table border round"
-          style={{
-            height: "200px" // This will force the table body to overflow and scroll, since there is not enough room
-          }}
-          showPageSizeOptions={false}
-        />
+        <div style = {{width:"100%",height:"100%"}}>
+          <div style = {{display: "flex", flexDirection:"row"}}>
+            <div style = {{overflow:"hidden",flexGrow:"1"}}>
+              <div
+              id="myGrid"
+              style={{
+                height:"25vh",
+                width:"100%",
+                fontSize:"15px",
+                fontFamily:"TitilliumWeb_Regular",
+              }}
+              className="ag-theme-balham-dark"
+              >
+                <AgGridReact
+                columnDefs={this.state.columnDefs}
+                rowData={this.state.rowData}
+                onGridReady={this.onGridReady}
+                defaultColDef ={this.state.defaultColDef}
+                getRowNodeId = {this.state.getRowNodeId}
+                >
+                </AgGridReact>
+
+              </div>
+            </div>
+          </div>
+        </div>
+        
       </div>
     );
   }

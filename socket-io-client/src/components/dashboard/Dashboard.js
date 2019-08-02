@@ -11,7 +11,7 @@ import StackedBarGraph from "./statckBarGraph";
 import PositionCSGraph from "./positionCandleStick";
 import PnLPanel from "./PnlPanel";
 
-import {withStyles,Tabs,Grid,Tab,AppBar, Typography} from '@material-ui/core';
+import {withStyles,Tabs,Grid,Tab,AppBar, Typography,Collapse} from '@material-ui/core';
 import PropTypes from 'prop-types';
 
 const styles = theme => ({
@@ -52,7 +52,9 @@ class Dashboard extends Component {
       portfolio: {},
       currenturl: this.props.url,
       serverconnect: true,
-      currenttab: "portfolio"
+      currenttab: "portfolioTab",
+      portfolioTab:true,
+      positionTab:false,
     };
 
     //open eventsource base on current url
@@ -150,7 +152,17 @@ class Dashboard extends Component {
     this.eventSource.close();
   }
   checkSelectedTab =(event,newValue) => {
-    console.log(newValue);
+    if(newValue==="portfolioTab"){
+      this.setState({
+        portfolioTab:true,
+        positionTab:false,
+      })
+    }else if (newValue == "positionTab"){
+      this.setState({
+        portfolioTab:false,
+        positionTab:true,
+      })
+    }
     this.setState({
       currenttab: newValue
     });
@@ -169,6 +181,9 @@ class Dashboard extends Component {
     const { serverconnect } = this.state;
     const { currenttab } = this.state;
     const { classes } = this.props;
+    const { positionTab } = this.state;
+    const { portfolioTab } = this.state;
+
     const dropdown = this.state.perfdata.map((object, i) => (
       <option key={i} value={object.id}>
         {object.id}
@@ -245,17 +260,17 @@ class Dashboard extends Component {
         textColor="inherit"
 
         >
-          <Tab label="portfolio" value="portfolio" />
-          <Tab label="position" value="position" />
+          <Tab label="portfolio" value="portfolioTab" />
+          <Tab label="position" value="positionTab" />
         </Tabs>
       </AppBar>
       
       <br/>
         {/* First summary tab */}
-               
-            {currenttab === "portfolio" ? (
+          <Collapse in={portfolioTab} style = {{transitionDelay:portfolioTab ? '2000ms':'0ms'}}>
+         
                <div className={classes.tab}>
-              <Grid container spacing={4} >
+              <Grid container spacing={3} >
           
                 <Grid item xs={6}>
                   <Grid container spacing={1}>
@@ -301,7 +316,7 @@ class Dashboard extends Component {
                       type={commentary}
                       currentStrat={currenturl}
                       numofRows={4}
-                      height="200px"
+                      height="29vh"
                     />
                     </Grid>
 
@@ -310,15 +325,15 @@ class Dashboard extends Component {
 
               </Grid>
               </div>
-            ) : null}
-      
+           
+        </Collapse>
 
           {/* Second position tab */}
-
-            {currenttab === "position" ? (
+          <Collapse in={positionTab} style = {{transitionDelay:positionTab ? '2000ms':'0ms'}}>
+           
               <div className={classes.tab}>
-                <Grid container spacing={4}>
-                  <Grid item xs={5}>
+                <Grid container spacing={3}>
+                  <Grid item xs={6}>
                     <Grid container spacing={1}>
                         <Grid item xs={12}>
                         <PositionTable
@@ -329,16 +344,17 @@ class Dashboard extends Component {
                         </Grid>
 
                         <Grid item xs={12}>
-                        <OrderPositionTable
-                          type={order}
-                          currentStrat={currenturl}
-                          numofRows={5}
-                        />
+                        <CommentTable
+                              type={commentary}
+                              currentStrat={currenturl}
+                              numofRows={10}
+                              height="50vh"
+                            />
                         </Grid>
                     </Grid>
                   </Grid>
 
-                  <Grid item xs={4}>
+                  <Grid item xs={6}>
                     <Grid container spacing={1}>
                           <Grid item xs={12}>
                             <StackedBarGraph
@@ -353,21 +369,20 @@ class Dashboard extends Component {
                       </Grid>
                   </Grid>
 
-                  <Grid item xs={3}>
+                  <Grid item xs={12}>
                       <Grid container spacing={1}>
                           <Grid item xs={12}>
-                            <CommentTable
-                              type={commentary}
+                              <OrderPositionTable
+                              type={order}
                               currentStrat={currenturl}
-                              numofRows={10}
-                              height="90vh"
-                            />
+                              numofRows={5}
+                              />
                           </Grid>
                       </Grid>
                     </Grid>
                 </Grid>
               </div>
-            ) : null}
+              </Collapse>
      
       </div>
     );

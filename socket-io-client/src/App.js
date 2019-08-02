@@ -15,12 +15,18 @@ const CssTextField = withStyles({
       '& fieldset': {
         borderColor: 'white',
       },
+
       '&:hover fieldset': {
         borderColor: 'white',
       },
       '&.Mui-focused fieldset': {
         borderColor: 'white',
       },
+    },
+    '& .MuiOutlinedInput-input':{
+      
+        padding:"10px",
+    
     },
   },
 })(TextField);
@@ -34,18 +40,18 @@ const styles = theme => ({
  },
 
  appbar:{
-  backgroundColor:"#404040"
+  backgroundColor:"#404040",
+  fontFamily:"TitilliumWeb_Regular",
  },
 
  textfield:{
-  minWidth:"120px",
+  width:"200px",
  },
 
  button:{
    fontSize:"15px",
    color:"white",
    borderColor:"white",
-   marginTop:"2px",
  },
  
  labelProps:{
@@ -182,8 +188,9 @@ class App extends Component {
                 }}
                 InputProps={{
                   style:{
-                    fontSize:12,
+                    fontSize:20,
                     color:"white",
+                    padding:"0px",
                   }
                 }}
                 />
@@ -208,8 +215,9 @@ class App extends Component {
 
                 InputProps={{
                   style:{
-                    fontSize:12,
+                    fontSize:20,
                     color:"white",
+                    padding:"0px",
                   }
                 }}
                 />
