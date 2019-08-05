@@ -137,7 +137,6 @@ class Graph extends Component {
       if (bar.name === this.selectedSymbol ) {
         // add to chart
         if (this.chart.data.length > this.MAX_DATA_POINTS) {
-          console.log("reached max points");
           this.chart.addData(bar,1);
         }else{
           this.chart.addData(bar);
