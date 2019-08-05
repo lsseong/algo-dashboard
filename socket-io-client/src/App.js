@@ -58,6 +58,10 @@ const styles = theme => ({
    color:"white",
    fontFamily:"TitilliumWeb_Regular",
  },
+ root:{
+  overflowX:"hidden",
+  overflowY:"hidden",
+ }
 
 });
 
@@ -162,7 +166,7 @@ class App extends Component {
     const { initData } = this.state;
     const { classes } = this.props;
     return (
-      <div>
+      <div className={classes.root}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
             <AppBar position="static" color="inherit" className={classes.appbar}>

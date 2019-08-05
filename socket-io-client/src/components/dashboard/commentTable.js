@@ -38,6 +38,7 @@ class CommentTable extends Component {
         return data.time
       },
     }
+    this.MAX_COMMENTS_COUNT = 50;
   }
 
   componentDidUpdate(prevProps){
@@ -50,6 +51,10 @@ class CommentTable extends Component {
         storerowNode.push(this.props.type);
         var newdata = storerowNode[0];
         this.gridApi.updateRowData({ add: [newdata] ,addIndex: 0});
+
+        if(this.gridApi.getDisplayedRowCount()>this.MAX_COMMENTS_COUNT){
+          this.gridApi.updateRowData({remove :[this.gridApi.getDisplayedRowAtIndex(this.gridApi.getDisplayedRowCount()-1).data]});
+        }
       }
     }
    
@@ -88,6 +93,8 @@ class CommentTable extends Component {
                 onGridReady={this.onGridReady}
                 defaultColDef ={this.state.defaultColDef}
                 getRowNodeId = {this.state.getRowNodeId}
+                paginationAutoPageSize={true}
+                pagination={true}
                 >
                 </AgGridReact>
 

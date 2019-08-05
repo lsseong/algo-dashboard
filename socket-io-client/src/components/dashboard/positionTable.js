@@ -71,7 +71,7 @@ class PositionTable extends Component {
               this.gridApi.refreshCells();
             }else{
               var newdata = storerowNode[0];
-              this.gridApi.updateRowData({ add: [newdata] });
+              this.gridApi.updateRowData({ add: [newdata] ,addIndex: 0});
             }
       }
     }
@@ -127,6 +127,8 @@ class PositionTable extends Component {
                 onGridReady={this.onGridReady}
                 defaultColDef ={this.state.defaultColDef}
                 getRowNodeId = {this.state.getRowNodeId}
+                paginationAutoPageSize={true}
+                pagination={true}
                 >
                 </AgGridReact>
 

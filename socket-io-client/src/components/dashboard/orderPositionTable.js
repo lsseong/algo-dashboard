@@ -119,7 +119,7 @@ class OrderPositionTable extends Component {
             }else{
               if(storerowNode[0].state!=="COMPLETE"){
                 var newdata = storerowNode[0];
-                this.gridApi.updateRowData({ add: [newdata] });
+                this.gridApi.updateRowData({ add: [newdata] ,addIndex: 0});
               }
 
             }
@@ -152,6 +152,8 @@ class OrderPositionTable extends Component {
                 onGridReady={this.onGridReady}
                 defaultColDef ={this.state.defaultColDef}
                 getRowNodeId = {this.state.getRowNodeId}
+                paginationAutoPageSize={true}
+                pagination={true}
                 >
                 </AgGridReact>
 

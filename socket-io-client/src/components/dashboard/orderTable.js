@@ -45,6 +45,7 @@ class OrderTable extends Component {
         return data.clientOrderId
       },
     }
+    this.MAX_ORDER_COUNT = 50;
   }
 
   onGridReady=(params)=>{
@@ -82,7 +83,10 @@ class OrderTable extends Component {
               this.gridApi.refreshCells();
             }else{
               var newdata = storerowNode[0];
-              this.gridApi.updateRowData({ add: [newdata] });
+              this.gridApi.updateRowData({ add: [newdata],addIndex: 0 });
+              if(this.gridApi.getDisplayedRowCount()>this.MAX_ORDER_COUNT){
+                this.gridApi.updateRowData({remove :[this.gridApi.getDisplayedRowAtIndex(this.gridApi.getDisplayedRowCount()-1).data]});
+              }
             }
       }
     }
@@ -111,6 +115,8 @@ class OrderTable extends Component {
                 onGridReady={this.onGridReady}
                 defaultColDef ={this.state.defaultColDef}
                 getRowNodeId = {this.state.getRowNodeId}
+                paginationAutoPageSize={true}
+                pagination={true}
                 >
                 </AgGridReact>
 

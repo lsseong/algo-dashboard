@@ -26,7 +26,8 @@ const styles = theme => ({
   },
   firstrow:{
     color:"white",
-        fontFamily:"TitilliumWeb_Regular",
+    width:"98%",
+    fontFamily:"TitilliumWeb_Regular",
   },
   text:{
     marginLeft:"8px",
@@ -205,7 +206,7 @@ class Dashboard extends Component {
         
             <Grid container spacing={0} className={classes.text}>
 
-              <Grid item xs={12}  >
+              <Grid item xs={12}>
               <Typography variant="h6" className={classes.typography}>
                 List of Strategies
               </Typography>
@@ -274,7 +275,7 @@ class Dashboard extends Component {
           <Collapse in={portfolioTab} style = {{transitionDelay:portfolioTab ? '2000ms':'0ms'}}>
          
                <div className={classes.tab}>
-              <Grid container spacing={3} >
+              <Grid container spacing={2} >
           
                 <Grid item xs={6}>
                   <Grid container spacing={1}>
@@ -336,7 +337,7 @@ class Dashboard extends Component {
           <Collapse in={positionTab} style = {{transitionDelay:positionTab ? '2000ms':'0ms'}}>
            
               <div className={classes.tab}>
-                <Grid container spacing={3}>
+                <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <Grid container spacing={1}>
                         <Grid item xs={12}>
