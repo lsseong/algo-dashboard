@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 const styles = theme => ({
   root:{
    textAlign:"center",
+   color:"white",
   },
   typography:{
     fontFamily:"TitilliumWeb_Regular",
@@ -14,13 +15,9 @@ const styles = theme => ({
 class PnLPanel extends React.Component {
   render() {
     const {classes} = this.props;
-    var totalValue = this.props.data.totalValue;
-    var unrealizedPnl = this.props.data.unrealizedPnl;
-    var realizedPnl = this.props.data.realizedPnl;
-
-    totalValue = Number(totalValue).toFixed(2);
-    unrealizedPnl = Number(unrealizedPnl).toFixed(2);
-    realizedPnl = Number(realizedPnl).toFixed(2);
+    let totalValue = this.props.data.totalValue;
+    let unrealizedPnl = this.props.data.unrealizedPnl;
+    let realizedPnl = this.props.data.realizedPnl;
 
     return (
       <div className={classes.root}>
@@ -38,7 +35,7 @@ class PnLPanel extends React.Component {
         <Grid item sm={4}>
 
         <Typography variant="h5"style={this.getNumberStyle(realizedPnl)} className={classes.typography}>
-          {totalValue}
+          {realizedPnl}
           </Typography>
 
           <Typography variant="body1">
@@ -50,7 +47,7 @@ class PnLPanel extends React.Component {
         <Grid item sm={4}>
 
         <Typography variant="h5"style={this.getNumberStyle(unrealizedPnl)} className={classes.typography}>
-          {totalValue}
+          {unrealizedPnl}
         </Typography>
 
         <Typography variant="body1">
@@ -64,10 +61,22 @@ class PnLPanel extends React.Component {
     );
   }
 
-  getNumberStyle(number) {
-    return {
-      color: number >= 0 ? "#00FF00" : "#ff0000"
-    };
+  getNumberStyle=(number)=>{
+    let num = Number(number);
+    if(num>0){
+      return {
+        color:"#00FF00"
+      };
+    }else if(num===0){
+      return {
+        color:"grey"
+      };
+    }else{
+      return {
+        color: "#ff0000"
+      };
+    }
+
   }
 }
 

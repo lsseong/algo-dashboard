@@ -140,7 +140,7 @@ class StackedBarGraph extends Component {
         }
         let maxvalue = this.storefirstcol[0].position;
         let minvalue = this.storefirstcol[0].position;
-        this.storefirstcol.map((item,index)=>{
+        this.storefirstcol.forEach((item,index)=>{
           if(item.position>maxvalue){
             maxvalue = item.position;
           }

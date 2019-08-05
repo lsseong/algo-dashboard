@@ -41,7 +41,7 @@ class PositionTable extends Component {
         
       ],
       rowData: [],
-      defaultColDef:{ resizeable:true, sortable:true},
+      defaultColDef:{ resizable:true, sortable:true},
       gridReady:false,
       getRowNodeId:function(data){
         return data.symbol
@@ -55,7 +55,7 @@ class PositionTable extends Component {
         this.gridApi.setRowData([]);
       }
     
-      if (this.props.type !== prevProps.type && this.props.type.length!==0) {
+      if (this.props.type !== prevProps.type && this.props.type!==0) {
         let rowNode = this.gridApi.getRowNode(this.props.type.symbol);
         let storerowNode = [];
         storerowNode.push(this.props.type);
@@ -87,13 +87,14 @@ class PositionTable extends Component {
   }
 
   setColumnColorStyle=(params)=>{
-    if(params.value>0){
+    let number  = Number(params.value);
+    if(number>0){
       return{
         color:this.state.positiveColor,
       }
-    }else if(params.value===0){
+    }else if(number===0){
       return{
-        color:"black",
+        color:"grey",
       }
     }else{
       return{

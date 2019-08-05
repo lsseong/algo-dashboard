@@ -40,7 +40,7 @@ class OrderTable extends Component {
       ],
       rowData: [],
       gridReady:false,
-      defaultColDef:{ resizeable:true, sortable:true},
+      defaultColDef:{ resizable:true, sortable:true},
       getRowNodeId:function(data){
         return data.clientOrderId
       },

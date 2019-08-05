@@ -169,7 +169,7 @@ class Graph extends Component {
       <Grid container className={classes.graph} spacing={0}>
         <Grid item xs={12} className={classes.dropdown}>
         {dropdown.length !== 0 && this.chart.data.length!==0  ? (
-          <div className="col-md-12">
+          <div>
             <select id="stock" onChange={this.change}>
               {dropdown}
             </select>

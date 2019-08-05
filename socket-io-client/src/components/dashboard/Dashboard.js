@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import PortfolioTable from "./portfolioTable";
-import QuoteTable from "./quoteTable";
+// import PortfolioTable from "./portfolioTable";
+// import QuoteTable from "./quoteTable";
 import CommentTable from "./commentTable";
 import Graph from "./graph";
 import OrderTable from "./orderTable";
