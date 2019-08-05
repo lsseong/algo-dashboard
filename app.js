@@ -32,9 +32,9 @@ io.on("connection", socket => {
 });
 
 app.post("/url", async (req, res) => {
-  console.log("host" + req.body.host);
-  console.log("port" + req.body.port);
-  console.log("status" + req.body.status);
+  console.log("host: " + req.body.host);
+  console.log("port: " + req.body.port);
+  console.log("status: " + req.body.status);
   host = req.body.host;
   portNumber = req.body.port;
   conStatus = req.body.status;

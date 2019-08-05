@@ -5,6 +5,9 @@ import PropTypes from 'prop-types';
 const styles = theme => ({
   root:{
    textAlign:"center",
+  },
+  typography:{
+    fontFamily:"TitilliumWeb_Regular",
   }
  });
 
@@ -23,7 +26,7 @@ class PnLPanel extends React.Component {
       <div className={classes.root}>
       <Grid container spacing={4}>
         <Grid item sm={4}>
-          <Typography variant="h5"style={this.getNumberStyle(totalValue)}>
+          <Typography variant="h5"style={this.getNumberStyle(totalValue)} className={classes.typography}>
           {totalValue}
           </Typography>
 
@@ -34,7 +37,7 @@ class PnLPanel extends React.Component {
 
         <Grid item sm={4}>
 
-        <Typography variant="h5"style={this.getNumberStyle(realizedPnl)}>
+        <Typography variant="h5"style={this.getNumberStyle(realizedPnl)} className={classes.typography}>
           {totalValue}
           </Typography>
 
@@ -46,7 +49,7 @@ class PnLPanel extends React.Component {
 
         <Grid item sm={4}>
 
-        <Typography variant="h5"style={this.getNumberStyle(unrealizedPnl)}>
+        <Typography variant="h5"style={this.getNumberStyle(unrealizedPnl)} className={classes.typography}>
           {totalValue}
         </Typography>
 

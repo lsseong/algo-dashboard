@@ -45,7 +45,7 @@ class CommentTable extends Component {
       if(this.props.currentStrat!==prevProps.currentStrat){
         this.gridApi.setRowData([]);
       }
-      if (this.props.type !== prevProps.type) {
+      if (this.props.type !== prevProps.type && this.props.type.length!==0) {
         let storerowNode = [];
         storerowNode.push(this.props.type);
         var newdata = storerowNode[0];

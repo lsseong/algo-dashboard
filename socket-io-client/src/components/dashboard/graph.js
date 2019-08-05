@@ -22,11 +22,11 @@ class Graph extends Component {
     super(props);
     this.state = {
       selections: [],
-      selectedSymbol: ""
     };
 
     this.dataCache = new Map();
     this.MAX_DATA_POINTS = 50;
+    this.selectedSymbol = "";
   }
 
   mytheme = (target) =>{
@@ -68,23 +68,24 @@ class Graph extends Component {
     series.dataFields.highValueY = "high";
     series.simplifiedProcessing = true;
 
-    series.tooltipText = "Open:${openValueY.value}\nLow:${lowValueY.value}\nHigh:${highValueY.value}\nClose:${valueY.value}";
-
+    series.tooltipText = "OPEN: [bold]{openValueY}[/]\nHIGH: [bold]{highValueY}[/]\nLOW: [bold]{lowValueY}[/]\nCLOSE: [bold]{closeValueY}[/]\n";
+    
     chart.cursor = new am4charts.XYCursor();
 
 
     this.chart = chart;
   }
 
-  componentDidUpdate(oldProps) {
-    if (this.props.currentStrat !== oldProps.currentStrat) {
+  componentDidUpdate(prevProps) {
+    if (this.props.currentStrat !== prevProps.currentStrat) {
       // user select a different strategy - reset
       this.selections = [];
       this.chart.data = [];
+      this.dataCache = new Map();
       this.setState({
         selections: [],
-        selectedSymbol: ""
       });
+      this.selectedSymbol = "";
     }
 
     if (this.props.bardata.length === 0) {
@@ -92,57 +93,57 @@ class Graph extends Component {
       return;
     }
 
-    if (this.props.bardata === oldProps.bardata) {
+    if (this.props.bardata === prevProps.bardata) {
       // no change in bar data
       return;
     }
 
     // create bar object
-    var newDate = new Date(this.props.bardata.time);
-    var bar = {
-      time: newDate,
-      name: this.props.bardata.symbol,
-      close: this.props.bardata.close,
-      open: this.props.bardata.open,
-      low: this.props.bardata.low,
-      high: this.props.bardata.high
-    };
-
-    // add to cache
-    var array = this.dataCache.get(this.props.bardata.symbol);
-    if (array == null) {
-      // first time seeing this security
-      array = [];
-
-      // initialize array with empty data
-
-      this.dataCache.set(bar.name, array);
-
-      // update state
-      const selections = this.state.selections;
-      selections.push(bar.name);
-      this.setState({ selections: selections }, () => {
-        // callback to set a default security to chart
-        if (this.state.selectedSymbol === "") {
-          this.setState({ selectedSymbol: this.state.selections[0] });
-        }
-      });
-    }
-    array.push(bar);
-
-    // maintain a maximum number of bars per symbol in the cache
-    if (array.length > this.MAX_DATA_POINTS) {
-      array.shift();
-    }
-
-    if (bar.name === this.state.selectedSymbol) {
-      // add to chart
-      if (this.chart.data.length > this.MAX_DATA_POINTS) {
-        this.chart.addData(bar,1);
-      }else{
-        this.chart.addData(bar);
+    if(this.props.bardata!==prevProps.bardata && this.props.bardata.length!==0){
+      var newDate = new Date(this.props.bardata.time);
+      var bar = {
+        time: newDate,
+        name: this.props.bardata.symbol,
+        close: this.props.bardata.close,
+        open: this.props.bardata.open,
+        low: this.props.bardata.low,
+        high: this.props.bardata.high
+      };
+  
+      // add to cache
+      var array = this.dataCache.get(this.props.bardata.symbol);
+      if (array == null) {
+        // first time seeing this security
+        array = [];
+  
+        // initialize array with empty data
+  
+        this.dataCache.set(bar.name, array);
+  
+        // update state
+        const selections = this.state.selections;
+        selections.push(bar.name);
+        if (this.selectedSymbol === "") {
+          this.selectedSymbol = bar.name;
+          }
+        this.setState({ selections: selections });
       }
-  }
+      array.push(bar);
+  
+      // maintain a maximum number of bars per symbol in the cache
+      if (array.length > this.MAX_DATA_POINTS) {
+        array.shift();
+      }
+      if (bar.name === this.selectedSymbol ) {
+        // add to chart
+        if (this.chart.data.length > this.MAX_DATA_POINTS) {
+          this.chart.addData(bar,1);
+        }else{
+          this.chart.addData(bar);
+        }
+    }
+    }
+   
 }
   componentWillUnmount() {
     if (this.chart) {
@@ -152,7 +153,7 @@ class Graph extends Component {
 
   change = event => {
     this.chart.data = this.dataCache.get(event.target.value);
-    this.setState({ selectedSymbol: event.target.value });
+    this.selectedSymbol = event.target.value;
     console.log("change bar " + event.target.value);
   };
 

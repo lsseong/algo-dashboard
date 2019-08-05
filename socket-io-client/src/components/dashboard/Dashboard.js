@@ -11,7 +11,7 @@ import StackedBarGraph from "./statckBarGraph";
 import PositionCSGraph from "./positionCandleStick";
 import PnLPanel from "./PnlPanel";
 
-import {withStyles,Tabs,Grid,Tab,AppBar, Typography,Collapse} from '@material-ui/core';
+import {withStyles,Tabs,Grid,Tab,AppBar, Typography,Collapse,} from '@material-ui/core';
 import PropTypes from 'prop-types';
 
 const styles = theme => ({
@@ -26,14 +26,17 @@ const styles = theme => ({
   },
   firstrow:{
     color:"white",
+        fontFamily:"TitilliumWeb_Regular",
   },
   text:{
     marginLeft:"8px",
   },
   tab:{
     backgroundColor:"#383838",
-  }
- 
+  },
+  typography:{
+    fontFamily:"TitilliumWeb_Regular",
+  },
  });
 
 class Dashboard extends Component {
@@ -86,24 +89,25 @@ class Dashboard extends Component {
     console.log(event.target.value);
     //set eventlistener to current event
     this.allEvent();
+   
   };
 
   allEvent = () => {
     //when eventsource open
-    this.eventSource.onopen = function(e) {
+    this.eventSource.onopen = (e)=> {
       console.log("EventSource started.");
       this.setState({
         serverconnect: true
       });
-    }.bind(this);
+    }
 
     //when eventsource have error
-    this.eventSource.onerror = function(e) {
+    this.eventSource.onerror = (e)=> {
       console.log("EventSource failed.");
       this.setState({
         serverconnect: false
       });
-    }.bind(this);
+    }
 
     //all the eventlisteners for current events
     this.eventSource.addEventListener("quote", quote =>
@@ -157,7 +161,7 @@ class Dashboard extends Component {
         portfolioTab:true,
         positionTab:false,
       })
-    }else if (newValue == "positionTab"){
+    }else if (newValue === "positionTab"){
       this.setState({
         portfolioTab:false,
         positionTab:true,
@@ -168,10 +172,11 @@ class Dashboard extends Component {
     });
   };
 
+
   //render DOM set all the components here
   render() {
     const { signal } = this.state;
-    const { quote } = this.state;
+    // const { quote } = this.state;
     const { position } = this.state;
     const { order } = this.state;
     const { portfolio } = this.state;
@@ -201,7 +206,7 @@ class Dashboard extends Component {
             <Grid container spacing={0} className={classes.text}>
 
               <Grid item xs={12}  >
-              <Typography variant="h6">
+              <Typography variant="h6" className={classes.typography}>
                 List of Strategies
               </Typography>
 
@@ -217,11 +222,11 @@ class Dashboard extends Component {
                 <Grid item>
              
                     {serverconnect ? (
-                      <Typography variant="caption">
+                      <Typography variant="caption" className={classes.typography}>
                         Connection Status : <span style={{ color: "#03c03c" }}>Connected</span>{" "}
                       </Typography>
                     ) : (
-                      <Typography variant="caption">
+                      <Typography variant="caption" className = {classes.typography}>
                         Connection Status : <span style={{ color: "red" }}>Disconnected</span>
                       </Typography>
                     )}
@@ -258,7 +263,6 @@ class Dashboard extends Component {
         value={currenttab} 
         onChange={this.checkSelectedTab}
         textColor="inherit"
-
         >
           <Tab label="portfolio" value="portfolioTab" />
           <Tab label="position" value="positionTab" />
@@ -348,7 +352,7 @@ class Dashboard extends Component {
                               type={commentary}
                               currentStrat={currenturl}
                               numofRows={10}
-                              height="50vh"
+                              height="55vh"
                             />
                         </Grid>
                     </Grid>

@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 
 const styles = theme => ({
   graph:{
-    backgroundColor:"#404040",
+    backgroundColor:"#303030",
     minHeight:"50vh",
   },
  
@@ -100,6 +100,7 @@ class StackedBarGraph extends Component {
     valueLabel.label.truncate = false;
     valueLabel.label.horizontalCenter = "right";
     valueLabel.label.dx = -10;
+    
 
     var columnTemplate = series.columns.template;
     columnTemplate.strokeOpacity = 0;
@@ -113,8 +114,6 @@ class StackedBarGraph extends Component {
     });
     this.valueAxis= valueAxis;
     this.chart = chart;
-
-    console.log("bar graph mounted");
   }
   componentDidUpdate(oldProps) {
     if (this.props.currentStrat !== oldProps.currentStrat) {

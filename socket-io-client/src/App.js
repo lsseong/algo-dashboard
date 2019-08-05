@@ -41,7 +41,6 @@ const styles = theme => ({
 
  appbar:{
   backgroundColor:"#404040",
-  fontFamily:"TitilliumWeb_Regular",
  },
 
  textfield:{
@@ -52,10 +51,12 @@ const styles = theme => ({
    fontSize:"15px",
    color:"white",
    borderColor:"white",
+   fontFamily:"TitilliumWeb_Regular",
  },
  
  labelProps:{
    color:"white",
+   fontFamily:"TitilliumWeb_Regular",
  },
 
 });
@@ -191,6 +192,7 @@ class App extends Component {
                     fontSize:20,
                     color:"white",
                     padding:"0px",
+                    fontFamily:"TitilliumWeb_Regular",
                   }
                 }}
                 />
@@ -218,6 +220,7 @@ class App extends Component {
                     fontSize:20,
                     color:"white",
                     padding:"0px",
+                    fontFamily:"TitilliumWeb_Regular",
                   }
                 }}
                 />

@@ -55,7 +55,7 @@ class PositionTable extends Component {
         this.gridApi.setRowData([]);
       }
     
-      if (this.props.type !== prevProps.type) {
+      if (this.props.type !== prevProps.type && this.props.type.length!==0) {
         let rowNode = this.gridApi.getRowNode(this.props.type.symbol);
         let storerowNode = [];
         storerowNode.push(this.props.type);

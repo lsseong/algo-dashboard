@@ -1,3 +1,4 @@
+
 import React, { Component } from "react";
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
@@ -22,9 +23,9 @@ class Graph extends Component {
     super(props);
     this.state = {
       selections: [],
-      selectedSymbol: ""
+    
     };
-
+    this.selectedSymbol = "";
     this.dataCache = new Map();
     this.MAX_DATA_POINTS = 50;
   }
@@ -47,7 +48,7 @@ class Graph extends Component {
 
     am4core.options.minPolylineStep = 5;
 
-    
+    chart.cursor = new am4charts.XYCursor();
     chart.data = [];
 
     let dateAxis = chart.xAxes.push(new am4charts.DateAxis());
@@ -68,8 +69,8 @@ class Graph extends Component {
     series.dataFields.highValueY = "high";
     series.simplifiedProcessing = true;
 
-    series.tooltipText = "Open:${openValueY.value}\nLow:${lowValueY.value}\nHigh:${highValueY.value}\nClose:${valueY.value}";
-    chart.cursor = new am4charts.XYCursor();
+    series.tooltipText = "OPEN: [bold]{openValueY}[/]\nHIGH: [bold]{highValueY}[/]\nLOW: [bold]{lowValueY}[/]\nCLOSE: [bold]{closeValueY}[/]\n";
+    
 
     this.chart = chart;
   }
@@ -81,8 +82,8 @@ class Graph extends Component {
       this.chart.data = [];
       this.setState({
         selections: [],
-        selectedSymbol: ""
       });
+      this.selectedSymbol = "";
     }
 
     if (this.props.bardata.length === 0) {
@@ -119,12 +120,10 @@ class Graph extends Component {
       // update state
       const selections = this.state.selections;
       selections.push(bar.name);
-      this.setState({ selections: selections }, () => {
-        // callback to set a default security to chart
-        if (this.state.selectedSymbol === "") {
-          this.setState({ selectedSymbol: this.state.selections[0] });
+      if (this.selectedSymbol === "") {
+        this.selectedSymbol = bar.name;
         }
-      });
+      this.setState({ selections: selections });
     }
     array.push(bar);
 
@@ -133,7 +132,7 @@ class Graph extends Component {
       array.shift();
     }
 
-    if (bar.name === this.state.selectedSymbol) {
+    if (bar.name === this.selectedSymbol) {
       // add to chart
       if (this.chart.data.length > this.MAX_DATA_POINTS) {
         this.chart.addData(bar,1);
@@ -151,7 +150,7 @@ class Graph extends Component {
 
   change = event => {
     this.chart.data = this.dataCache.get(event.target.value);
-    this.setState({ selectedSymbol: event.target.value });
+    this.selectedSymbol = event.target.value;
     console.log("change bar " + event.target.value);
   };
 

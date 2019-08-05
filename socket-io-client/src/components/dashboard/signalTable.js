@@ -82,15 +82,13 @@ class SignalTable extends Component {
       if(this.props.currentStrat!==prevProps.currentStrat){
         this.gridApi.setRowData([]);
       }
-      if (this.props.type !== prevProps.type) {
+      if (this.props.type !== prevProps.type && this.props.type.length!==0) {
         let rowNode = this.gridApi.getRowNode(this.props.type.symbol);
         let storerowNode = [];
         storerowNode.push(this.props.type);
-        console.log(storerowNode);
      
             if(rowNode!==undefined){
               var data = rowNode.data;
-              console.log(data);
               data.time = storerowNode[0].time;
               data.symbol = storerowNode[0].symbol;
               data.signal = storerowNode[0].signal;

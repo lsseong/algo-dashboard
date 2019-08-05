@@ -93,7 +93,7 @@ class OrderPositionTable extends Component {
       if(this.props.currentStrat!==prevProps.currentStrat){
         this.gridApi.setRowData([]);
       }
-      if (this.props.type !== prevProps.type) {
+      if (this.props.type !== prevProps.type && this.props.type.length!==0) {
         let rowNode = this.gridApi.getRowNode(this.props.type.clientOrderId);
         let storerowNode = [];
         storerowNode.push(this.props.type);
