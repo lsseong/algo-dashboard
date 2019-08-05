@@ -26,7 +26,6 @@ const styles = theme => ({
   },
   firstrow:{
     color:"white",
-    width:"98%",
     fontFamily:"TitilliumWeb_Regular",
   },
   text:{
@@ -270,11 +269,12 @@ class Dashboard extends Component {
         </Tabs>
       </AppBar>
       
-      <br/>
+     
         {/* First summary tab */}
           <Collapse in={portfolioTab} style = {{transitionDelay:portfolioTab ? '2000ms':'0ms'}}>
          
                <div className={classes.tab}>
+               <br/>
               <Grid container spacing={2} >
           
                 <Grid item xs={6}>
@@ -337,6 +337,7 @@ class Dashboard extends Component {
           <Collapse in={positionTab} style = {{transitionDelay:positionTab ? '2000ms':'0ms'}}>
            
               <div className={classes.tab}>
+              <br/>
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <Grid container spacing={1}>
