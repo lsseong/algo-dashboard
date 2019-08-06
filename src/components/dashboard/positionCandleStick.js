@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 const styles = theme => ({
   graph:{
     backgroundColor:"#303030",
-    minHeight:"50vh",
+    minHeight:"30em",
   },
   dropdown:{
  
@@ -50,6 +50,7 @@ class Graph extends Component {
 
     chart.cursor = new am4charts.XYCursor();
     chart.data = [];
+    chart.responsive.enabled = true;
 
     let dateAxis = chart.xAxes.push(new am4charts.DateAxis());
     dateAxis.renderer.grid.template.location = 0;
@@ -181,7 +182,7 @@ class Graph extends Component {
         <Grid item xs={12}>
         <div
           id="chartdiv2"
-          style={{ width: "100%", height: "50vh" }}
+          style={{ width: "100%", height: "30em" }}
         />
         </Grid>
 

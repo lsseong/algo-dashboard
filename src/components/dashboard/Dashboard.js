@@ -25,6 +25,7 @@ const styles = theme => ({
     backgroundColor:"#484848",
   },
   firstrow:{
+    width:"98%",
     color:"white",
     fontFamily:"TitilliumWeb_Regular",
   },
@@ -64,6 +65,8 @@ class Dashboard extends Component {
     this.eventSource = new EventSource(
       "http://" + this.props.host + ":" + this.props.port + "/service/" + this.props.url
     );
+    this.tabVariant="standard";
+    this.isMobile = false;
   }
 
   //on drop down change
@@ -171,6 +174,17 @@ class Dashboard extends Component {
       currenttab: newValue
     });
   };
+   detectmob=()=> {
+    this.isMobile = window.orientation > -1; 
+    if(this.isMobile){
+          this.tabVariant="fullWidth"
+          return true;
+        }
+      else {
+          this.tabVariant="standard";
+          return false;
+        }
+      }
 
 
   //render DOM set all the components here
@@ -200,7 +214,7 @@ class Dashboard extends Component {
        
 
         {/* First row */}
-        <Grid container spacing={0} justify="space-between"  className={classes.firstrow}>
+        <Grid container spacing={0} className={classes.firstrow}>
           <Grid item xs={6} >
         
             <Grid container spacing={0} className={classes.text}>
@@ -263,6 +277,8 @@ class Dashboard extends Component {
         value={currenttab} 
         onChange={this.checkSelectedTab}
         textColor="inherit"
+        centered={this.detectmob()}
+        variant={this.tabVariant}
         >
           <Tab label="portfolio" value="portfolioTab" />
           <Tab label="position" value="positionTab" />
@@ -277,7 +293,7 @@ class Dashboard extends Component {
                <br/>
               <Grid container spacing={2} >
           
-                <Grid item xs={6}>
+                <Grid item sm={6} xs={12}>
                   <Grid container spacing={1}>
 
                     <Grid item xs={12}>
@@ -286,7 +302,7 @@ class Dashboard extends Component {
                     
                     <Grid item xs={12}>
                       <OrderTable
-                      
+                        isMobile={this.isMobile}
                         type={order}
                         currentStrat={currenturl}
                         numofRows={10}
@@ -295,11 +311,11 @@ class Dashboard extends Component {
 
                   </Grid>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item sm={6} xs={12}>
                   <Grid container spacing={1}>
                     <Grid item xs={12}>
                       <PositionTable
-                        
+                        isMobile={this.isMobile}
                         type={position}
                         currentStrat={currenturl}
                         numofRows={3}
@@ -308,7 +324,7 @@ class Dashboard extends Component {
 
                     <Grid item xs={12}>
                       <SignalTable 
-                      
+                      isMobile={this.isMobile}
                       type={signal} 
                       currentStrat={currenturl}
                       numofRows={4}
@@ -317,11 +333,11 @@ class Dashboard extends Component {
 
                     <Grid item xs={12}>
                     <CommentTable
-                   
+                      isMobile={this.isMobile}
                       type={commentary}
                       currentStrat={currenturl}
                       numofRows={4}
-                      height="29vh"
+                      height="15em"
                     />
                     </Grid>
 
@@ -339,10 +355,11 @@ class Dashboard extends Component {
               <div className={classes.tab}>
               <br/>
                 <Grid container spacing={2}>
-                  <Grid item xs={6}>
+                  <Grid item sm={6} xs={12}>
                     <Grid container spacing={1}>
                         <Grid item xs={12}>
                         <PositionTable
+                          isMobile={this.isMobile}
                           type={position}
                           currentStrat={currenturl}
                           numofRows={5}
@@ -351,16 +368,17 @@ class Dashboard extends Component {
 
                         <Grid item xs={12}>
                         <CommentTable
+                              isMobile={this.isMobile}
                               type={commentary}
                               currentStrat={currenturl}
                               numofRows={10}
-                              height="55vh"
+                              height="30em"
                             />
                         </Grid>
                     </Grid>
                   </Grid>
 
-                  <Grid item xs={6}>
+                  <Grid item sm={6} xs={12}>
                     <Grid container spacing={1}>
                           <Grid item xs={12}>
                             <StackedBarGraph
@@ -379,6 +397,7 @@ class Dashboard extends Component {
                       <Grid container spacing={1}>
                           <Grid item xs={12}>
                               <OrderPositionTable
+                              isMobile={this.isMobile}
                               type={order}
                               currentStrat={currenturl}
                               numofRows={5}

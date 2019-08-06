@@ -44,11 +44,12 @@ const styles = theme => ({
  },
 
  textfield:{
-  width:"200px",
+  minWidth:"200px",
  },
 
  button:{
    fontSize:"15px",
+   minWidth:"150px",
    color:"white",
    borderColor:"white",
    fontFamily:"TitilliumWeb_Regular",
@@ -140,15 +141,16 @@ class App extends Component {
     return (
       <div className={classes.root}>
           <Grid container spacing={2}>
-            <Grid item xs={12}>
+          <Grid item xs={12}>
             <AppBar position="static" color="inherit" className={classes.appbar}>
+            
                <Toolbar  variant="dense">
               {/* First Row - input fields and buttons */}
-
+              <Grid item>
               <Grid container spacing={2} className={classes.formgroup}>
-
+             
               {/* The local host text field */}
-                <Grid item className={classes.textfield}>
+                <Grid item xs={6} sm={4}>
                 <CssTextField
                 required
                 id="outlined-required"
@@ -158,14 +160,13 @@ class App extends Component {
                 value={this.state.host}
                 onChange={this.connectionInput}
                 disabled={this.state.disabled}
-
                 InputLabelProps={{                
                   shrink:true,
                   className:classes.labelProps
                 }}
                 InputProps={{
                   style:{
-                    fontSize:20,
+                    fontSize:18,
                     color:"white",
                     padding:"0px",
                     fontFamily:"TitilliumWeb_Regular",
@@ -175,7 +176,7 @@ class App extends Component {
                 </Grid>
 
                 {/* The port text field */}
-                <Grid item className={classes.textfield}>
+                <Grid item xs={6} sm={4} >
                 <CssTextField
                 required
                 id="outlined-required"
@@ -193,7 +194,7 @@ class App extends Component {
 
                 InputProps={{
                   style:{
-                    fontSize:20,
+                    fontSize:18,
                     color:"white",
                     padding:"0px",
                     fontFamily:"TitilliumWeb_Regular",
@@ -203,8 +204,9 @@ class App extends Component {
                 </Grid>
 
                 {/* Connect Button */}
-                <Grid item >
+                <Grid item xs={12} sm={4}>
                 <Button 
+                fullWidth
                 size="large"
                 className={classes.button}
                 variant="outlined" color="inherit" 
@@ -215,10 +217,12 @@ class App extends Component {
                 </Grid>
                
               </Grid>
+              </Grid>
               </Toolbar>
+             
               </AppBar>
-              
-            </Grid>
+              </Grid>
+           
                 {/* Second Row - Main Body */}
               <Grid item xs={12}>
                   <div>

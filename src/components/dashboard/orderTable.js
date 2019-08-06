@@ -24,15 +24,15 @@ class OrderTable extends Component {
       columnDefs: [
         { headerName:"ORDERS", marryChildren:true,
           children:[
-        {headerName: 'Time', field: 'time'},
-        {headerName: 'Order Id', field: 'clientOrderId',},
-        {headerName: 'State', field: 'state',},
-        {headerName: 'Symbol', field: 'order.symbol',},
-        {headerName: 'Side', field: 'order.side',},
-        {headerName: 'Qty', field: 'order.qty',},
-        {headerName: 'Type', field: 'order.type',},
-        {headerName: 'Limit Price', field: 'order.limitPrice',},
-        {headerName: 'Avg Price', field: 'avgPrice',},
+        {headerName: 'Time', field: 'time',width:120},
+        {headerName: 'Order Id', field: 'clientOrderId',width:100,},
+        {headerName: 'State', field: 'state',width:100,},
+        {headerName: 'Symbol', field: 'order.symbol',width:100},
+        {headerName: 'Side', field: 'order.side',width:80,},
+        {headerName: 'Qty', field: 'order.qty',width:100,},
+        {headerName: 'Type', field: 'order.type',width:100,},
+        {headerName: 'Limit Price', field: 'order.limitPrice',width:100,},
+        {headerName: 'Avg Price', field: 'avgPrice',width:100,},
         
           ]
         }
@@ -54,7 +54,20 @@ class OrderTable extends Component {
     })
     this.gridApi = params.api;
     this.gridColumnApi = params.columnApi;
-    params.api.sizeColumnsToFit();
+
+    if(this.props.isMobile){
+      this.gridColumnApi.autoSizeColumns();
+    }else{
+      this.gridApi.sizeColumnsToFit();
+    }
+  }
+  sizeToFit=()=> {
+    if(this.props.isMobile){
+      this.gridColumnApi.autoSizeColumns();
+    }else{
+      this.gridApi.sizeColumnsToFit();
+    }
+   
   }
 
   componentDidUpdate(prevProps){
@@ -103,7 +116,7 @@ class OrderTable extends Component {
               <div
               id="myGrid"
               style={{
-                height:"50vh",
+                height:"30em",
                 width:"100%",
                 fontFamily:"TitilliumWeb_Regular",
               }}
@@ -117,6 +130,7 @@ class OrderTable extends Component {
                 getRowNodeId = {this.state.getRowNodeId}
                 paginationAutoPageSize={true}
                 pagination={true}
+                onGridSizeChanged={this.sizeToFit}
                 >
                 </AgGridReact>
 

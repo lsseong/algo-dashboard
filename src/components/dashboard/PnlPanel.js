@@ -9,6 +9,11 @@ const styles = theme => ({
   },
   typography:{
     fontFamily:"TitilliumWeb_Regular",
+  },
+  paper:{
+    color:"white",
+    backgroundColor:"grey",
+    borderColor:"white",
   }
  });
 
@@ -22,41 +27,42 @@ class PnLPanel extends React.Component {
     return (
       <div className={classes.root}>
       <Grid container spacing={4}>
-        <Grid item sm={4}>
-          <Typography variant="h5"style={this.getNumberStyle(totalValue)} className={classes.typography}>
+       
+        <Grid item sm={4} xs={12}>
+          <Typography fontWeight="fontWeightBold" variant="h5"style={this.getNumberStyle(totalValue)} className={classes.typography}>
           {totalValue}
           </Typography>
 
-          <Typography variant="body1">
+          <Typography variant="body2">
             Total
           </Typography>
         </Grid>
 
-        <Grid item sm={4}>
+        <Grid item sm={4} xs={12}>
 
-        <Typography variant="h5"style={this.getNumberStyle(realizedPnl)} className={classes.typography}>
+        <Typography fontWeight="fontWeightBold" variant="h5"style={this.getNumberStyle(realizedPnl)} className={classes.typography}>
           {realizedPnl}
           </Typography>
 
-          <Typography variant="body1">
+          <Typography variant="body2">
             Realized PnL
           </Typography>
 
         </Grid>
 
-        <Grid item sm={4}>
+        <Grid item sm={4} xs={12}>
 
-        <Typography variant="h5"style={this.getNumberStyle(unrealizedPnl)} className={classes.typography}>
+        <Typography fontWeight="fontWeightBold" variant="h5"style={this.getNumberStyle(unrealizedPnl)} className={classes.typography}>
           {unrealizedPnl}
         </Typography>
 
-        <Typography variant="body1">
+        <Typography variant="body2">
             Unreal PnL
           </Typography>
 
         </Grid>
-
-      </Grid>
+        </Grid>
+       
       </div>
     );
   }

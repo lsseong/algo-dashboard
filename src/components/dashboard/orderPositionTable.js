@@ -54,7 +54,12 @@ class OrderPositionTable extends Component {
     })
     this.gridApi = params.api;
     this.gridColumnApi = params.columnApi;
-    params.api.sizeColumnsToFit();
+
+    if(this.props.isMobile){
+      this.gridColumnApi.autoSizeColumns();
+    }else{
+      this.gridApi.sizeColumnsToFit();
+    }
   }
 
 
@@ -128,6 +133,15 @@ class OrderPositionTable extends Component {
     
   }
   
+  sizeToFit=()=> {
+    if(this.props.isMobile){
+      this.gridColumnApi.autoSizeColumns();
+    }else{
+      this.gridApi.sizeColumnsToFit();
+    }
+   
+  }
+  
 
   render() {
     const { classes } = this.props;
@@ -140,7 +154,7 @@ class OrderPositionTable extends Component {
               <div
               id="myGrid"
               style={{
-                height:"250px",
+                height:"15em",
                 width:"100%",
                 fontFamily:"TitilliumWeb_Regular",
               }}
@@ -154,6 +168,7 @@ class OrderPositionTable extends Component {
                 getRowNodeId = {this.state.getRowNodeId}
                 paginationAutoPageSize={true}
                 pagination={true}
+                onGridSizeChanged={this.sizeToFit}
                 >
                 </AgGridReact>
 

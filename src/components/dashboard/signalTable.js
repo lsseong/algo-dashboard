@@ -57,7 +57,12 @@ class SignalTable extends Component {
     })
     this.gridApi = params.api;
     this.gridColumnApi = params.columnApi;
-    params.api.sizeColumnsToFit();
+    
+    if(this.props.isMobile){
+      this.gridColumnApi.autoSizeColumns();
+    }else{
+      this.gridApi.sizeColumnsToFit();
+    }
   }
 
   setColumnColorStyle=(params)=>{
@@ -106,6 +111,15 @@ class SignalTable extends Component {
     
   }
 
+  sizeToFit=()=> {
+    if(this.props.isMobile){
+      this.gridColumnApi.autoSizeColumns();
+    }else{
+      this.gridApi.sizeColumnsToFit();
+    }
+   
+  }
+
   render() {
     const {classes} = this.props;
     return (
@@ -116,7 +130,7 @@ class SignalTable extends Component {
               <div
               id="myGrid"
               style={{
-                height:"25vh",
+                height:"15em",
                 width:"100%",
                 fontSize:"15px",
                 fontFamily:"TitilliumWeb_Regular",
@@ -131,6 +145,7 @@ class SignalTable extends Component {
                 getRowNodeId = {this.state.getRowNodeId}
                 paginationAutoPageSize={true}
                 pagination={true}
+                onGridSizeChanged={this.sizeToFit}
                 >
                 </AgGridReact>
 

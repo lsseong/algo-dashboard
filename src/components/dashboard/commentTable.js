@@ -25,7 +25,7 @@ class CommentTable extends Component {
       columnDefs: [
         { headerName:"COMMENTS", 
           children:[
-        {headerName: 'Time', field: 'time',},
+        {headerName: 'Time', field: 'time',width:100},
         {headerName: 'Comment', field: 'comment',},
           ]
         }
@@ -69,6 +69,10 @@ class CommentTable extends Component {
     this.gridColumnApi = params.columnApi;
     params.api.sizeColumnsToFit();
   }
+  sizeToFit=()=> {
+      this.gridApi.sizeColumnsToFit();
+  }
+
 
   render() {
     const {classes} = this.props;
@@ -95,6 +99,7 @@ class CommentTable extends Component {
                 getRowNodeId = {this.state.getRowNodeId}
                 paginationAutoPageSize={true}
                 pagination={true}
+                onGridSizeChanged={this.sizeToFit}
                 >
                 </AgGridReact>
 

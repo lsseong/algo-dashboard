@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 const styles = theme => ({
   graph:{
     backgroundColor:"#303030",
-    minHeight:"50vh",
+    minHeight:"30em",
   },
  
  });
@@ -40,11 +40,8 @@ class StackedBarGraph extends Component {
   componentDidMount() {
 
     am4core.useTheme(this.mytheme);
-
+    
     let chart = am4core.create("barchartdiv", am4charts.XYChart);
-
-    chart.paddingRight = 40;
-
     //let title = chart.titles.create();
     //title.text = "POSITION GRAPH";
     //title.fontSize = 12;
@@ -53,12 +50,16 @@ class StackedBarGraph extends Component {
 
     // Use only absolute numbers
     chart.numberFormatter.numberFormat = "#.#";
-
+    chart.maskBullets = false;
+    chart.responsive.enabled = true;
     // Create axes
     var categoryAxis = chart.yAxes.push(new am4charts.CategoryAxis());
     categoryAxis.dataFields.category = "symbol";
     categoryAxis.renderer.grid.template.location = 0;
     categoryAxis.renderer.inversed = true;
+    categoryAxis.renderer.minGridDistance = 20;
+    categoryAxis.truncate = true;
+    categoryAxis.maxWidth = 120;
 
     var valueAxis = chart.xAxes.push(new am4charts.ValueAxis());
     valueAxis.extraMin = 0.1;
@@ -94,13 +95,29 @@ class StackedBarGraph extends Component {
     series.dataFields.categoryY = "symbol";
     series.clustered = false;
 
+    //position label
     var valueLabel = series.bullets.push(new am4charts.LabelBullet());
     valueLabel.label.text = "{valueX}";
     valueLabel.label.hideOversized = false;
     valueLabel.label.truncate = false;
-    valueLabel.label.horizontalCenter = "right";
-    valueLabel.label.dx = -10;
-    
+    valueLabel.label.adapter.add("horizontalCenter", function(center, target) {
+      if (!target.dataItem) {
+        return center;
+      }
+      let values = target.dataItem.values;
+      return values.valueX.value >=0
+        ? "right"
+        : "left";
+    });
+
+    valueLabel.label.adapter.add("dx", function(center,target) {
+      let values = target.dataItem.values;
+      return values.valueX.value >=0
+        ? -5
+        : 5;
+    });
+
+
 
     var columnTemplate = series.columns.template;
     columnTemplate.strokeOpacity = 0;
@@ -153,11 +170,11 @@ class StackedBarGraph extends Component {
         let minAbs = Math.abs(minvalue);
 
         if(maxAbs>minAbs){
-          this.valueAxis.min = -Math.abs(maxAbs);
-          this.valueAxis.max = maxAbs;
+          this.valueAxis.min = -Math.abs(maxAbs-100);
+          this.valueAxis.max = maxAbs+100;
         }else{
-          this.valueAxis.min = -Math.abs(minAbs);
-          this.valueAxis.max = minAbs;
+          this.valueAxis.min = -Math.abs(minAbs-100);
+          this.valueAxis.max = minAbs+100;
         }
 
         this.chart.validateData();
@@ -179,7 +196,7 @@ class StackedBarGraph extends Component {
     return (
       <Grid container className={classes.graph} spacing={0}>
       <Grid item xs={12}>
-          <div id="barchartdiv" style={{ width: "100%", height: "50vh" }} />
+          <div id="barchartdiv" style={{ width: "100%", height: "30em" }} />
           </Grid>
       </Grid>
     );

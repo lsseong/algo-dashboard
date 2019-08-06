@@ -83,7 +83,11 @@ class PositionTable extends Component {
     })
     this.gridApi = params.api;
     this.gridColumnApi = params.columnApi;
-    params.api.sizeColumnsToFit();
+    if(this.props.isMobile){
+      this.gridColumnApi.autoSizeColumns();
+    }else{
+      this.gridApi.sizeColumnsToFit();
+    }
   }
 
   setColumnColorStyle=(params)=>{
@@ -103,6 +107,15 @@ class PositionTable extends Component {
     }
   }
   
+  sizeToFit=()=> {
+    if(this.props.isMobile){
+      this.gridColumnApi.autoSizeColumns();
+    }else{
+      this.gridApi.sizeColumnsToFit();
+    }
+   
+  }
+  
 
   render() {
     const {classes} = this.props;
@@ -114,7 +127,7 @@ class PositionTable extends Component {
               <div
               id="myGrid"
               style={{
-                height:"50vh",
+                height:"20em",
                 width:"100%",
                 fontSize:"15px",
                 fontFamily:"TitilliumWeb_Regular",
@@ -129,6 +142,7 @@ class PositionTable extends Component {
                 getRowNodeId = {this.state.getRowNodeId}
                 paginationAutoPageSize={true}
                 pagination={true}
+                onGridSizeChanged={this.sizeToFit}
                 >
                 </AgGridReact>
 
