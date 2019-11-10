@@ -28,3 +28,6 @@ On the **Command Prompt** that pops up
 1) Ctrl C
 2) press Y and Enter to close(If not the port would still be running in the background.)
 
+## React quick guides
+index.js is the traditional and actual entry point for all node apps. Note that it render an App component in the root element in public/index.html
+```ReactDOM.render(<App />, document.getElementById('root'));```
