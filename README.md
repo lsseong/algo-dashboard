@@ -1,4 +1,11 @@
 # algo-dashboard
+This project uses the following Javascript technology to host a dashboard:
+1) npm - package manager to start the runtime. It points to start script in the package.json file, which is "react-scripts start"
+2) react - "react-scripts start" runs the React app in dev mode, as well as hot module reloading. It contains the following two main folders: src (contains app.js. index.js and components subfolder) and public (contains index.html). 
+3) Google material (previous design was using Bootstrap)
+4) amCharts - for graphs
+5) ag-grids - for tables
+
 
 ## How to run and close
 
