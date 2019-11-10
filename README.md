@@ -29,5 +29,9 @@ On the **Command Prompt** that pops up
 2) press Y and Enter to close(If not the port would still be running in the background.)
 
 ## React quick guides
-index.js is the traditional and actual entry point for all node apps. Note that it render an App component in the root element in public/index.html
+Public folder contains index.html, where "root" element is defined.
+
+index.js is the traditional and actual entry point for all node apps. It render an App component in the root element:
 ```ReactDOM.render(<App />, document.getElementById('root'));```
+
+App component is defined and exported from app.js
