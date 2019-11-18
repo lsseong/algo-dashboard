@@ -45,3 +45,15 @@ User will specify the hostname and port to connect, then the dashboard will conn
 | service/strategy/performances      | To get running strategies and performance info | $1600 |
 
 
+### /service/strategy/performances
+~~~
+[ {
+  "id" : "AlterBuySell-EURUSD",
+  "time" : "18-11-19 19:21:53",
+  "totalValue" : 34.0,
+  "cash" : 29.0,
+  "unrealizedPnl" : 5.0,
+  "realizedPnl" : 29.0
+} ]
+~~~
+
