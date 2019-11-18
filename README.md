@@ -36,3 +36,12 @@ index.js is the traditional and actual entry point for all node apps. It render 
 ```ReactDOM.render(<App />, document.getElementById('root'));```
 
 App component is defined and exported from app.js
+
+## REST End-Points To Get Strategy Data
+User will specify the hostname and port to connect, then the dashboard will connect to the following REST end points to get strategy information:
+
+| End Point                          | Description                                    | Cool  |
+| ---------------------------------- |:----------------------------------------------:| -----:|
+| service/strategy/performances      | To get running strategies and performance info | $1600 |
+
+
