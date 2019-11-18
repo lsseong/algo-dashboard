@@ -40,12 +40,15 @@ App component is defined and exported from app.js
 ## REST End-Points To Get Strategy Data
 User will specify the hostname and port to connect, then the dashboard will connect to the following REST end points to get strategy information:
 
-| End Point                          | Description                                    | Cool  |
-| ---------------------------------- |:----------------------------------------------:| -----:|
-| service/strategy/performances      | To get running strategies and performance info | $1600 |
+| End Point                          | Description                                        | Example       |
+| ---------------------------------- |:--------------------------------------------------:| -------------:|
+| service/strategy/performances      | To get running strategy names and performance info |
+| service/{strategy-name}            | Streaming data (server-side events)                | service/AlterBuySell-EURUSD |
 
 
-### /service/strategy/performances
+
+
+#### /service/strategy/performances
 ~~~
 [ {
   "id" : "AlterBuySell-EURUSD",
@@ -56,4 +59,6 @@ User will specify the hostname and port to connect, then the dashboard will conn
   "realizedPnl" : 29.0
 } ]
 ~~~
+
+#### /service/{strategy-name}
 
