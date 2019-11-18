@@ -43,9 +43,8 @@ User will specify the hostname and port to connect, then the dashboard will conn
 | End Point                          | Description                                        |
 | ---------------------------------- |:--------------------------------------------------:|
 | service/strategy/performances      | To get running strategy names and performance info |
+| service/strategy/statuses          | To get running strategy statuses                   |
 | service/{strategy-name}            | Streaming data (server-side events)                |
-
-
 
 
 #### /service/strategy/performances
@@ -61,6 +60,28 @@ Example: http://localhost:2222/service/strategy/performances
   "realizedPnl" : 29.0
 } ]
 ~~~
+
+#### /service/strategy/statuses
+Example: http://localhost:2222/service/strategy/statuses
+
+~~~
+[ {
+  "id" : "AlterBuySell-EURUSD",
+  "name" : "AlterBuySell-EURUSD",
+  "time" : 1574075758354,
+  "status" : "RUNNING",
+  "parameters" : {
+    "tradeAmt" : "100000.00",
+    "longOnly" : "true",
+    "security" : "EURUSD",
+    "marketOrderAllowed" : "true",
+    "frequency" : "5[SECOND]"
+  }
+} ]
+~~~
+
+
+
 
 #### /service/{strategy-name}
 Example - http://localhost:2222/service/AlterBuySell-EURUSD
@@ -80,5 +101,11 @@ data: {"time":"19:31:08.536","symbol":"EURUSD","signal":0.0,"commentary":"","ana
 
 event: order
 data: {"time":"19:31:08.535","uuid":"b8649781-eecb-42be-a01b-50d5ff31bd10","clientOrderId":"sim.1.183","state":"COMPLETE","order":{"symbol":"EURUSD","side":"BUY","qty":100000,"type":"MARKET","limitPrice":0.0,"tif":"DAY"},"totalFill":100000,"avgPrice":1.06088}
+
+event: portfolio
+data: {"id":"AlterBuySell-EURUSD","time":"18-11-19 19:39:52","totalValue":69.0,"cash":76.0,"unrealizedPnl":-7.0,"realizedPnl":76.0}
+
+event: position
+data: {"time":"19:39:52.513","symbol":"EURUSD","position":100000,"unrealizedPnl":-7.0,"realizedPnl":76.0}
 
 ~~~
