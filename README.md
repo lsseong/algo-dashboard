@@ -40,15 +40,17 @@ App component is defined and exported from app.js
 ## REST End-Points To Get Strategy Data
 User will specify the hostname and port to connect, then the dashboard will connect to the following REST end points to get strategy information:
 
-| End Point                          | Description                                        | Example       |
-| ---------------------------------- |:--------------------------------------------------:| -------------:|
+| End Point                          | Description                                        |
+| ---------------------------------- |:--------------------------------------------------:|
 | service/strategy/performances      | To get running strategy names and performance info |
-| service/{strategy-name}            | Streaming data (server-side events)                | service/AlterBuySell-EURUSD |
+| service/{strategy-name}            | Streaming data (server-side events)                |
 
 
 
 
 #### /service/strategy/performances
+Example: http://localhost:2222/service/strategy/performances
+
 ~~~
 [ {
   "id" : "AlterBuySell-EURUSD",
@@ -61,4 +63,22 @@ User will specify the hostname and port to connect, then the dashboard will conn
 ~~~
 
 #### /service/{strategy-name}
+Example - http://localhost:2222/service/AlterBuySell-EURUSD
 
+~~~
+event: quote
+data: {"time":"19:31:06.512","status":"TRADING","security":"EURUSD","bidPrice":1.06087,"askPrice":1.06087}
+
+event: bar
+data: {"time":"2019-11-18 19:31:08","symbol":"EURUSD","open":1.0608,"high":1.06088,"low":1.0608,"close":1.06088,"volume":0}
+
+event: commentary
+data: {"time":"19:31:08.535","comment":"Raised a buy order"}
+
+event: signal
+data: {"time":"19:31:08.536","symbol":"EURUSD","signal":0.0,"commentary":"","analytics":{"sma10":1.0608,"sma20":1.0607285}}
+
+event: order
+data: {"time":"19:31:08.535","uuid":"b8649781-eecb-42be-a01b-50d5ff31bd10","clientOrderId":"sim.1.183","state":"COMPLETE","order":{"symbol":"EURUSD","side":"BUY","qty":100000,"type":"MARKET","limitPrice":0.0,"tif":"DAY"},"totalFill":100000,"avgPrice":1.06088}
+
+~~~
