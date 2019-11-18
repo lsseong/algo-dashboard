@@ -21,6 +21,7 @@ Double click the **run.bat** file
 
 1) A Command Prompt will pop up (**DO NOT CLOSE**) ,minimise it if you find it disturbing
 2) The Dashboard will automatically open on your default browser (**Open on Chrome or Firefox** does not work on Internet Explorer)
+3) Otherwise open URL http://localhost:3000/
 
 #### To Close
 ---------------------
