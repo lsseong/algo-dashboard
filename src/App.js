@@ -72,8 +72,8 @@ class App extends Component {
     this.state = {
       initStrat: "",
       connectstatus: "Connect",
-      host: "localhost",
-      port: "3333",
+      host: "",
+      port: "",
       disabled: false,
       initData: false
     };
