@@ -196,7 +196,7 @@ class StackedBarGraph extends Component {
     return (
       <Grid container className={classes.graph} spacing={0}>
       <Grid item xs={12}>
-          <div id="barchartdiv" style={{ width: "100%", height: "30em" }} />
+          <div id="barchartdiv" style={{ width: "100%", height: this.props.height }} />
           </Grid>
       </Grid>
     );

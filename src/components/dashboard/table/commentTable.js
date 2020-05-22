@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import  { AgGridReact } from 'ag-grid-react';
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-balham-dark.css";
-import "../dashboard/styling/css/Table.css";
+import "../styling/css/Table.css";
 
 import {withStyles} from '@material-ui/core';
 import PropTypes from 'prop-types';
@@ -33,7 +33,7 @@ class CommentTable extends Component {
       ],
       rowData: [],
       gridReady:false,
-      defaultColDef:{ resizable:true, sortable:true},
+      defaultColDef:{ resizable:true, sortable:true,suppressMovable: true,},
       getRowNodeId:function(data){
         return data.time
       },
@@ -82,7 +82,7 @@ class CommentTable extends Component {
           <div style = {{display: "flex", flexDirection:"row"}}>
             <div style = {{overflow:"hidden",flexGrow:"1"}}>
               <div
-              id="myGrid"
+              
               style={{
                 height:this.props.height,
                 width:"100%",
@@ -100,6 +100,7 @@ class CommentTable extends Component {
                 paginationAutoPageSize={true}
                 pagination={true}
                 onGridSizeChanged={this.sizeToFit}
+                
                 >
                 </AgGridReact>
 

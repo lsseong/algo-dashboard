@@ -1,15 +1,17 @@
 import React, { Component } from "react";
 // import PortfolioTable from "./portfolioTable";
 // import QuoteTable from "./quoteTable";
-import CommentTable from "./commentTable";
-import Graph from "./graph";
-import OrderTable from "./orderTable";
-import PositionTable from "./positionTable";
-import SignalTable from "./signalTable";
-import OrderPositionTable from "./orderPositionTable";
-import StackedBarGraph from "./statckBarGraph";
-import PositionCSGraph from "./positionCandleStick";
-import PnLPanel from "./PnlPanel";
+import CommentTable from "../table/commentTable";
+import CandleStickGraph from "../graph/candleStickGraph";
+import OrderTable from "../table/orderTable";
+import PositionTable from "../table/positionTable";
+import SignalTable from "../table/signalTable";
+import OrderPositionTable from "../table/orderPositionTable";
+import StackedBarGraph from "../graph/stackBarGraph";
+import PnLPanel from "./Panel/PnlPanel";
+import SignalLineGraph from '../graph/signalLineGraph';
+// import Draggable from "../main/Draggable/draggable";
+// import Droppable from "../main/Droppable/droppable";
 
 import {withStyles,Tabs,Grid,Tab,AppBar, Typography,Collapse,} from '@material-ui/core';
 import PropTypes from 'prop-types';
@@ -38,6 +40,15 @@ const styles = theme => ({
   typography:{
     fontFamily:"TitilliumWeb_Regular",
   },
+  droppable:{
+    width:"100%",
+    height:"100%",
+  },
+  wrapper:{
+    width:"100%",
+    padding:"32px",
+    backgroundColor:"yellow",
+  }
  });
 
 class Dashboard extends Component {
@@ -59,6 +70,8 @@ class Dashboard extends Component {
       currenttab: "portfolioTab",
       portfolioTab:true,
       positionTab:false,
+      securityList: [],
+      
     };
 
     //open eventsource base on current url
@@ -67,10 +80,19 @@ class Dashboard extends Component {
     );
     this.tabVariant="standard";
     this.isMobile = false;
+    this.COMPONENT_HEIGHT = '400px'
+    this.selectedSecurity = ""
+    this.securitychild = {};
   }
 
+  getOrCreateRef(id) {
+    if (!this.securitychild.hasOwnProperty(id)) {
+        this.securitychild[id] = React.createRef();
+    }
+    return this.securitychild[id];
+}
   //on drop down change
-  change = event => {
+  changeStrategy = event => {
     //close current eventsource
     this.eventSource.close();
     //set current state to default and initalise currenturl to changed event
@@ -83,7 +105,8 @@ class Dashboard extends Component {
       order: [],
       portfolio: {},
       analytics: [],
-      currenturl: event.target.value
+      currenturl: event.target.value,
+      securityList: [],
     });
     //open eventsource base on new event
     this.eventSource = new EventSource(
@@ -92,8 +115,19 @@ class Dashboard extends Component {
     console.log(event.target.value);
     //set eventlistener to current event
     this.allEvent();
-   
+    
   };
+
+  changeSecurity = (event)=>{
+
+    this.selectedSecurity = event.target.value
+    console.log("change",this.selectedSecurity)
+    Object.entries(this.securitychild).forEach(([key,value])=>{
+      console.log(`${key}:${value}`)
+      let ref = this.getOrCreateRef(key);
+      ref.current.changeSecurity(this.selectedSecurity);
+    })
+  }
 
   allEvent = () => {
     //when eventsource open
@@ -132,15 +166,43 @@ class Dashboard extends Component {
     this.eventSource.addEventListener("order", order =>
       this.setState({ order: JSON.parse(order.data) })
     );
-    this.eventSource.addEventListener("bar", bar => this.setState({ bar: JSON.parse(bar.data) }));
+    this.eventSource.addEventListener("bar", bar => 
+    
+    this.setState({ bar: JSON.parse(bar.data) },()=>this.addSecurity(this.state.bar.symbol))
+    
+    
+    );
+
     this.eventSource.addEventListener("signal", signal =>
       this.setState({ signal: JSON.parse(signal.data) })
     );
   };
+  addSecurity=(name)=>{
+    if (name === undefined){
+      console.log('name is null')
+    }
+    if (this.state.securityList.includes(name)===false){
+      
+      let tempList = this.state.securityList
+      tempList.push(name)
+      this.setState({
+        securityList : tempList
+      })
+
+
+    }
+    if(this.state.securityList.length === 1){
+      this.selectedSecurity = this.state.securityList[0]
+    }
+
+    
+  }
+
   //when component mount initalise
   componentDidMount() {
     this.fetchPerfURL();
     this.allEvent();
+    this.detectmob();
   }
   //fetch list of current strategy
   fetchPerfURL() {
@@ -148,13 +210,17 @@ class Dashboard extends Component {
       "http://" + this.props.host + ":" + this.props.port + "/service/strategy/performances";
     fetch(perfURL)
       .then(response => response.json())
-      .then(perfdata => this.setState({ perfdata }));
+      .then(perfdata => this.setState({ perfdata }))
+      .catch(err=>{
+        console.log(err)
+      });
   }
 
   clearEventListener() {
     this.eventSource.removeEventListener(null, null);
   }
   componentWillUnmount() {
+    console.log("EventSource close.");
     this.clearEventListener();
     this.eventSource.close();
   }
@@ -178,11 +244,10 @@ class Dashboard extends Component {
     this.isMobile = window.orientation > -1; 
     if(this.isMobile){
           this.tabVariant="fullWidth"
-          return true;
         }
       else {
           this.tabVariant="standard";
-          return false;
+
         }
       }
 
@@ -208,6 +273,11 @@ class Dashboard extends Component {
         {object.id}
       </option>
     ));
+    const secdropdown = this.state.securityList.map((object, i) => (
+      <option key={i} value={object}>
+        {object}
+      </option>
+    ));
 
     return (
       <div className={classes.root}>
@@ -219,19 +289,26 @@ class Dashboard extends Component {
         
             <Grid container spacing={0} className={classes.text}>
 
-              <Grid item xs={12}>
-              <Typography variant="h6" className={classes.typography}>
-                List of Strategies
-              </Typography>
+              <Grid item xs={4}>
 
+                  <Typography variant="h6" className={classes.typography}>
+                    List of Strategies
+                  </Typography>
               </Grid>
-
+              <Grid item xs={4}>
+                  <Typography variant="h6" className={classes.typography}>
+                    List of Securities
+              </Typography>
+              </Grid>
                
               <Grid item xs={12}>
 
-                <Grid container spacing={8}>
+                <Grid container>
                 <Grid item xs={4}>
-                <select onChange={this.change}>{dropdown}</select>
+                <select onChange={this.changeStrategy}>{dropdown}</select>
+                </Grid>
+                <Grid item xs={4}>
+                <select onChange={this.changeSecurity}>  {secdropdown}</select>
                 </Grid>
                 <Grid item>
              
@@ -277,7 +354,7 @@ class Dashboard extends Component {
         value={currenttab} 
         onChange={this.checkSelectedTab}
         textColor="inherit"
-        centered={this.detectmob()}
+        centered={this.isMobile}
         variant={this.tabVariant}
         >
           <Tab label="portfolio" value="portfolioTab" />
@@ -287,70 +364,92 @@ class Dashboard extends Component {
       
      
         {/* First summary tab */}
-          <Collapse in={portfolioTab} style = {{transitionDelay:portfolioTab ? '2000ms':'0ms'}}>
+          <Collapse in={portfolioTab} >
          
                <div className={classes.tab}>
                <br/>
-              <Grid container spacing={2} >
-          
+              <Grid container spacing={1} >
+                {/* Left Side */}
+                
                 <Grid item sm={6} xs={12}>
+              
                   <Grid container spacing={1}>
 
                     <Grid item xs={12}>
-                      <Graph bardata={bar} currentStrat={currenturl} />
+                      <CandleStickGraph ref={this.getOrCreateRef("cs1")} height={this.COMPONENT_HEIGHT} id="cs1" bardata={bar} currentStrat={currenturl} />
                     </Grid>
-                    
+
                     <Grid item xs={12}>
+                      <SignalLineGraph height={this.COMPONENT_HEIGHT} id ="signalline" signaldata={signal} currentStrat={currenturl}/>
+
+                    
+                    </Grid>
+
+                 
+                  <Grid item xs={12}>
                       <OrderTable
+                        height={this.COMPONENT_HEIGHT}
                         isMobile={this.isMobile}
                         type={order}
                         currentStrat={currenturl}
-                        numofRows={10}
+                       
                       />
                     </Grid>
-
                   </Grid>
+                 
                 </Grid>
+              
+                {/* Right Side */}
+               
                 <Grid item sm={6} xs={12}>
+              
                   <Grid container spacing={1}>
+              
+
+              
                     <Grid item xs={12}>
                       <PositionTable
+                        height={this.COMPONENT_HEIGHT}
                         isMobile={this.isMobile}
                         type={position}
                         currentStrat={currenturl}
-                        numofRows={3}
+                        
                       />
                     </Grid>
-
+                  
                     <Grid item xs={12}>
                       <SignalTable 
+                      height={this.COMPONENT_HEIGHT}
                       isMobile={this.isMobile}
                       type={signal} 
                       currentStrat={currenturl}
-                      numofRows={4}
+                      
                       />
                     </Grid>
-
-                    <Grid item xs={12}>
+                 
+                  <Grid item xs={12}>
                     <CommentTable
-                      isMobile={this.isMobile}
+                      
                       type={commentary}
                       currentStrat={currenturl}
-                      numofRows={4}
-                      height="15em"
+                      
+                      height={this.COMPONENT_HEIGHT}
                     />
-                    </Grid>
-
+                  </Grid>
+             
+                 
+                 
                   </Grid>
                 </Grid>
 
+             
               </Grid>
-              </div>
+            </div>
            
         </Collapse>
-
+                     
           {/* Second position tab */}
-          <Collapse in={positionTab} style = {{transitionDelay:positionTab ? '2000ms':'0ms'}}>
+          <Collapse in={positionTab}>
            
               <div className={classes.tab}>
               <br/>
@@ -362,7 +461,7 @@ class Dashboard extends Component {
                           isMobile={this.isMobile}
                           type={position}
                           currentStrat={currenturl}
-                          numofRows={5}
+                          height={this.COMPONENT_HEIGHT}
                         />
                         </Grid>
 
@@ -372,7 +471,7 @@ class Dashboard extends Component {
                               type={commentary}
                               currentStrat={currenturl}
                               numofRows={10}
-                              height="30em"
+                              height={this.COMPONENT_HEIGHT}
                             />
                         </Grid>
                     </Grid>
@@ -384,11 +483,12 @@ class Dashboard extends Component {
                             <StackedBarGraph
                               type={position}
                               currentStrat={currenturl}
+                              height={this.COMPONENT_HEIGHT}
                             />
                           </Grid>
 
                           <Grid item xs={12}>
-                            <PositionCSGraph bardata={bar} currentStrat={currenturl} />
+                            <CandleStickGraph ref={this.getOrCreateRef("cs2")}  id="cs2" bardata={bar} currentStrat={currenturl} />
                           </Grid>
                       </Grid>
                   </Grid>
@@ -400,7 +500,7 @@ class Dashboard extends Component {
                               isMobile={this.isMobile}
                               type={order}
                               currentStrat={currenturl}
-                              numofRows={5}
+                              height={this.COMPONENT_HEIGHT}
                               />
                           </Grid>
                       </Grid>

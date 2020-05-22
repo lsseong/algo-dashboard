@@ -1,4 +1,3 @@
-
 import React, { Component } from "react";
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
@@ -23,11 +22,11 @@ class Graph extends Component {
     super(props);
     this.state = {
       selections: [],
-    
     };
-    this.selectedSymbol = "";
+
     this.dataCache = new Map();
     this.MAX_DATA_POINTS = 50;
+    this.selectedSymbol = "";
   }
 
   mytheme = (target) =>{
@@ -44,13 +43,12 @@ class Graph extends Component {
 
   componentDidMount() {
     am4core.useTheme(this.mytheme);
-    let chart = am4core.create("chartdiv2", am4charts.XYChart);
+    let chart = am4core.create(this.props.id, am4charts.XYChart);
 
     am4core.options.minPolylineStep = 5;
 
-    chart.cursor = new am4charts.XYCursor();
-    chart.data = [];
     chart.responsive.enabled = true;
+    chart.data = [];
 
     let dateAxis = chart.xAxes.push(new am4charts.DateAxis());
     dateAxis.renderer.grid.template.location = 0;
@@ -72,15 +70,18 @@ class Graph extends Component {
 
     series.tooltipText = "OPEN: [bold]{openValueY}[/]\nHIGH: [bold]{highValueY}[/]\nLOW: [bold]{lowValueY}[/]\nCLOSE: [bold]{closeValueY}[/]\n";
     
+    chart.cursor = new am4charts.XYCursor();
+
 
     this.chart = chart;
   }
 
-  componentDidUpdate(oldProps) {
-    if (this.props.currentStrat !== oldProps.currentStrat) {
+  componentDidUpdate(prevProps) {
+    if (this.props.currentStrat !== prevProps.currentStrat) {
       // user select a different strategy - reset
       this.selections = [];
       this.chart.data = [];
+      this.dataCache = new Map();
       this.setState({
         selections: [],
       });
@@ -92,83 +93,91 @@ class Graph extends Component {
       return;
     }
 
-    if (this.props.bardata === oldProps.bardata) {
+    if (this.props.bardata === prevProps.bardata) {
       // no change in bar data
       return;
     }
 
     // create bar object
-    var newDate = new Date(this.props.bardata.time);
-    var bar = {
-      time: newDate,
-      name: this.props.bardata.symbol,
-      close: this.props.bardata.close,
-      open: this.props.bardata.open,
-      low: this.props.bardata.low,
-      high: this.props.bardata.high
-    };
-
-    // add to cache
-    var array = this.dataCache.get(this.props.bardata.symbol);
-    if (array == null) {
-      // first time seeing this security
-      array = [];
-
-      // initialize array with empty data
-
-      this.dataCache.set(bar.name, array);
-
-      // update state
-      const selections = this.state.selections;
-      selections.push(bar.name);
-      if (this.selectedSymbol === "") {
-        this.selectedSymbol = bar.name;
-        }
-      this.setState({ selections: selections });
-    }
-    array.push(bar);
-
-    // maintain a maximum number of bars per symbol in the cache
-    if (array.length > this.MAX_DATA_POINTS) {
-      array.shift();
-    }
-
-    if (bar.name === this.selectedSymbol) {
-      // add to chart
-      if (this.chart.data.length > this.MAX_DATA_POINTS) {
-        this.chart.addData(bar,1);
-      }else{
-        this.chart.addData(bar);
+    
+      
+      var newDate = new Date(this.props.bardata.time);
+      var bar = {
+        time: newDate,
+        name: this.props.bardata.symbol,
+        close: this.props.bardata.close,
+        open: this.props.bardata.open,
+        low: this.props.bardata.low,
+        high: this.props.bardata.high
+      };
+  
+      // add to cache
+      var array = this.dataCache.get(this.props.bardata.symbol);
+      if (array == null) {
+        // first time seeing this security
+        array = [];
+  
+        // initialize array with empty data
+  
+        this.dataCache.set(bar.name, array);
+  
+        // update state
+        const selections = this.state.selections;
+        selections.push(bar.name);
+        if (this.selectedSymbol === "") {
+          this.selectedSymbol = bar.name;
+          }
+        this.setState({ selections: selections });
       }
-  }
+      array.push(bar);
+  
+      // maintain a maximum number of bars per symbol in the cache
+      if (array.length > this.MAX_DATA_POINTS) {
+        array.shift();
+      }
+      if (bar.name === this.selectedSymbol ) {
+        // add to chart
+        if (this.chart.data.length > this.MAX_DATA_POINTS) {
+          this.chart.addData(bar,1);
+        }else{
+          this.chart.addData(bar);
+        }
+    }
+    
+   
 }
-
   componentWillUnmount() {
     if (this.chart) {
       this.chart.dispose();
     }
   }
+  changeSecurity=(value)=>{
+    this.chart.data = this.dataCache.get(value);
+    this.selectedSymbol = value;
+    console.log("change bar " + value);
+  }
 
-  change = event => {
-    this.chart.data = this.dataCache.get(event.target.value);
-    this.selectedSymbol = event.target.value;
-    console.log("change bar " + event.target.value);
-  };
+  // change = event => {
+  //   this.chart.data = this.dataCache.get(event.target.value);
+  //   this.selectedSymbol = event.target.value;
+  //   console.log("change bar " + event.target.value);
+  // };
 
   render() {
     // create a drop down menu
     const {classes} = this.props;
 
-    const dropdown = this.state.selections.map((object, i) => (
-      <option key={i} value={object}>
-        {object}
-      </option>
-    ));
+    // const dropdown = this.state.selections.map((object, i) => (
+    //   <option key={i} value={object}>
+    //     {object}
+    //   </option>
+    // ));
 
     return (
-
+      <div style = {{width:"100%",height:"100%"}}>
+      <div style={{ width: "100%", height: this.props.height }}>
       <Grid container className={classes.graph} spacing={0}>
-        <Grid item xs={12} className={classes.dropdown}>
+        {/* <Grid item xs={12} className={classes.dropdown}>
         {dropdown.length !== 0 && this.chart.data.length!==0  ? (
           <div>
             <select id="stock" onChange={this.change}>
@@ -177,16 +186,18 @@ class Graph extends Component {
           </div>
         ) : null
         }
-        </Grid>
+        </Grid> */}
 
         <Grid item xs={12}>
         <div
-          id="chartdiv2"
+          id={this.props.id}
           style={{ width: "100%", height: "30em" }}
         />
         </Grid>
 
       </Grid>
+      </div>
+      </div>
     );
   }
 }

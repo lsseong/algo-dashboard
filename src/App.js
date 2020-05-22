@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import Dashboard from "./components/dashboard/Dashboard";
+import Dashboard from "./components/dashboard/main/Dashboard";
 import {withStyles,TextField,Grid,Button,AppBar,Toolbar} from '@material-ui/core';
 import PropTypes from 'prop-types';
 
@@ -72,8 +72,8 @@ class App extends Component {
     this.state = {
       initStrat: "",
       connectstatus: "Connect",
-      host: "",
-      port: "",
+      host: "localhost",
+      port: "3333",
       disabled: false,
       initData: false
     };
@@ -84,9 +84,27 @@ class App extends Component {
   initConnection=(host, port)=>{
     const URL =
       "http://" + host + ":" + port + "/service/strategy/performances";
-    fetch(URL)
-      .then(response => response.json())
-      .then(data => this.setState({ initStrat: data[0].id, initData: true }),()=>console.log(this.state.initData));
+  
+      fetch(URL)
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw Error(`Request rejected with status ${response.status}`);
+        }
+      })
+      .then(data => this.setState({ initStrat: data[0].id, initData: true }),()=>console.log(this.state.initData))
+      .catch(err=>{
+        if (!err.response) {
+          // network error
+          this.errorStatus = 'Error: Network Error';
+      } else {
+          this.errorStatus = err.response.data.message;
+      }
+      });
+
+ 
+ 
   }
 
   //when clicked connection
@@ -130,6 +148,13 @@ class App extends Component {
       [event.target.name]: event.target.value
     });
   };
+  keyPress=(e)=>{
+    if(e.keyCode === 13){
+      //  console.log('value', e.target.value);
+       // submit connection
+       this.handleConnection()
+    }
+ }
 
   //send first strategy to Strategy list when rendering DOM
   render() {
@@ -153,9 +178,10 @@ class App extends Component {
                 <Grid item xs={6} sm={4}>
                 <CssTextField
                 required
-                id="outlined-required"
+                id="host-required"
                 label="Hostname"
                 variant="outlined"
+                color="inherit"
                 name="host"
                 value={this.state.host}
                 onChange={this.connectionInput}
@@ -164,6 +190,7 @@ class App extends Component {
                   shrink:true,
                   className:classes.labelProps
                 }}
+                onKeyDown={this.keyPress} 
                 InputProps={{
                   style:{
                     fontSize:18,
@@ -179,7 +206,7 @@ class App extends Component {
                 <Grid item xs={6} sm={4} >
                 <CssTextField
                 required
-                id="outlined-required"
+                id="port-required"
                 label="Port"
                 color="inherit"
                 name="port"
@@ -191,7 +218,7 @@ class App extends Component {
                   shrink:true,
                   className:classes.labelProps
                 }}
-
+                onKeyDown={this.keyPress} 
                 InputProps={{
                   style:{
                     fontSize:18,

@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import  { AgGridReact } from 'ag-grid-react';
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-balham-dark.css";
+import "../styling/css/Table.css";
 
 import {withStyles} from '@material-ui/core';
 import PropTypes from 'prop-types';
@@ -25,7 +26,7 @@ class OrderTable extends Component {
         { headerName:"ORDERS", marryChildren:true,
           children:[
         {headerName: 'Time', field: 'time',width:120},
-        {headerName: 'Order Id', field: 'clientOrderId',width:100,},
+        {headerName: 'Order ID', field: 'clientOrderId',width:100,},
         {headerName: 'State', field: 'state',width:100,},
         {headerName: 'Symbol', field: 'order.symbol',width:100},
         {headerName: 'Side', field: 'order.side',width:80,},
@@ -40,7 +41,7 @@ class OrderTable extends Component {
       ],
       rowData: [],
       gridReady:false,
-      defaultColDef:{ resizable:true, sortable:true},
+      defaultColDef:{ resizable:true, sortable:true,suppressMovable: true,},
       getRowNodeId:function(data){
         return data.clientOrderId
       },
@@ -69,6 +70,7 @@ class OrderTable extends Component {
     }
    
   }
+
 
   componentDidUpdate(prevProps){
 
@@ -114,9 +116,9 @@ class OrderTable extends Component {
           <div style = {{display: "flex", flexDirection:"row"}}>
             <div style = {{overflow:"hidden",flexGrow:"1"}}>
               <div
-              id="myGrid"
+              
               style={{
-                height:"30em",
+                height:this.props.height,
                 width:"100%",
                 fontFamily:"TitilliumWeb_Regular",
               }}
@@ -129,6 +131,7 @@ class OrderTable extends Component {
                 defaultColDef ={this.state.defaultColDef}
                 getRowNodeId = {this.state.getRowNodeId}
                 paginationAutoPageSize={true}
+                
                 pagination={true}
                 onGridSizeChanged={this.sizeToFit}
                 >

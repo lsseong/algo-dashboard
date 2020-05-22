@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import  { AgGridReact } from 'ag-grid-react';
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-balham-dark.css";
+import "../styling/css/Table.css";
 import {withStyles} from '@material-ui/core';
 import PropTypes from 'prop-types';
 
@@ -39,7 +40,7 @@ class OrderPositionTable extends Component {
       ],
       rowData: [],
       gridReady:false,
-      defaultColDef:{ resizable:true, sortable:true},
+      defaultColDef:{ resizable:true, sortable:true,suppressMovable: true,},
       getRowNodeId:function(data){
         return data.clientOrderId
       },
@@ -154,7 +155,7 @@ class OrderPositionTable extends Component {
               <div
               id="myGrid"
               style={{
-                height:"15em",
+                height:this.props.height,
                 width:"100%",
                 fontFamily:"TitilliumWeb_Regular",
               }}

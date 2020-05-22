@@ -3,7 +3,7 @@ import  { AgGridReact } from 'ag-grid-react';
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-balham-dark.css";
 
-import "../dashboard/styling/css/Table.css";
+import "../styling/css/Table.css";
 
 import {withStyles} from '@material-ui/core';
 import PropTypes from 'prop-types';
@@ -41,7 +41,7 @@ class PositionTable extends Component {
         
       ],
       rowData: [],
-      defaultColDef:{ resizable:true, sortable:true},
+      defaultColDef:{ resizable:true, sortable:true,suppressMovable: true,},
       gridReady:false,
       getRowNodeId:function(data){
         return data.symbol
@@ -55,7 +55,7 @@ class PositionTable extends Component {
         this.gridApi.setRowData([]);
       }
     
-      if (this.props.type !== prevProps.type && this.props.type!==0) {
+      if (this.props.type !== prevProps.type && this.props.type.length!==0) {
         let rowNode = this.gridApi.getRowNode(this.props.type.symbol);
         let storerowNode = [];
         storerowNode.push(this.props.type);
@@ -120,14 +120,14 @@ class PositionTable extends Component {
   render() {
     const {classes} = this.props;
     return (
-      <div className={classes.root}>
-        <div style = {{width:"100%",height:"100%"}}>
+      <div className={classes.root} style = {{width:"100%",height:"100%"}}>
+      
           <div style = {{display: "flex", flexDirection:"row"}}>
             <div style = {{overflow:"hidden",flexGrow:"1"}}>
               <div
-              id="myGrid"
+              
               style={{
-                height:"20em",
+                height:this.props.height,
                 width:"100%",
                 fontSize:"15px",
                 fontFamily:"TitilliumWeb_Regular",
@@ -140,7 +140,8 @@ class PositionTable extends Component {
                 onGridReady={this.onGridReady}
                 defaultColDef ={this.state.defaultColDef}
                 getRowNodeId = {this.state.getRowNodeId}
-                paginationAutoPageSize={true}
+                // paginationAutoPageSize={true}
+                paginationPageSize={this.props.numofRows}
                 pagination={true}
                 onGridSizeChanged={this.sizeToFit}
                 >
@@ -152,7 +153,7 @@ class PositionTable extends Component {
         </div>
 
 
-      </div>
+ 
     );
   }
 }
