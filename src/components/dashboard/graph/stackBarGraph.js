@@ -11,7 +11,7 @@ const styles = theme => ({
     backgroundColor:"#303030",
     minHeight:"30em",
   },
- 
+  
  });
 
 
@@ -20,9 +20,11 @@ class StackedBarGraph extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      graphbar: []
+      graphbar: [],
+      graphReady:false,
     };
     this.storefirstcol = [];
+    this.graphID = this.getUniqueID()
   }
 
   mytheme = (target) =>{
@@ -37,11 +39,9 @@ class StackedBarGraph extends Component {
     }
   }
 
-  componentDidMount() {
-
+  createBarGraph=(id)=>{
     am4core.useTheme(this.mytheme);
-    
-    let chart = am4core.create("barchartdiv", am4charts.XYChart);
+    let chart = am4core.create(id, am4charts.XYChart); 
     //let title = chart.titles.create();
     //title.text = "POSITION GRAPH";
     //title.fontSize = 12;
@@ -131,7 +131,14 @@ class StackedBarGraph extends Component {
     });
     this.valueAxis= valueAxis;
     this.chart = chart;
+  
   }
+
+  componentDidMount() {
+    this.createBarGraph(this.graphID);
+    
+  }
+
   componentDidUpdate(oldProps) {
     if (this.props.currentStrat !== oldProps.currentStrat) {
       this.storefirstcol = [];
@@ -184,6 +191,18 @@ class StackedBarGraph extends Component {
     }
   }
 
+  getUniqueID = (prefix='sb')=>{
+    //generate uniqueID
+    var length = 10
+    var result           = '';
+   var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+   var charactersLength = characters.length;
+   for ( var i = 0; i < length; i++ ) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+   }
+   return prefix+result;
+  }
+
   componentWillUnmount() {
     if (this.chart) {
       this.chart.dispose();
@@ -196,9 +215,12 @@ class StackedBarGraph extends Component {
     return (
       <Grid container className={classes.graph} spacing={0}>
       <Grid item xs={12}>
-          <div id="barchartdiv" style={{ width: "100%", height: this.props.height }} />
+       
+        <div id={this.graphID} style={{ width: "100%", height: this.props.height }} />
+        
           </Grid>
-      </Grid>
+          </Grid>
+   
     );
   }
 }

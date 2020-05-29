@@ -15,6 +15,7 @@ import SignalLineGraph from '../graph/signalLineGraph';
 
 import {withStyles,Tabs,Grid,Tab,AppBar, Typography,Collapse,} from '@material-ui/core';
 import PropTypes from 'prop-types';
+const LAYOUT_MAPPING = require('../main/layout/layout_map.json');
 
 const styles = theme => ({
   root:{
@@ -71,6 +72,8 @@ class Dashboard extends Component {
       portfolioTab:true,
       positionTab:false,
       securityList: [],
+      portfolioTabLayout:this.props.portfolioLayout,
+      positionTabLayout:this.props.positionLayout,
       
     };
 
@@ -83,14 +86,17 @@ class Dashboard extends Component {
     this.COMPONENT_HEIGHT = '400px'
     this.selectedSecurity = ""
     this.securitychild = {};
+    this.currentDiv = [];
+    
   }
 
-  getOrCreateRef(id) {
+  getOrCreateRef(id,ref=null) {
     if (!this.securitychild.hasOwnProperty(id)) {
-        this.securitychild[id] = React.createRef();
+        this.securitychild[id] = ref
     }
     return this.securitychild[id];
-}
+  }
+
   //on drop down change
   changeStrategy = event => {
     //close current eventsource
@@ -123,9 +129,8 @@ class Dashboard extends Component {
     this.selectedSecurity = event.target.value
     console.log("change",this.selectedSecurity)
     Object.entries(this.securitychild).forEach(([key,value])=>{
-      console.log(`${key}:${value}`)
       let ref = this.getOrCreateRef(key);
-      ref.current.changeSecurity(this.selectedSecurity);
+      ref.changeSecurity(this.selectedSecurity);
     })
   }
 
@@ -203,6 +208,7 @@ class Dashboard extends Component {
     this.fetchPerfURL();
     this.allEvent();
     this.detectmob();
+    this.getComponent();
   }
   //fetch list of current strategy
   fetchPerfURL() {
@@ -250,18 +256,98 @@ class Dashboard extends Component {
 
         }
       }
+  
+
+
+  getComponent = (componentType)=>{
+    let item = LAYOUT_MAPPING[componentType]
+    let component;
+    switch(item){
+      case 'comment' :
+        // comment table
+        component = <CommentTable
+        type={this.state.commentary}
+        currentStrat={this.state.currenturl}
+        height={this.COMPONENT_HEIGHT}
+      />
+        break;
+      case 'csgraph' :
+        // console.log(csid)
+        // console.log(csid)
+        // candle stick graph
+        component = <CandleStickGraph 
+                    onRef={(id,ref) => (this.getOrCreateRef(id,ref))}
+                    height={this.COMPONENT_HEIGHT} 
+                    bardata={this.state.bar} 
+                    currentStrat={this.state.currenturl} 
+                    />
+
+        break;
+      case 'order' :
+        // order table
+        component = <OrderTable
+                      height={this.COMPONENT_HEIGHT}
+                      isMobile={this.isMobile}
+                      type={this.state.order}
+                      currentStrat={this.state.currenturl}
+                    />
+        break;
+      case 'position' :
+        // position table
+        component =  <PositionTable
+                      height={this.COMPONENT_HEIGHT}
+                      isMobile={this.isMobile}
+                      type={this.state.position}
+                      currentStrat={this.state.currenturl}
+                    />
+        break;       
+      case 'sbgraph' :
+        // stacked bar graph
+        component = <StackedBarGraph
+                    type={this.state.position}
+                    currentStrat={this.state.currenturl}
+                    height={this.COMPONENT_HEIGHT}
+              
+                    />
+        break;
+      case 'slgraph' :
+        // signal line graph
+
+        component = <SignalLineGraph 
+                    height={this.COMPONENT_HEIGHT} 
+                    signaldata={this.state.signal} 
+                    currentStrat={this.state.currenturl}/>
+        break;
+      case 'orderposition' :
+        // order position table
+      component =   <OrderPositionTable
+                    isMobile={this.isMobile}
+                    type={this.state.order}
+                    currentStrat={this.state.currenturl}
+                    height={this.COMPONENT_HEIGHT}
+                    />
+        break;
+      case 'signal' :
+        // signal table
+        component =  <SignalTable 
+                      height={this.COMPONENT_HEIGHT}
+                      isMobile={this.isMobile}
+                      type={this.state.signal} 
+                      currentStrat={this.state.currenturl}
+                      />
+        break;
+      default:
+        // console.log(item,'out of range')
+        component = undefined
+          
+    }
+    return component
+  }
 
 
   //render DOM set all the components here
   render() {
-    const { signal } = this.state;
-    // const { quote } = this.state;
-    const { position } = this.state;
-    const { order } = this.state;
     const { portfolio } = this.state;
-    const { bar } = this.state;
-    const { currenturl } = this.state;
-    const { commentary } = this.state;
     const { serverconnect } = this.state;
     const { currenttab } = this.state;
     const { classes } = this.props;
@@ -278,6 +364,38 @@ class Dashboard extends Component {
         {object}
       </option>
     ));
+
+    const portfolioLayout = this.state.portfolioTabLayout.map((item,index)=>{
+
+      if(this.state.portfolioTabLayout.length ===index+1 && (index+1) % 2 === 1){
+        return( <Grid item xs={12} key = {index}>
+         {this.getComponent(item)}
+       </Grid>)
+       }else{
+        return( <Grid item xs={6} key = {index}>
+          {this.getComponent(item)}
+        </Grid>)
+       }
+
+
+      }
+    )
+
+    const positionLayout = this.state.positionTabLayout.map((item,index)=>{
+ 
+      if(this.state.positionTabLayout.length === index+1 && (index+1) % 2 === 1){
+        return( <Grid item xs={12} key ={index}>
+         {this.getComponent(item)}
+       </Grid>)
+       }else{
+        return( <Grid item xs={6} key = {index}>
+          {this.getComponent(item)}
+        </Grid>)
+       }
+
+
+      }
+    )
 
     return (
       <div className={classes.root}>
@@ -369,80 +487,7 @@ class Dashboard extends Component {
                <div className={classes.tab}>
                <br/>
               <Grid container spacing={1} >
-                {/* Left Side */}
-                
-                <Grid item sm={6} xs={12}>
-              
-                  <Grid container spacing={1}>
-
-                    <Grid item xs={12}>
-                      <CandleStickGraph ref={this.getOrCreateRef("cs1")} height={this.COMPONENT_HEIGHT} id="cs1" bardata={bar} currentStrat={currenturl} />
-                    </Grid>
-
-                    <Grid item xs={12}>
-                      <SignalLineGraph height={this.COMPONENT_HEIGHT} id ="signalline" signaldata={signal} currentStrat={currenturl}/>
-
-                    
-                    </Grid>
-
-                 
-                  <Grid item xs={12}>
-                      <OrderTable
-                        height={this.COMPONENT_HEIGHT}
-                        isMobile={this.isMobile}
-                        type={order}
-                        currentStrat={currenturl}
-                       
-                      />
-                    </Grid>
-                  </Grid>
-                 
-                </Grid>
-              
-                {/* Right Side */}
-               
-                <Grid item sm={6} xs={12}>
-              
-                  <Grid container spacing={1}>
-              
-
-              
-                    <Grid item xs={12}>
-                      <PositionTable
-                        height={this.COMPONENT_HEIGHT}
-                        isMobile={this.isMobile}
-                        type={position}
-                        currentStrat={currenturl}
-                        
-                      />
-                    </Grid>
-                  
-                    <Grid item xs={12}>
-                      <SignalTable 
-                      height={this.COMPONENT_HEIGHT}
-                      isMobile={this.isMobile}
-                      type={signal} 
-                      currentStrat={currenturl}
-                      
-                      />
-                    </Grid>
-                 
-                  <Grid item xs={12}>
-                    <CommentTable
-                      
-                      type={commentary}
-                      currentStrat={currenturl}
-                      
-                      height={this.COMPONENT_HEIGHT}
-                    />
-                  </Grid>
-             
-                 
-                 
-                  </Grid>
-                </Grid>
-
-             
+                {portfolioLayout}
               </Grid>
             </div>
            
@@ -453,58 +498,8 @@ class Dashboard extends Component {
            
               <div className={classes.tab}>
               <br/>
-                <Grid container spacing={2}>
-                  <Grid item sm={6} xs={12}>
-                    <Grid container spacing={1}>
-                        <Grid item xs={12}>
-                        <PositionTable
-                          isMobile={this.isMobile}
-                          type={position}
-                          currentStrat={currenturl}
-                          height={this.COMPONENT_HEIGHT}
-                        />
-                        </Grid>
-
-                        <Grid item xs={12}>
-                        <CommentTable
-                              isMobile={this.isMobile}
-                              type={commentary}
-                              currentStrat={currenturl}
-                              numofRows={10}
-                              height={this.COMPONENT_HEIGHT}
-                            />
-                        </Grid>
-                    </Grid>
-                  </Grid>
-
-                  <Grid item sm={6} xs={12}>
-                    <Grid container spacing={1}>
-                          <Grid item xs={12}>
-                            <StackedBarGraph
-                              type={position}
-                              currentStrat={currenturl}
-                              height={this.COMPONENT_HEIGHT}
-                            />
-                          </Grid>
-
-                          <Grid item xs={12}>
-                            <CandleStickGraph ref={this.getOrCreateRef("cs2")}  id="cs2" bardata={bar} currentStrat={currenturl} />
-                          </Grid>
-                      </Grid>
-                  </Grid>
-
-                  <Grid item xs={12}>
-                      <Grid container spacing={1}>
-                          <Grid item xs={12}>
-                              <OrderPositionTable
-                              isMobile={this.isMobile}
-                              type={order}
-                              currentStrat={currenturl}
-                              height={this.COMPONENT_HEIGHT}
-                              />
-                          </Grid>
-                      </Grid>
-                    </Grid>
+                <Grid container spacing={1}>
+                {positionLayout}
                 </Grid>
               </div>
               </Collapse>

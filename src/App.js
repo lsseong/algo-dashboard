@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import Dashboard from "./components/dashboard/main/Dashboard";
-import {withStyles,TextField,Grid,Button,AppBar,Toolbar} from '@material-ui/core';
+import {withStyles,TextField,Grid,Button,AppBar,Toolbar,IconButton} from '@material-ui/core';
 import PropTypes from 'prop-types';
+import SettingsIcon from '@material-ui/icons/Settings';
 
 const CssTextField = withStyles({
   root: {
@@ -37,8 +38,8 @@ const styles = theme => ({
  formgroup:{
    marginTop:"5px",
    marginBottom:"5px",
- },
 
+ },
  appbar:{
   backgroundColor:"#404040",
  },
@@ -53,6 +54,13 @@ const styles = theme => ({
    color:"white",
    borderColor:"white",
    fontFamily:"TitilliumWeb_Regular",
+   
+ },
+ settings:{
+  color:"white",
+  borderColor:"white",
+  fontFamily:"TitilliumWeb_Regular",
+
  },
  
  labelProps:{
@@ -72,10 +80,12 @@ class App extends Component {
     this.state = {
       initStrat: "",
       connectstatus: "Connect",
-      host: "",
-      port: "",
+      host: "localhost",
+      port: "3333",
       disabled: false,
-      initData: false
+      initData: false,
+      portfolioLayout:[2,4,6,8,3,1],
+      positionLayout:[4,5,1,2,7],
     };
     this.conStatus = false;
   }
@@ -162,20 +172,22 @@ class App extends Component {
     const { host } = this.state;
     const { port } = this.state;
     const { initData } = this.state;
+    const { portfolioLayout } = this.state
+    const { positionLayout } = this.state
     const { classes } = this.props;
     return (
       <div className={classes.root}>
-          <Grid container spacing={2}>
+          <Grid container spacing={2} >
           <Grid item xs={12}>
             <AppBar position="static" color="inherit" className={classes.appbar}>
             
                <Toolbar  variant="dense">
               {/* First Row - input fields and buttons */}
-              <Grid item>
-              <Grid container spacing={2} className={classes.formgroup}>
+              <Grid container spacing={2} className={classes.formgroup} direction="row" justify="flex-start"alignItems="center">
+       
              
               {/* The local host text field */}
-                <Grid item xs={6} sm={4}>
+                <Grid item >
                 <CssTextField
                 required
                 id="host-required"
@@ -203,7 +215,7 @@ class App extends Component {
                 </Grid>
 
                 {/* The port text field */}
-                <Grid item xs={6} sm={4} >
+                <Grid item >
                 <CssTextField
                 required
                 id="port-required"
@@ -231,7 +243,7 @@ class App extends Component {
                 </Grid>
 
                 {/* Connect Button */}
-                <Grid item xs={12} sm={4}>
+                <Grid item >
                 <Button 
                 fullWidth
                 size="large"
@@ -241,10 +253,24 @@ class App extends Component {
                 
                 {this.state.connectstatus}
                 </Button>
+
+            
                 </Grid>
+
                
               </Grid>
-              </Grid>
+             
+              <Grid container spacing={2} direction="row" justify="flex-end"alignItems="center">
+                <Grid item>
+                <IconButton color="inherit" aria-label="settings" component="span">
+                  <SettingsIcon className={classes.settings} />
+                </IconButton>
+                
+                
+
+                </Grid>
+                </Grid>
+
               </Toolbar>
              
               </AppBar>
@@ -255,7 +281,7 @@ class App extends Component {
                   <div>
                     {initData 
                     ? (
-                      <Dashboard url={initStrat} host={host} port={port} />
+                      <Dashboard portfolioLayout={portfolioLayout} positionLayout={positionLayout} url={initStrat} host={host} port={port} />
                     ) :null
                     
                     }

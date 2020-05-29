@@ -24,6 +24,7 @@ class SignalLineGraph extends Component {
         
         };
         this.selectedSymbol = "";
+        this.graphID = this.getUniqueID();
         this.dataCache = new Map();
         this.MAX_DATA_POINTS = 50;
     }
@@ -38,9 +39,10 @@ class SignalLineGraph extends Component {
       
         }
       }
-    componentDidMount() {
+
+      createSignalLineGraph=(id)=>{
       am4core.useTheme(this.mytheme);
-      let chart = am4core.create(this.props.id, am4charts.XYChart);
+      let chart = am4core.create(id, am4charts.XYChart);
 
       
       am4core.options.minPolylineStep = 5;
@@ -106,6 +108,9 @@ class SignalLineGraph extends Component {
 
 
       this.chart = chart;
+      }
+    componentDidMount() {
+      this.createSignalLineGraph(this.graphID)
     }
 
 
@@ -211,11 +216,21 @@ class SignalLineGraph extends Component {
         bullet.circle.fill = am4core.color("#fff");
 
       }
+    getUniqueID = (prefix='sl')=>{
+      var length = 10
+      var result           = '';
+      var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      var charactersLength = characters.length;
+      for ( var i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      }
+      return prefix+result;
+    }
 
     change = event => {
         this.chart.data = this.dataCache.get(event.target.value);
         this.selectedSymbol = event.target.value;
-        console.log("change symbol " + event.target.value);
+        // console.log("change symbol " + event.target.value);
       };
   
     render() {
@@ -242,7 +257,7 @@ class SignalLineGraph extends Component {
             </Grid>
 
             <Grid item xs={12}>
-            <div id={this.props.id} style={{ width: "100%", height:"30em" }}></div>
+            <div id={this.graphID} style={{ width: "100%", height:"30em" }}></div>
             </Grid>
 
         </Grid>

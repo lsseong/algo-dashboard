@@ -27,6 +27,7 @@ class Graph extends Component {
     this.dataCache = new Map();
     this.MAX_DATA_POINTS = 50;
     this.selectedSymbol = "";
+    this.graphID = this.getUniqueID();
   }
 
   mytheme = (target) =>{
@@ -41,9 +42,9 @@ class Graph extends Component {
     }
   }
 
-  componentDidMount() {
+  createCSGraph=(id)=>{
     am4core.useTheme(this.mytheme);
-    let chart = am4core.create(this.props.id, am4charts.XYChart);
+    let chart = am4core.create(id, am4charts.XYChart);
 
     am4core.options.minPolylineStep = 5;
 
@@ -74,6 +75,16 @@ class Graph extends Component {
 
 
     this.chart = chart;
+
+
+
+  /*! create reference to allow parent to toggle between securities by returning graphID and this(the object)*/
+   this.props.onRef(this.graphID,this)
+  }
+
+  componentDidMount() {
+   this.createCSGraph(this.graphID)
+  //  this.props.ref(this.graphID)
   }
 
   componentDidUpdate(prevProps) {
@@ -154,7 +165,17 @@ class Graph extends Component {
   changeSecurity=(value)=>{
     this.chart.data = this.dataCache.get(value);
     this.selectedSymbol = value;
-    console.log("change bar " + value);
+    // console.log("change bar " + value);
+  }
+  getUniqueID = (prefix='cs')=>{
+    var length = 10
+    var result           = '';
+   var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+   var charactersLength = characters.length;
+   for ( var i = 0; i < length; i++ ) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+   }
+   return prefix+result;
   }
 
   // change = event => {
@@ -190,8 +211,8 @@ class Graph extends Component {
 
         <Grid item xs={12}>
         <div
-          id={this.props.id}
-          style={{ width: "100%", height: "30em" }}
+          id={this.graphID}
+          style={{ width: "100%", height: this.props.height }}
         />
         </Grid>
 
