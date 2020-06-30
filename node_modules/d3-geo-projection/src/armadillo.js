@@ -1,5 +1,5 @@
 import {geoProjectionMutator as projectionMutator} from "d3-geo";
-import {abs, atan2, cos, degrees, epsilon, radians, sin, tan} from "./math";
+import {abs, atan2, cos, degrees, epsilon, radians, sin, tan} from "./math.js";
 
 export function armadilloRaw(phi0) {
   var sinPhi0 = sin(phi0),
@@ -36,6 +36,7 @@ export function armadilloRaw(phi0) {
           denominator = dxdPhi * dydLambda - dydPhi * dxdLambda,
           dLambda = (fy * dxdPhi - fx * dydPhi) / denominator / 2,
           dPhi = (fx * dydLambda - fy * dxdLambda) / denominator;
+      if (abs(dPhi) > 2) dPhi /= 2;
       lambda -= dLambda, phi -= dPhi;
     } while ((abs(dLambda) > epsilon || abs(dPhi) > epsilon) && --i > 0);
     return sPhi0 * phi > -atan2(cos(lambda), tanPhi0) - 1e-3 ? [lambda * 2, phi] : null;

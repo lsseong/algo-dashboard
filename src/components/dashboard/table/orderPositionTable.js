@@ -65,34 +65,9 @@ class OrderPositionTable extends Component {
 
 
 
-  componentWillMount() {
-    if (this.props.type.length !== 0 && this.props.type.state !== "COMPLETE") {
-      this.storeorderarr.unshift(this.props.type);
-    }
-  }
 
-  componentWillReceiveProps(nextProps) {
-    if (this.props.currentStrat !== nextProps.currentStrat) {
-      this.storeorderarr = [];
-    }
-    var pt = this.storeorderarr.findIndex(
-      i => i.clientOrderId === nextProps.type.clientOrderId
-    );
-    if (this.props.type !== nextProps.type) {
-      if (pt !== -1) {
-        if (nextProps.type.state !== "COMPLETE") {
-          this.storeorderarr.splice(pt, 1, nextProps.type);
-        } else if (nextProps.type.state === "COMPLETE") {
-          this.storeorderarr.splice(pt, 1);
-        }
-      } else if (pt < 0) {
-        if (nextProps.type.state !== "COMPLETE") {
-          this.storeorderarr.unshift(nextProps.type);
-        }
-      }
-    }
-  }
 
+  
   componentDidUpdate(prevProps){
 
     if(this.state.gridReady){

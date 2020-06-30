@@ -1,11 +1,9 @@
 import React, { Component } from "react";
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
-
-
 import { withStyles ,Grid } from '@material-ui/core';
 import PropTypes from 'prop-types';
-
+am4core.options.queue = true;
 const styles = theme => ({
   graph:{
     backgroundColor:"#303030",
@@ -42,16 +40,14 @@ class StackedBarGraph extends Component {
   createBarGraph=(id)=>{
     am4core.useTheme(this.mytheme);
     let chart = am4core.create(id, am4charts.XYChart); 
-    //let title = chart.titles.create();
-    //title.text = "POSITION GRAPH";
-    //title.fontSize = 12;
-    //title.marginBottom = 10;
-    //title.fontWeight = 600;
+    am4core.options.minPolylineStep = 5;
+
 
     // Use only absolute numbers
     chart.numberFormatter.numberFormat = "#.#";
     chart.maskBullets = false;
     chart.responsive.enabled = true;
+
     // Create axes
     var categoryAxis = chart.yAxes.push(new am4charts.CategoryAxis());
     categoryAxis.dataFields.category = "symbol";
@@ -94,9 +90,11 @@ class StackedBarGraph extends Component {
     series.dataFields.valueX = "position";
     series.dataFields.categoryY = "symbol";
     series.clustered = false;
+    series.showOnInit = false;
+    series.minBulletDistance = 20;
 
     //position label
-    var valueLabel = series.bullets.push(new am4charts.LabelBullet());
+    let valueLabel = series.bullets.push(new am4charts.LabelBullet());
     valueLabel.label.text = "{valueX}";
     valueLabel.label.hideOversized = false;
     valueLabel.label.truncate = false;
@@ -119,17 +117,22 @@ class StackedBarGraph extends Component {
 
 
 
-    var columnTemplate = series.columns.template;
+    let columnTemplate = series.columns.template;
     columnTemplate.strokeOpacity = 0;
+    columnTemplate.fill = am4core.color("#a8b3b7");
     columnTemplate.adapter.add("fill", function(fill, target) {
-      var dataItem = target.dataItem;
-      if (dataItem.valueX > 0) {
+      if (target.dataItem && target.dataItem.valueX > 0) {
         return am4core.color("#78b711");
       } else {
-        return am4core.color("#a8b3b7");
+        return fill
       }
     });
-    this.valueAxis= valueAxis;
+
+    series.events.on("validated", (ev)=> {
+      this.resizeAxis(valueAxis);
+    });
+
+   
     this.chart = chart;
   
   }
@@ -139,56 +142,74 @@ class StackedBarGraph extends Component {
     
   }
 
-  componentDidUpdate(oldProps) {
-    if (this.props.currentStrat !== oldProps.currentStrat) {
-      this.storefirstcol = [];
+  componentDidUpdate(prevProps) {
+    if (this.props.currentStrat !== prevProps.currentStrat) {
+      // this.storefirstcol = [];
       this.chart.data = [];
     }
 
-    if (this.props.type.length !== 0) {
-      var pt = this.storefirstcol.findIndex(i => i.symbol === this.props.type.symbol);
+    
+    if (this.props.type.length === 0) {
+      // update due to selection event
+      return;
+    }
 
-      if (this.props.type !== oldProps.type) {
-        if (pt !== -1) {
-          this.storefirstcol.splice(pt, 1, {
+    if (this.props.type === prevProps.type) {
+      // no change in bar data
+      return;
+    }
+
+  
+        let pt = this.chart.data.findIndex(i => i.symbol === this.props.type.symbol);
+ 
+
+        if (pt >= 0) {
+  
+          this.chart.data[pt]['position'] = this.props.type.position;
+          this.chart.invalidateData();
+        } else {
+
+          let item = {
             symbol: this.props.type.symbol,
             position: this.props.type.position
-          });
-          this.chart.data = this.storefirstcol;
-        } else if (pt < 0) {
-          this.storefirstcol.unshift({
-            symbol: this.props.type.symbol,
-            position: this.props.type.position
-          });
-          this.chart.data = this.storefirstcol;
-        }
-        let maxvalue = this.storefirstcol[0].position;
-        let minvalue = this.storefirstcol[0].position;
-        this.storefirstcol.forEach((item,index)=>{
-          if(item.position>maxvalue){
-            maxvalue = item.position;
           }
-          if(item.position<minvalue){
-            minvalue = item.position;
-          }
-        })
 
-        let maxAbs = Math.abs(maxvalue);
-        let minAbs = Math.abs(minvalue);
-
-        if(maxAbs>minAbs){
-          this.valueAxis.min = -Math.abs(maxAbs-100);
-          this.valueAxis.max = maxAbs+100;
-        }else{
-          this.valueAxis.min = -Math.abs(minAbs-100);
-          this.valueAxis.max = minAbs+100;
+          // this.storefirstcol.unshift(item);
+          this.chart.addData(item)
         }
 
-        this.chart.validateData();
+        
 
-        //console.log("current chart data "+this.chart.data);
+
+   
+  }
+
+  resizeAxis=(valueAxis)=>{
+    if(this.chart.data.length !== 0){
+      let maxvalue = this.chart.data[0].position;
+      let minvalue = this.chart.data[0].position;
+  
+      this.chart.data.forEach((item,index)=>{
+        if(item.position > maxvalue){
+          maxvalue = item.position;
+        }
+        if(item.position < minvalue){
+          minvalue = item.position;
+        }
+      })
+  
+      let maxAbs = Math.abs(maxvalue);
+      let minAbs = Math.abs(minvalue);
+  
+      if(maxAbs > minAbs){
+        valueAxis.min = -Math.abs(maxAbs-100);
+        valueAxis.max = maxAbs + 100;
+      }else{
+        valueAxis.min = -Math.abs(minAbs-100);
+        valueAxis.max = minAbs + 100;
       }
     }
+   
   }
 
   getUniqueID = (prefix='sb')=>{

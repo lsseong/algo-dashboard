@@ -1,6 +1,4 @@
 import React, { Component } from "react";
-// import PortfolioTable from "./portfolioTable";
-// import QuoteTable from "./quoteTable";
 import CommentTable from "../table/commentTable";
 import CandleStickGraph from "../graph/candleStickGraph";
 import OrderTable from "../table/orderTable";
@@ -10,9 +8,11 @@ import OrderPositionTable from "../table/orderPositionTable";
 import StackedBarGraph from "../graph/stackBarGraph";
 import PnLPanel from "./Panel/PnlPanel";
 import SignalLineGraph from '../graph/signalLineGraph';
+import AnalyticsTable from '../table/analyticsTable';
 // import Draggable from "../main/Draggable/draggable";
 // import Droppable from "../main/Droppable/droppable";
-
+// import DoubleGraph from '../graph/doubleCharts';
+import BarChart from '../graph/BarChart';
 import {withStyles,Tabs,Grid,Tab,AppBar, Typography,Collapse,} from '@material-ui/core';
 import PropTypes from 'prop-types';
 const LAYOUT_MAPPING = require('../main/layout/layout_map.json');
@@ -61,7 +61,7 @@ class Dashboard extends Component {
       position: [],
       commentary: [],
       signal: [],
-      analytics: [],
+      analytic: [],
       bar: [],
       perfdata: [],
       order: [],
@@ -72,6 +72,8 @@ class Dashboard extends Component {
       portfolioTab:true,
       positionTab:false,
       securityList: [],
+      allPositions:[],
+      allBarSignals:[],
       portfolioTabLayout:this.props.portfolioLayout,
       positionTabLayout:this.props.positionLayout,
       
@@ -86,8 +88,7 @@ class Dashboard extends Component {
     this.COMPONENT_HEIGHT = '400px'
     this.selectedSecurity = ""
     this.securitychild = {};
-    this.currentDiv = [];
-    
+    this.currentPositions = new Map();
   }
 
   getOrCreateRef(id,ref=null) {
@@ -110,9 +111,10 @@ class Dashboard extends Component {
       bar: [],
       order: [],
       portfolio: {},
-      analytics: [],
+      analytic: [],
       currenturl: event.target.value,
       securityList: [],
+      allPositions:[],
     });
     //open eventsource base on new event
     this.eventSource = new EventSource(
@@ -162,27 +164,61 @@ class Dashboard extends Component {
       this.setState({ portfolio: JSON.parse(portfolio.data) })
     );
     this.eventSource.addEventListener("position", position => {
-      var inputPosition = JSON.parse(position.data);
+      let inputPosition = JSON.parse(position.data);
       inputPosition.unrealizedPnl = Number(inputPosition.unrealizedPnl).toFixed(2);
       inputPosition.realizedPnl = Number(inputPosition.realizedPnl).toFixed(2);
 
-      this.setState({ position: inputPosition });
+      this.setState({ position: inputPosition },()=>this.positionBuffer(this.state.position));
     });
     this.eventSource.addEventListener("order", order =>
       this.setState({ order: JSON.parse(order.data) })
     );
     this.eventSource.addEventListener("bar", bar => 
-    
+   
     this.setState({ bar: JSON.parse(bar.data) },()=>this.addSecurity(this.state.bar.symbol))
-    
+   
     
     );
 
     this.eventSource.addEventListener("signal", signal =>
-      this.setState({ signal: JSON.parse(signal.data) })
+      this.setState({ signal: JSON.parse(signal.data)})
     );
+
+    this.eventSource.addEventListener("analytic", analytic =>
+    this.setState({ analytic: JSON.parse(analytic.data)})
+  );
   };
+ 
+  positionBuffer=(data)=>{
+    if(data !== undefined){
+     
+      let tempPos = [].concat(this.state.allPositions);
+       
+      let pt = tempPos.findIndex(i => i.symbol === data.symbol);
+ 
+
+      if (pt >= 0) {
+
+        tempPos[pt]['position'] = data.position;
+        
+      } else {
+
+        let item = {
+          symbol: data.symbol,
+          position: data.position
+        }
+
+        tempPos.push(item)
+      }
+      this.setState({
+        allPositions:tempPos
+      })
+    }
+ 
+    
+  }
   addSecurity=(name)=>{
+    
     if (name === undefined){
       console.log('name is null')
     }
@@ -263,7 +299,7 @@ class Dashboard extends Component {
     let item = LAYOUT_MAPPING[componentType]
     let component;
     switch(item){
-      case 'comment' :
+      case LAYOUT_MAPPING[1] :
         // comment table
         component = <CommentTable
         type={this.state.commentary}
@@ -271,19 +307,24 @@ class Dashboard extends Component {
         height={this.COMPONENT_HEIGHT}
       />
         break;
-      case 'csgraph' :
+      case LAYOUT_MAPPING[2] :
         // console.log(csid)
         // console.log(csid)
         // candle stick graph
-        component = <CandleStickGraph 
+        component = <div>
+                    {this.state.bar
+                    ?<CandleStickGraph 
                     onRef={(id,ref) => (this.getOrCreateRef(id,ref))}
                     height={this.COMPONENT_HEIGHT} 
                     bardata={this.state.bar} 
                     currentStrat={this.state.currenturl} 
                     />
+                    :null
+                    }
+                    </div>
 
         break;
-      case 'order' :
+      case LAYOUT_MAPPING[3] :
         // order table
         component = <OrderTable
                       height={this.COMPONENT_HEIGHT}
@@ -292,7 +333,7 @@ class Dashboard extends Component {
                       currentStrat={this.state.currenturl}
                     />
         break;
-      case 'position' :
+      case LAYOUT_MAPPING[4] :
         // position table
         component =  <PositionTable
                       height={this.COMPONENT_HEIGHT}
@@ -301,16 +342,20 @@ class Dashboard extends Component {
                       currentStrat={this.state.currenturl}
                     />
         break;       
-      case 'sbgraph' :
+      case LAYOUT_MAPPING[5] :
         // stacked bar graph
-        component = <StackedBarGraph
-                    type={this.state.position}
-                    currentStrat={this.state.currenturl}
-                    height={this.COMPONENT_HEIGHT}
+
+        component = <BarChart id="barChart" 
+                    data ={this.state.allPositions} 
+                     height={this.COMPONENT_HEIGHT}/>
+        // component = <StackedBarGraph
+        //             type={this.state.position}
+        //             currentStrat={this.state.currenturl}
+        //             height={this.COMPONENT_HEIGHT}
               
-                    />
+        //             />
         break;
-      case 'slgraph' :
+      case LAYOUT_MAPPING[6] :
         // signal line graph
 
         component = <SignalLineGraph 
@@ -318,7 +363,7 @@ class Dashboard extends Component {
                     signaldata={this.state.signal} 
                     currentStrat={this.state.currenturl}/>
         break;
-      case 'orderposition' :
+      case LAYOUT_MAPPING[7] :
         // order position table
       component =   <OrderPositionTable
                     isMobile={this.isMobile}
@@ -327,7 +372,7 @@ class Dashboard extends Component {
                     height={this.COMPONENT_HEIGHT}
                     />
         break;
-      case 'signal' :
+      case LAYOUT_MAPPING[8] :
         // signal table
         component =  <SignalTable 
                       height={this.COMPONENT_HEIGHT}
@@ -336,6 +381,18 @@ class Dashboard extends Component {
                       currentStrat={this.state.currenturl}
                       />
         break;
+        case LAYOUT_MAPPING[9] :
+          // signal table
+          component =  <AnalyticsTable 
+                        height={this.COMPONENT_HEIGHT}
+                        isMobile={this.isMobile}
+                        type={this.state.analytic} 
+                        currentStrat={this.state.currenturl}
+                        />
+          break;
+
+
+        
       default:
         // console.log(item,'out of range')
         component = undefined
@@ -372,7 +429,7 @@ class Dashboard extends Component {
          {this.getComponent(item)}
        </Grid>)
        }else{
-        return( <Grid item xs={6} key = {index}>
+        return( <Grid item sm={6} xs={12} key = {index}>
           {this.getComponent(item)}
         </Grid>)
        }
@@ -388,7 +445,7 @@ class Dashboard extends Component {
          {this.getComponent(item)}
        </Grid>)
        }else{
-        return( <Grid item xs={6} key = {index}>
+        return( <Grid item sm={6} xs={12} key = {index}>
           {this.getComponent(item)}
         </Grid>)
        }
@@ -485,8 +542,9 @@ class Dashboard extends Component {
           <Collapse in={portfolioTab} >
          
                <div className={classes.tab}>
-               <br/>
+               
               <Grid container spacing={1} >
+                
                 {portfolioLayout}
               </Grid>
             </div>

@@ -1,10 +1,12 @@
-{
-	"1": "comment",
-	"2": "csgraph",
-	"3": "order",
-	"4": "position",
-	"5": "sbgraph",
-	"6": "slgraph",
-	"7": "orderposition",
-	"8": "signal"
+{   
+    "0": "None",
+	"1": "Comment Table",
+	"2": "CandleStick Graph",
+	"3": "Order Table",
+	"4": "Position Table",
+	"5": "Stack Bar Graph",
+	"6": "Signal Line Graph",
+	"7": "Order Position Table",
+	"8": "Signal Table",
+	"9": "Analytics Table"
 }

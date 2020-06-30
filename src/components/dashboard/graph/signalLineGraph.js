@@ -3,11 +3,11 @@ import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import { withStyles ,Grid } from '@material-ui/core';
 import PropTypes from 'prop-types';
-
+am4core.options.queue = true;
 const styles = theme => ({
     graph:{
       backgroundColor:"#303030",
-      
+      minHeight:"30em",
     },
     dropdown:{
    
@@ -70,33 +70,23 @@ class SignalLineGraph extends Component {
       let valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
       valueAxis.tooltip.disabled = true;
       valueAxis.renderer.minWidth = 35;
+      valueAxis.renderer.opposite = true;
       // Create series
     
+ 
       
-      let series = chart.series.push(new am4charts.LineSeries());
-      series.dataFields.valueY = "sma10";
-      series.dataFields.dateX = "time";
-      series.name = "SMA10";
-      series.tooltipText = "[bold font-size: 15]{valueY}[/]";
-      series.legendSettings.itemValueText = "{valueY}";
-
-
-      let bullet = series.bullets.push(new am4charts.CircleBullet());
-      bullet.circle.radius = 3;
-      bullet.circle.strokeWidth = 2;
-      bullet.circle.fill = am4core.color("#fff");
       
-      let series2 = chart.series.push(new am4charts.LineSeries());
-      series2.dataFields.valueY = "sma20";
-      series2.dataFields.dateX = "time";
-      series2.name = "SMA20";
-      series2.tooltipText = "[bold font-size: 15]{valueY}[/]";
-      series2.legendSettings.itemValueText = "{valueY}";
+      // let series2 = chart.series.push(new am4charts.LineSeries());
+      // series2.dataFields.valueY = "sma20";
+      // series2.dataFields.dateX = "time";
+      // series2.name = "SMA20";
+      // series2.tooltipText = "[bold font-size: 15]{valueY}[/]";
+      // series2.legendSettings.itemValueText = "{valueY}";
       
-      let bullet2 = series2.bullets.push(new am4charts.CircleBullet());
-      bullet2.circle.radius = 3;
-      bullet2.circle.strokeWidth = 2;
-      bullet2.circle.fill = am4core.color("#fff");
+      // let bullet2 = series2.bullets.push(new am4charts.CircleBullet());
+      // bullet2.circle.radius = 3;
+      // bullet2.circle.strokeWidth = 2;
+      
       
       // Add cursor
       chart.cursor = new am4charts.XYCursor();
@@ -104,11 +94,13 @@ class SignalLineGraph extends Component {
       
       // Add legend
       chart.legend = new am4charts.Legend();
-
+  
 
 
       this.chart = chart;
       }
+
+ 
     componentDidMount() {
       this.createSignalLineGraph(this.graphID)
     }
@@ -140,17 +132,28 @@ class SignalLineGraph extends Component {
     
         // create bar object
         if(this.props.signaldata!==prevProps.signaldata && this.props.signaldata.length!==0){
+          let spiltTime = this.props.signaldata.time.split(":");
           var newDate = new Date();
-
+          newDate.setHours(spiltTime[0])
+          newDate.setMinutes(spiltTime[1])
+          newDate.setSeconds(spiltTime[2])
 
           var signal = {
             time: newDate,
             signalname: this.props.signaldata.symbol,
             signal: this.props.signaldata.signal,
             commentary: this.props.signaldata.commentary,
-            sma10: this.props.signaldata.analytics.sma10,
-            sma20: this.props.signaldata.analytics.sma20,
           };
+          var analyticsItems = this.props.signaldata.analytics;
+          
+          for (const [key, value] of Object.entries(analyticsItems)) {
+            signal[key] = value
+            let analyticsExist = this.chart.map.getKey(key)
+            if(analyticsExist === undefined){
+                    // create line series dynamically
+              this.addSeries(key)
+            }
+          }
           
           // add to cache
           var array = this.dataCache.get(this.props.signaldata.symbol);
@@ -158,14 +161,6 @@ class SignalLineGraph extends Component {
             // first time seeing this security
             array = [];
 
-            //create line series for the first time dynamically
-            // var analyticsItems = this.props.signaldata.analytics;
-
-            // for (const [key, value] of Object.entries(analyticsItems)) {
-            //   console.log(key, value);
-            //   this.addSeries(key)
-            // }
-      
             // initialize array with empty data
       
             this.dataCache.set(signal.signalname, array);
@@ -192,8 +187,9 @@ class SignalLineGraph extends Component {
               this.chart.addData(signal);
             }
         }
+        console.log(this.chart.data[this.chart.data.length-1])
         }
-       
+     
     }
   
     componentWillUnmount() {
@@ -204,16 +200,57 @@ class SignalLineGraph extends Component {
      addSeries=(name)=> {
 
         let series = this.chart.series.push(new am4charts.LineSeries());
+        series.id = name
         series.dataFields.valueY = name;
         series.dataFields.dateX = "time";
         series.name = name.toUpperCase();
         series.tooltipText = "[bold font-size: 15]{valueY}[/]";
         series.legendSettings.itemValueText = "{valueY}";
         
-        let bullet = series.bullets.push(new am4charts.CircleBullet());
-        bullet.circle.radius = 3;
-        bullet.circle.strokeWidth = 2;
-        bullet.circle.fill = am4core.color("#fff");
+
+        var bullet = series.bullets.push(new am4charts.Bullet());
+
+        let arrow = bullet.createChild(am4core.Triangle);
+        arrow.horizontalCenter = "middle";
+        arrow.verticalCenter = "middle";
+        arrow.stroke = am4core.color("#fff");
+        arrow.direction = "top";
+        arrow.width = 8;
+        arrow.height = 8;
+
+        arrow.adapter.add("fill", function(fill, target) {
+          if (!target.dataItem) {
+            return fill
+          }
+         
+          let values = target.dataItem.dataContext.signal;
+          if (values === -1){
+            return am4core.color("red")
+          }else if(values === 1){
+           return  am4core.color("green")
+          }else{
+           return fill
+          }
+      
+        });
+        
+        arrow.adapter.add("rotation", function(rotation, target) {
+          if (!target.dataItem) {
+            return rotation;
+          }
+          let values = target.dataItem.dataContext.signal;
+          if (values === -1){
+            return 180
+          }else if(values === 1){
+           return  0
+          }else{
+           return 90
+          }
+        });
+
+        // bullet.circle.stroke = am4core.color("#fff");
+
+        
 
       }
     getUniqueID = (prefix='sl')=>{
@@ -241,9 +278,10 @@ class SignalLineGraph extends Component {
               {object}
             </option>
           ));
+        
       return (
-        <div style = {{width:"100%",height:"100%"}}>
-        <div style={{ width: "100%", height: this.props.height }}>
+        <div style = {{width:"100%",height:this.props.height}}>
+    
         <Grid container className={classes.graph} spacing={0}>
             <Grid item xs={12} className={classes.dropdown}>
             {dropdown.length !== 0 && this.chart.data.length!==0  ? (
@@ -257,11 +295,11 @@ class SignalLineGraph extends Component {
             </Grid>
 
             <Grid item xs={12}>
-            <div id={this.graphID} style={{ width: "100%", height:"30em" }}></div>
+            <div id={this.graphID} style={{ width: "100%", height:this.props.height}}></div>
             </Grid>
 
         </Grid>
-       </div>
+       
        </div>
       );
     }

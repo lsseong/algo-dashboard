@@ -1,5 +1,5 @@
 import {geoProjection as projection, geoRotation as rotation} from "d3-geo";
-import {abs, asin, atan, atan2, cos, epsilon, sin, sqrt} from "./math";
+import {abs, asin, atan, atan2, cos, epsilon, sin, sqrt} from "./math.js";
 
 export function modifiedStereographicRaw(C) {
   var m = C.length - 1;
@@ -73,9 +73,10 @@ var alaska = [[0.9972523, 0], [0.0052513, -0.0041175], [0.0074606, 0.0048125], [
 
 export function modifiedStereographicAlaska() {
   return modifiedStereographic(alaska, [152, -64])
-      .scale(1500)
+      .scale(1400)
       .center([-160.908, 62.4864])
-      .clipAngle(25);
+      .clipAngle(30)
+      .angle(7.8);
 }
 
 export function modifiedStereographicGs48() {

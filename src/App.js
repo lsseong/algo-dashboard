@@ -1,8 +1,14 @@
 import React, { Component } from "react";
 import Dashboard from "./components/dashboard/main/Dashboard";
-import {withStyles,TextField,Grid,Button,AppBar,Toolbar,IconButton} from '@material-ui/core';
+import {withStyles,TextField,Grid,Button,AppBar,Toolbar,IconButton,
+  Dialog,DialogContent,DialogTitle,DialogContentText,Snackbar} from '@material-ui/core';
 import PropTypes from 'prop-types';
 import SettingsIcon from '@material-ui/icons/Settings';
+import CloseIcon  from '@material-ui/icons/Close';
+// import DoubleGraph from '../src/components/dashboard/graph/doubleCharts';
+const LAYOUT_MAPPING = require('../src/components/dashboard/main/layout/layout_map.json');
+
+require('dotenv').config();
 
 const CssTextField = withStyles({
   root: {
@@ -80,14 +86,19 @@ class App extends Component {
     this.state = {
       initStrat: "",
       connectstatus: "Connect",
-      host: "localhost",
-      port: "3333",
+      host: process.env.REACT_APP_URL_MAIN,
+      port: process.env.REACT_APP_URL_PORT,
       disabled: false,
       initData: false,
-      portfolioLayout:[2,4,6,8,3,1],
+      portfolioLayout:[2,4,6,8,9,3,1],
       positionLayout:[4,5,1,2,7],
+      open:false,
+      snackBarOpen:false,
+      snackBarStatus:false
     };
     this.conStatus = false;
+
+    
   }
 
   //when component mount fetch 1st strategy name
@@ -96,14 +107,8 @@ class App extends Component {
       "http://" + host + ":" + port + "/service/strategy/performances";
   
       fetch(URL)
-      .then(response => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          throw Error(`Request rejected with status ${response.status}`);
-        }
-      })
-      .then(data => this.setState({ initStrat: data[0].id, initData: true }),()=>console.log(this.state.initData))
+      .then(response => response.json())
+      .then(data => this.setState({ initStrat: data[0].id, initData: true }))
       .catch(err=>{
         if (!err.response) {
           // network error
@@ -116,6 +121,90 @@ class App extends Component {
  
  
   }
+   handleClickOpen = () => {
+    //  console.log('open')
+    this.setState({
+      open:true,
+      
+    })
+  };
+
+   handleClose = () => {
+    // console.log('close')
+    this.setState({
+      open:false,
+    })
+  };
+
+
+  handleSBOpen = (msgstatus) => {
+    this.setState({
+      snackBarOpen:true,
+      snackBarStatus:msgstatus
+    })
+  };
+
+  handleSBClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    this.setState({
+      snackBarOpen:false
+    })
+  };
+
+  getAndSetLayout = ()=>{
+    localStorage.clear();
+    let tempPortfolioLayout  = JSON.parse(localStorage.getItem('portfolioLayout'));
+    let tempPositionLayout  = JSON.parse(localStorage.getItem('positionLayout'));
+    // console.log( tempPortfolioLayout,  tempPositionLayout)
+    
+    if (tempPortfolioLayout === null){
+      console.log("tempPortfolioLayout does not exist")
+
+      localStorage.setItem('portfolioLayout',JSON.stringify(this.state.portfolioLayout));
+    }else{
+      this.setState({
+        portfolioLayout:tempPortfolioLayout
+      })
+    }
+
+    if (tempPositionLayout === null){
+      console.log("tempPositionLayout does not exist")
+     
+      
+      localStorage.setItem('positionLayout',JSON.stringify(this.state.positionLayout));
+    }else{
+      this.setState({
+        positionLayout:tempPositionLayout
+      })
+    }
+
+  }
+
+  setLocalStorage=(itemName,data)=>{
+    
+    localStorage.setItem(itemName,JSON.stringify(data));
+    let results  = JSON.parse(localStorage.getItem(itemName));
+    console.log(results,data)
+    console.log(String(results) === String(data))
+   
+      if (String(results) === String(data)){
+        console.log(itemName,"was stored successfully")
+        this.handleSBOpen(true);
+      }else{
+        this.handleSBOpen(false);
+        console.log(itemName,"storage failed")
+      }
+    
+
+  }
+
+  componentDidMount(){
+    this.getAndSetLayout()
+  }
+
 
   //when clicked connection
   handleConnection =() => {
@@ -166,6 +255,34 @@ class App extends Component {
     }
  }
 
+ handleChange=(event)=> {
+  const id = event.target.id
+  const name = event.target.name
+  let tempArr = []
+
+  if (name === "portfolioLayout"){
+    tempArr = this.state.portfolioLayout
+    tempArr[id] = parseInt(event.target.value)
+  }else if (name === "positionLayout"){
+    tempArr = this.state.positionLayout
+    tempArr[id] = parseInt(event.target.value)
+  }
+
+  if( tempArr.length >0 ){
+    this.setState({
+      [name]:tempArr
+    },()=>this.setLocalStorage(name,tempArr))
+    
+  }
+  
+  // this.tempArr[type][id] = parseInt(event.target.value)
+ 
+  // console.log(this.tempArr)
+  // console.log(this.state.portfolioLayout)
+  }
+
+  
+
   //send first strategy to Strategy list when rendering DOM
   render() {
     const { initStrat } = this.state;
@@ -175,6 +292,50 @@ class App extends Component {
     const { portfolioLayout } = this.state
     const { positionLayout } = this.state
     const { classes } = this.props;
+
+    const allComponent = Object.keys(LAYOUT_MAPPING).map((item,index)=>(
+    <option key={index} value={item} >
+      {LAYOUT_MAPPING[item]}
+    </option>
+    ))
+
+    const currentPortfolioLayout = this.state.portfolioLayout.map((item,index)=>{
+
+      if(this.state.portfolioLayout.length === index+1 && (index+1) % 2 === 1){
+ 
+        return( <Grid item xs={12} key = {index}>
+          <select id = {index} name='portfolioLayout'  onChange={this.handleChange} value ={item}>{allComponent}</select>
+          
+       </Grid>)
+       }else{
+        return( <Grid item xs={6} key = {index}>
+          <select id = {index} name='portfolioLayout' onChange={this.handleChange} value ={item}>{allComponent}</select>
+        </Grid>)
+       }
+
+
+      }
+    )
+
+
+    const currentPositionLayout = this.state.positionLayout.map((item,index)=>{
+
+      if(this.state.positionLayout.length === index+1 && (index+1) % 2 === 1){
+   
+        return( <Grid item xs={12} key = {index}>
+          <select id = {index} name='positionLayout'  onChange={e=>(this.handleChange(e,'portfolioLayout'))} value ={item}>{allComponent}</select>
+          
+       </Grid>)
+       }else{
+        return( <Grid item xs={6} key = {index}>
+          <select id = {index} name='positionLayout'  onChange={e=>(this.handleChange(e,'position'))} value ={item}>{allComponent}</select>
+        </Grid>)
+       }
+
+
+      }
+    )
+    
     return (
       <div className={classes.root}>
           <Grid container spacing={2} >
@@ -193,7 +354,6 @@ class App extends Component {
                 id="host-required"
                 label="Hostname"
                 variant="outlined"
-                color="inherit"
                 name="host"
                 value={this.state.host}
                 onChange={this.connectionInput}
@@ -220,7 +380,6 @@ class App extends Component {
                 required
                 id="port-required"
                 label="Port"
-                color="inherit"
                 name="port"
                 variant="outlined"
                 value={this.state.port}
@@ -262,11 +421,41 @@ class App extends Component {
              
               <Grid container spacing={2} direction="row" justify="flex-end"alignItems="center">
                 <Grid item>
-                <IconButton color="inherit" aria-label="settings" component="span">
-                  <SettingsIcon className={classes.settings} />
+                  {/* settings buttons */}
+                <IconButton className={classes.settings} aria-label="settings" component="span" onClick={this.handleClickOpen}>
+                  <SettingsIcon  disabled={this.state.disabled}/>
                 </IconButton>
+                  {/* pop up dialog box with the form */}
+                  <Dialog open={this.state.open} onClose={this.handleClose} aria-labelledby="form-dialog-title">
                 
-                
+                  <DialogTitle id="form-dialog-title">Settings</DialogTitle>
+                  <DialogContent>
+                    <DialogContentText>
+                      Change the layout of the dashboard ,empty spaces are collapsed.
+                    </DialogContentText>
+                    Portfolio
+                    <Grid container spacing={1}>
+                      
+                    {
+                    currentPortfolioLayout
+                    
+                    }
+                    
+                    </Grid>
+                    Position
+                    <Grid container spacing={1}>
+                      
+                    {
+                    currentPositionLayout
+                    
+                    }
+                  
+                    </Grid>
+                   
+
+                  </DialogContent>
+                </Dialog>
+                       
 
                 </Grid>
                 </Grid>
@@ -278,7 +467,10 @@ class App extends Component {
            
                 {/* Second Row - Main Body */}
               <Grid item xs={12}>
+                
                   <div>
+                    
+                  
                     {initData 
                     ? (
                       <Dashboard portfolioLayout={portfolioLayout} positionLayout={positionLayout} url={initStrat} host={host} port={port} />
@@ -287,8 +479,25 @@ class App extends Component {
                     }
                     </div>
               </Grid>
+           
             </Grid>
-            
+            <Snackbar        
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left',
+            }} 
+            message={this.state.snackBarStatus ? "Sucessfully edited layout" : "Failed to edit layout"}
+            open={this.state.snackBarOpen} autoHideDuration={6000} onClose={this.handleSBClose}
+            action={
+              <React.Fragment>
+              <IconButton size="small" aria-label="close" color="inherit" onClick={this.handleSBClose}>
+              <CloseIcon fontSize="small" />
+            </IconButton>
+            </React.Fragment>
+            }
+            >
+ 
+            </Snackbar>
   
          
       </div>
