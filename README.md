@@ -108,7 +108,7 @@ data: {"id":"AlterBuySell-EURUSD","time":"18-11-19 19:39:52","totalValue":69.0,"
 event: position
 data: {"time":"19:39:52.513","symbol":"EURUSD","position":100000,"unrealizedPnl":-7.0,"realizedPnl":76.0}
 
-event: analytics
+event: analytic
 data:{"time":"18:29:13.303","key":"EURUSD","name":"sma20","value":1.059927}
 
 ~~~
