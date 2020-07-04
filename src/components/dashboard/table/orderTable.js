@@ -23,7 +23,7 @@ class OrderTable extends Component {
     super(props);
     this.state = {
       columnDefs: [
-        { headerName:"ORDERS", marryChildren:true,
+        { headerName:"HISTORICAL ORDERS", marryChildren:true,
           children:[
         {headerName: 'Time', field: 'time',width:120},
         {headerName: 'Order ID', field: 'clientOrderId',width:100,},

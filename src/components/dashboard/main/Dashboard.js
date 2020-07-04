@@ -71,12 +71,16 @@ class Dashboard extends Component {
       currenttab: "portfolioTab",
       portfolioTab:true,
       positionTab:false,
+      signalTab:false,
+      currentPriceTab:'stackedBar',
+      stackedBar:true,
+      priceBar:false,
       securityList: [],
       allPositions:[],
       allBarSignals:[],
       portfolioTabLayout:this.props.portfolioLayout,
       positionTabLayout:this.props.positionLayout,
-      
+      signalTabLayout:this.props.signalLayout,
     };
 
     //open eventsource base on current url
@@ -271,17 +275,45 @@ class Dashboard extends Component {
       this.setState({
         portfolioTab:true,
         positionTab:false,
+        signalTab:false,
       })
     }else if (newValue === "positionTab"){
       this.setState({
         portfolioTab:false,
         positionTab:true,
+        signalTab:false,
+      })
+    }else if (newValue === "signalTab"){
+      this.setState({
+        portfolioTab:false,
+        positionTab:false,
+        signalTab:true
       })
     }
     this.setState({
       currenttab: newValue
     });
   };
+
+
+checkSelectedPositionTab =(event,newValue) => {
+  if(newValue==="stackedBar"){
+    this.setState({
+      stackedBar:true,
+      priceBar:false,
+
+    })
+  }else if (newValue === "priceBar"){
+    this.setState({
+      stackedBar:false,
+      priceBar:true,
+
+    })
+  }
+  this.setState({
+    currentPriceTab: newValue
+  });
+};
    detectmob=()=> {
     this.isMobile = window.orientation > -1; 
     if(this.isMobile){
@@ -407,9 +439,13 @@ class Dashboard extends Component {
     const { portfolio } = this.state;
     const { serverconnect } = this.state;
     const { currenttab } = this.state;
+    const { currentPriceTab } = this.state;
     const { classes } = this.props;
     const { positionTab } = this.state;
     const { portfolioTab } = this.state;
+    const { signalTab } = this.state;
+    const { stackedBar } = this.state;
+    const { priceBar } = this.state;
 
     const dropdown = this.state.perfdata.map((object, i) => (
       <option key={i} value={object.id}>
@@ -441,6 +477,77 @@ class Dashboard extends Component {
     const positionLayout = this.state.positionTabLayout.map((item,index)=>{
  
       if(this.state.positionTabLayout.length === index+1 && (index+1) % 2 === 1){
+        return( <Grid item xs={6} key ={index}>
+         {this.getComponent(item)}
+       </Grid>)
+       }else{
+
+        if(index === 0 ){
+          return(
+         
+            <Grid item sm={6} xs={12} key = {index}>
+            <AppBar position="static" className={classes.appbar}>
+            <Tabs 
+            value={currentPriceTab} 
+            onChange={this.checkSelectedPositionTab}
+            textColor="inherit"
+            centered={this.isMobile}
+            variant={this.tabVariant}
+            >
+              <Tab label="Position Chart" value="stackedBar" />
+              <Tab label="Price Chart" value="priceBar" />
+         
+            </Tabs>
+          </AppBar>
+         
+          <Collapse in={stackedBar} >
+                            
+          <div className={classes.tab}>
+
+          <Grid item >
+            
+          {this.getComponent(item)}
+          </Grid>
+          </div>
+
+          </Collapse>
+
+          <Collapse in={priceBar} >
+          
+          <div className={classes.tab}>
+
+          <Grid item >
+            
+          {this.getComponent(this.state.positionTabLayout[index+1])}
+          </Grid>
+          </div>
+
+          </Collapse>
+       
+       
+          </Grid>
+            
+          )
+        }
+  
+        else if(index > 1){
+          
+        return( <Grid item sm={6} xs={12} key = {index}>
+          {this.getComponent(item)}
+        </Grid>)
+        }else{
+          return null;
+        }
+ 
+
+
+       }
+
+      })
+
+    const signalLayout = this.state.signalTabLayout.map((item,index)=>{
+ 
+      if(this.state.signalTabLayout.length === index+1 && (index+1) % 2 === 1){
         return( <Grid item xs={12} key ={index}>
          {this.getComponent(item)}
        </Grid>)
@@ -534,11 +641,12 @@ class Dashboard extends Component {
         >
           <Tab label="portfolio" value="portfolioTab" />
           <Tab label="position" value="positionTab" />
+          <Tab label="signal" value="signalTab" />
         </Tabs>
       </AppBar>
       
      
-        {/* First summary tab */}
+        {/* First portfolio tab */}
           <Collapse in={portfolioTab} >
          
                <div className={classes.tab}>
@@ -561,6 +669,16 @@ class Dashboard extends Component {
                 </Grid>
               </div>
               </Collapse>
+          {/* Third signal tab */}
+          <Collapse in={signalTab}>
+           
+           <div className={classes.tab}>
+           <br/>
+             <Grid container spacing={1}>
+             {signalLayout}
+             </Grid>
+           </div>
+           </Collapse>
      
       </div>
     );

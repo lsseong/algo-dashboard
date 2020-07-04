@@ -90,8 +90,9 @@ class App extends Component {
       port: process.env.REACT_APP_URL_PORT,
       disabled: false,
       initData: false,
-      portfolioLayout:[2,4,6,8,9,3,1],
-      positionLayout:[4,5,1,2,7],
+      portfolioLayout:[2,4,1,8],
+      positionLayout:[5,2,4,7,3],
+      signalLayout:[2,8,6,9],
       open:false,
       snackBarOpen:false,
       snackBarStatus:false
@@ -155,10 +156,21 @@ class App extends Component {
   };
 
   getAndSetLayout = ()=>{
-    localStorage.clear();
+    // localStorage.clear();
+    let currentLayoutVersion = JSON.parse(localStorage.getItem('layoutVersion'));
+
+    if(currentLayoutVersion !== process.env.REACT_APP_LAYOUT_VER){
+      console.log('clear cache')
+      localStorage.clear();
+      localStorage.setItem('layoutVersion',JSON.stringify(process.env.REACT_APP_LAYOUT_VER));
+
+    }
+
+  
     let tempPortfolioLayout  = JSON.parse(localStorage.getItem('portfolioLayout'));
     let tempPositionLayout  = JSON.parse(localStorage.getItem('positionLayout'));
-    // console.log( tempPortfolioLayout,  tempPositionLayout)
+    let tempSignalLayout  = JSON.parse(localStorage.getItem('signalLayout'));
+    // console.log( tempPortfolioLayout,  tempPositionLayout,tempSignalLayout)
     
     if (tempPortfolioLayout === null){
       console.log("tempPortfolioLayout does not exist")
@@ -178,6 +190,17 @@ class App extends Component {
     }else{
       this.setState({
         positionLayout:tempPositionLayout
+      })
+    }
+
+    if (tempSignalLayout === null){
+      console.log("tempSignalLayout does not exist")
+     
+      
+      localStorage.setItem('signalLayout',JSON.stringify(this.state.signalLayout));
+    }else{
+      this.setState({
+        signalLayout:tempSignalLayout
       })
     }
 
@@ -266,6 +289,9 @@ class App extends Component {
   }else if (name === "positionLayout"){
     tempArr = this.state.positionLayout
     tempArr[id] = parseInt(event.target.value)
+  }else if (name === "signalLayout"){
+    tempArr = this.state.positionLayout
+    tempArr[id] = parseInt(event.target.value)
   }
 
   if( tempArr.length >0 ){
@@ -291,6 +317,7 @@ class App extends Component {
     const { initData } = this.state;
     const { portfolioLayout } = this.state
     const { positionLayout } = this.state
+    const { signalLayout } = this.state
     const { classes } = this.props;
 
     const allComponent = Object.keys(LAYOUT_MAPPING).map((item,index)=>(
@@ -319,16 +346,44 @@ class App extends Component {
 
 
     const currentPositionLayout = this.state.positionLayout.map((item,index)=>{
-
+      
       if(this.state.positionLayout.length === index+1 && (index+1) % 2 === 1){
+
+  
+        return( <Grid item xs={6} key = {index}>
+          <select id = {index} name='positionLayout'  onChange={this.handleChange}  value ={item}>{allComponent}</select>
+          
+       </Grid>)
+       }else{
+
+        if(index <= 1){
+          
+        return( <Grid item xs={3} key = {index}>
+          <select id = {index} name='positionLayout'  onChange={this.handleChange}  value ={item}>{allComponent}</select>
+          
+        </Grid>)
+        }
+
+        return( <Grid item xs={6} key = {index}>
+          <select id = {index} name='positionLayout'  onChange={this.handleChange}  value ={item}>{allComponent}</select>
+        </Grid>)
+       }
+
+
+      }
+    )
+
+    const currentSignalLayout = this.state.signalLayout.map((item,index)=>{
+
+      if(this.state.signalLayout.length === index+1 && (index+1) % 2 === 1){
    
         return( <Grid item xs={12} key = {index}>
-          <select id = {index} name='positionLayout'  onChange={e=>(this.handleChange(e,'portfolioLayout'))} value ={item}>{allComponent}</select>
+          <select id = {index} name='signalLayout' onChange={this.handleChange}  value ={item}>{allComponent}</select>
           
        </Grid>)
        }else{
         return( <Grid item xs={6} key = {index}>
-          <select id = {index} name='positionLayout'  onChange={e=>(this.handleChange(e,'position'))} value ={item}>{allComponent}</select>
+          <select id = {index} name='signalLayout'  onChange={this.handleChange}  value ={item}>{allComponent}</select>
         </Grid>)
        }
 
@@ -434,7 +489,7 @@ class App extends Component {
                       Change the layout of the dashboard ,empty spaces are collapsed.
                     </DialogContentText>
                     Portfolio
-                    <Grid container spacing={1}>
+                    <Grid container spacing={4}>
                       
                     {
                     currentPortfolioLayout
@@ -443,10 +498,19 @@ class App extends Component {
                     
                     </Grid>
                     Position
-                    <Grid container spacing={1}>
+                    <Grid container spacing={4}>
                       
                     {
                     currentPositionLayout
+                    
+                    }
+                  
+                    </Grid>
+                    Signal
+                    <Grid container spacing={4}>
+                      
+                    {
+                    currentSignalLayout
                     
                     }
                   
@@ -473,7 +537,8 @@ class App extends Component {
                   
                     {initData 
                     ? (
-                      <Dashboard portfolioLayout={portfolioLayout} positionLayout={positionLayout} url={initStrat} host={host} port={port} />
+                      <Dashboard portfolioLayout={portfolioLayout} positionLayout={positionLayout} 
+                      signalLayout={signalLayout}  url={initStrat} host={host} port={port} />
                     ) :null
                     
                     }

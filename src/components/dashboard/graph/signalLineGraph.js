@@ -187,7 +187,7 @@ class SignalLineGraph extends Component {
               this.chart.addData(signal);
             }
         }
-        console.log(this.chart.data[this.chart.data.length-1])
+      
         }
      
     }
