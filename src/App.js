@@ -105,7 +105,7 @@ class App extends Component {
   //when component mount fetch 1st strategy name
   initConnection=(host, port)=>{
     const URL =
-      "http://" + host + ":" + port + "/service/strategy/performances";
+      "http://" + host + ":" + port + "/service/strategy/statuses";
   
       fetch(URL)
       .then(response => response.json())

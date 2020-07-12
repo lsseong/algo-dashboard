@@ -248,7 +248,7 @@ class Dashboard extends Component {
 
   //when component mount initalise
   componentDidMount() {
-    this.fetchPerfURL();
+    // this.fetchPerfURL();
     this.fetchStatusesURL();
     this.allEvent();
     this.detectmob();
@@ -271,7 +271,7 @@ class Dashboard extends Component {
     "http://" + this.props.host + ":" + this.props.port + "/service/strategy/statuses";
   fetch(statsURL)
     .then(response => response.json())
-    .then(statsdata => this.setState({ statsdata },()=>console.log(this.state.statsdata)))
+    .then(statsdata => this.setState({ statsdata }))
     .catch(err=>{
       console.log(err)
     });
@@ -474,7 +474,7 @@ checkSelectedPositionTab =(event,newValue) => {
     const { stackedBar } = this.state;
     const { priceBar } = this.state;
 
-    const dropdown = this.state.perfdata.map((object, i) => (
+    const dropdown = this.state.statsdata.map((object, i) => (
       <option key={i} value={object.id}>
         {object.id}
       </option>
@@ -691,7 +691,7 @@ checkSelectedPositionTab =(event,newValue) => {
           <Collapse in={positionTab}>
            
               <div className={classes.tab}>
-              <br/>
+             
                 <Grid container spacing={1}>
                 {positionLayout}
                 </Grid>
@@ -701,7 +701,7 @@ checkSelectedPositionTab =(event,newValue) => {
           <Collapse in={signalTab}>
            
            <div className={classes.tab}>
-           <br/>
+         
              <Grid container spacing={1}>
              {signalLayout}
              </Grid>
@@ -709,21 +709,22 @@ checkSelectedPositionTab =(event,newValue) => {
            </Collapse>
 
            <Collapse in={configTab}>
-           
+          
            <div className={classes.tab}>
-           <br/>
+         
              <Grid container spacing={1}>
              <Grid item xs={12}>
                <ConfigTable
                 height={this.COMPONENT_HEIGHT} 
                 isMobile={this.isMobile}
                 type={this.state.statsdata} 
-                currentStrat={this.state.currenturl}
+                
                 />
 
               </Grid>
              </Grid>
            </div>
+           
            </Collapse>
      
       </div>

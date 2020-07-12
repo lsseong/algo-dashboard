@@ -109,6 +109,7 @@ class SignalTable extends Component {
     
   }
 
+
   sizeToFit=()=> {
     if(this.props.isMobile){
       this.gridColumnApi.autoSizeColumns();

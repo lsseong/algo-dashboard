@@ -30,14 +30,14 @@ class ConfigTable extends Component {
       columnDefs: [
         { headerName:"CONFIG", 
           children:[
-        {headerName: 'ID', field: 'id',width:300},
-        {headerName: 'Name', field: 'name',width:300},
+        {headerName: 'ID', field: 'id',type:'numericColumn',width:300},
+        {headerName: 'Name', field: 'name',type:'numericColumn',width:300},
         {headerName: 'Time', field: 'time',type:'numericColumn',width:300},
         {headerName: 'Status', field: 'status',type:'numericColumn',cellStyle:this.setStatusColorStyle},
         {headerName: 'Trade Amt', field: 'parameters.tradeAmt',type:'numericColumn',cellStyle:this.setColumnColorStyle},
-        {headerName: 'Long Only', field: 'parameters.longOnly',type:'numericColumn'},
+        {headerName: 'Long Only', field: 'parameters.longOnly',type:'numericColumn',cellStyle:this.setParamsColorStyle},
         {headerName: 'Security', field: 'parameters.security',type:'numericColumn'},
-        {headerName: 'Market Order', field: 'parameters.marketOrderAllowed',type:'numericColumn'},
+        {headerName: 'Market Order', field: 'parameters.marketOrderAllowed',type:'numericColumn',cellStyle:this.setParamsColorStyle},
         {headerName: 'Frequency', field: 'parameters.frequency',type:'numericColumn'},
           ]
         }
@@ -94,16 +94,26 @@ class ConfigTable extends Component {
       }
     }
   }
+  setParamsColorStyle=(params)=>{
+    if(params.value === 'true'){
+      return{
+        color:this.state.positiveColor,
+      }
+    
+    }else{
+      return{
+        color:this.state.negativeColor,
+      }
+    }
+  }
 
 
   //when component 1st mount store the var in the array and set the state of the storesignal
   componentDidUpdate(prevProps){
     if(this.state.gridReady){
-      if(this.props.currentStrat!==prevProps.currentStrat){
-        this.gridApi.setRowData([]);
-      }
+   
       if (this.props.type !== prevProps.type && this.props.type.length!==0) {
-     
+
         this.props.type.forEach((item)=>{
           
         let rowNode = this.gridApi.getRowNode(item.id);
@@ -136,9 +146,7 @@ class ConfigTable extends Component {
     }
     
   }
-  componentDidMount(){
-      console.log(this.props.type)
-  }
+
 
   sizeToFit=()=> {
     if(this.props.isMobile){
