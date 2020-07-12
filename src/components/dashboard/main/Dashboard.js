@@ -9,6 +9,7 @@ import StackedBarGraph from "../graph/stackBarGraph";
 import PnLPanel from "./Panel/PnlPanel";
 import SignalLineGraph from '../graph/signalLineGraph';
 import AnalyticsTable from '../table/analyticsTable';
+import ConfigTable from '../table/configTable';
 // import Draggable from "../main/Draggable/draggable";
 // import Droppable from "../main/Droppable/droppable";
 // import DoubleGraph from '../graph/doubleCharts';
@@ -64,6 +65,7 @@ class Dashboard extends Component {
       analytic: [],
       bar: [],
       perfdata: [],
+      statsdata:[],
       order: [],
       portfolio: {},
       currenturl: this.props.url,
@@ -72,6 +74,7 @@ class Dashboard extends Component {
       portfolioTab:true,
       positionTab:false,
       signalTab:false,
+      configTab:false,
       currentPriceTab:'stackedBar',
       stackedBar:true,
       priceBar:false,
@@ -246,6 +249,7 @@ class Dashboard extends Component {
   //when component mount initalise
   componentDidMount() {
     this.fetchPerfURL();
+    this.fetchStatusesURL();
     this.allEvent();
     this.detectmob();
     this.getComponent();
@@ -262,6 +266,17 @@ class Dashboard extends Component {
       });
   }
 
+  fetchStatusesURL(){
+    const statsURL =
+    "http://" + this.props.host + ":" + this.props.port + "/service/strategy/statuses";
+  fetch(statsURL)
+    .then(response => response.json())
+    .then(statsdata => this.setState({ statsdata },()=>console.log(this.state.statsdata)))
+    .catch(err=>{
+      console.log(err)
+    });
+  }
+
   clearEventListener() {
     this.eventSource.removeEventListener(null, null);
   }
@@ -276,18 +291,29 @@ class Dashboard extends Component {
         portfolioTab:true,
         positionTab:false,
         signalTab:false,
+        configTab:false,
       })
     }else if (newValue === "positionTab"){
       this.setState({
         portfolioTab:false,
         positionTab:true,
         signalTab:false,
+        configTab:false,
       })
     }else if (newValue === "signalTab"){
       this.setState({
         portfolioTab:false,
         positionTab:false,
-        signalTab:true
+        signalTab:true,
+        configTab:false,
+      })
+    }
+    else if (newValue === "configTab"){
+      this.setState({
+        portfolioTab:false,
+        positionTab:false,
+        signalTab:false,
+        configTab:true,
       })
     }
     this.setState({
@@ -444,6 +470,7 @@ checkSelectedPositionTab =(event,newValue) => {
     const { positionTab } = this.state;
     const { portfolioTab } = this.state;
     const { signalTab } = this.state;
+    const { configTab } = this.state;
     const { stackedBar } = this.state;
     const { priceBar } = this.state;
 
@@ -642,6 +669,7 @@ checkSelectedPositionTab =(event,newValue) => {
           <Tab label="portfolio" value="portfolioTab" />
           <Tab label="position" value="positionTab" />
           <Tab label="signal" value="signalTab" />
+          <Tab label="config" value="configTab" />
         </Tabs>
       </AppBar>
       
@@ -676,6 +704,24 @@ checkSelectedPositionTab =(event,newValue) => {
            <br/>
              <Grid container spacing={1}>
              {signalLayout}
+             </Grid>
+           </div>
+           </Collapse>
+
+           <Collapse in={configTab}>
+           
+           <div className={classes.tab}>
+           <br/>
+             <Grid container spacing={1}>
+             <Grid item xs={12}>
+               <ConfigTable
+                height={this.COMPONENT_HEIGHT} 
+                isMobile={this.isMobile}
+                type={this.state.statsdata} 
+                currentStrat={this.state.currenturl}
+                />
+
+              </Grid>
              </Grid>
            </div>
            </Collapse>

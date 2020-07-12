@@ -109,7 +109,7 @@ class App extends Component {
   
       fetch(URL)
       .then(response => response.json())
-      .then(data => this.setState({ initStrat: data[0].id, initData: true }))
+      .then(data => this.setState({ initStrat: data[0].id, initData: true },()=>console.log(this.state.initStrat)))
       .catch(err=>{
         if (!err.response) {
           // network error
