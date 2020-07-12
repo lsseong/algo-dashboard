@@ -30,11 +30,11 @@ class ConfigTable extends Component {
       columnDefs: [
         { headerName:"CONFIG", 
           children:[
-        {headerName: 'ID', field: 'id',type:'numericColumn'},
-        {headerName: 'Name', field: 'name',type:'numericColumn'},
-        // {headerName: 'Time', field: 'time',type:'numericColumn'},
-        {headerName: 'Status', field: 'status',type:'numericColumn'},
-        {headerName: 'Trade Amt', field: 'parameters.tradeAmt',type:'numericColumn'},
+        {headerName: 'ID', field: 'id',width:300},
+        {headerName: 'Name', field: 'name',width:300},
+        {headerName: 'Time', field: 'time',type:'numericColumn',width:300},
+        {headerName: 'Status', field: 'status',type:'numericColumn',cellStyle:this.setStatusColorStyle},
+        {headerName: 'Trade Amt', field: 'parameters.tradeAmt',type:'numericColumn',cellStyle:this.setColumnColorStyle},
         {headerName: 'Long Only', field: 'parameters.longOnly',type:'numericColumn'},
         {headerName: 'Security', field: 'parameters.security',type:'numericColumn'},
         {headerName: 'Market Order', field: 'parameters.marketOrderAllowed',type:'numericColumn'},
@@ -82,6 +82,19 @@ class ConfigTable extends Component {
       }
     }
   }
+  setStatusColorStyle=(params)=>{
+    if(params.value === 'RUNNING'){
+      return{
+        color:this.state.positiveColor,
+      }
+    
+    }else{
+      return{
+        color:this.state.negativeColor,
+      }
+    }
+  }
+
 
   //when component 1st mount store the var in the array and set the state of the storesignal
   componentDidUpdate(prevProps){
@@ -101,6 +114,7 @@ class ConfigTable extends Component {
               var data = rowNode.data;
               data.id = storerowNode[0].id;
               data.name = storerowNode[0].name;
+              data.time = storerowNode[0].time;
               data.status = storerowNode[0].status;
               data.parameters.tradeAmt = storerowNode[0].parameters.tradeAmt;
               data.parameters.longOnly = storerowNode[0].parameters.longOnly;
