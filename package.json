@@ -9,7 +9,7 @@
     "ag-grid-community": "^21.2.2",
     "ag-grid-react": "^21.2.2",
     "d3": "^5.16.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "^3.4.1"
