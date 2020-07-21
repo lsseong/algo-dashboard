@@ -1,12 +1,12 @@
-{   
-    "0": "None",
-	"1": "Comment Table",
-	"2": "CandleStick Graph",
-	"3": "Historial Order Table",
-	"4": "Position Table",
-	"5": "Stack Bar Graph",
-	"6": "Signal Line Graph",
-	"7": "Order Position Table",
-	"8": "Signal Table",
-	"9": "Analytics Table"
+{
+  "0": "None",
+  "1": "Comment Table",
+  "2": "CandleStick Graph",
+  "3": "Historial Order Table",
+  "4": "Position Table",
+  "5": "Stack Bar Graph",
+  "6": "Analytics Line Graph",
+  "7": "Order Position Table",
+  "8": "Signal Table",
+  "9": "Analytics Table"
 }
