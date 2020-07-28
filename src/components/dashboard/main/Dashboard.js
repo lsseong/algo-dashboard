@@ -8,7 +8,7 @@ import OrderPositionTable from "../table/orderPositionTable";
 // import StackedBarGraph from "../graph/stackBarGraph";
 import TradingChart from "../graph/TradingChart";
 import PnLPanel from "./Panel/PnlPanel";
-import SignalLineGraph from "../graph/signalLineGraph";
+// import SignalLineGraph from "../graph/signalLineGraph";
 import AnalyticsLineChart from "../graph/AnalyticsLineGraph";
 import AnalyticsTable from "../table/analyticsTable";
 import ConfigTable from "../table/configTable";
@@ -108,6 +108,7 @@ class Dashboard extends Component {
         "/service/" +
         this.props.url
     );
+    console.log(this.eventSource);
     this.tabVariant = "standard";
     this.isMobile = false;
     this.COMPONENT_HEIGHT = "400px";
@@ -159,7 +160,7 @@ class Dashboard extends Component {
         "/service/" +
         event.target.value
     );
-    console.log(event.target.value);
+
     //set eventlistener to current event
     this.allEvent();
   };
@@ -428,28 +429,13 @@ class Dashboard extends Component {
 
   //when component mount initalise
   componentDidMount() {
-    // this.fetchPerfURL();
     this.fetchStatusesURL();
     this.allEvent();
     this.detectmob();
     this.getComponent();
   }
-  //fetch list of current strategy
-  fetchPerfURL() {
-    const perfURL =
-      "http://" +
-      this.props.host +
-      ":" +
-      this.props.port +
-      "/service/strategy/performances";
-    fetch(perfURL)
-      .then((response) => response.json())
-      .then((perfdata) => this.setState({ perfdata }))
-      .catch((err) => {
-        console.log(err);
-      });
-  }
 
+  //fetch list of current strategy
   fetchStatusesURL() {
     const statsURL =
       "http://" +
@@ -457,9 +443,12 @@ class Dashboard extends Component {
       ":" +
       this.props.port +
       "/service/strategy/statuses";
+
     fetch(statsURL)
       .then((response) => response.json())
-      .then((statsdata) => this.setState({ statsdata }))
+      .then((statsdata) =>
+        this.setState({ statsdata }, () => console.log(this.state.statsdata))
+      )
       .catch((err) => {
         console.log(err);
       });
@@ -684,11 +673,6 @@ class Dashboard extends Component {
     const { stackedBar } = this.state;
     const { priceBar } = this.state;
 
-    const dropdown = this.state.statsdata.map((object, i) => (
-      <option key={i} value={object.id}>
-        {object.id}
-      </option>
-    ));
     const secdropdown = this.state.securityList.map((object, i) => (
       <option key={i} value={object}>
         {object}
@@ -762,7 +746,7 @@ class Dashboard extends Component {
             <Grid container spacing={0} className={classes.text}>
               <Grid item xs={4}>
                 <Typography variant="h6" className={classes.typography}>
-                  List of Strategies
+                  Strategy
                 </Typography>
               </Grid>
               <Grid item xs={4}>
@@ -774,7 +758,12 @@ class Dashboard extends Component {
               <Grid item xs={12}>
                 <Grid container>
                   <Grid item xs={4}>
-                    <select onChange={this.changeStrategy}>{dropdown}</select>
+                    <Typography
+                      variant="subtitle2"
+                      className={classes.typography}
+                    >
+                      {this.props.url}
+                    </Typography>
                   </Grid>
                   <Grid item xs={4}>
                     <select onChange={this.changeSecurity}>

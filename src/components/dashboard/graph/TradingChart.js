@@ -316,7 +316,7 @@ class TradingChart extends Component {
       .scaleBand()
       .domain(d3.range(0, xBuffer))
       .range([0, this.screen_width])
-      .paddingInner(0.5);
+      .paddingInner(0.6);
 
     this.xAxisRange = d3
       .scaleTime()

@@ -29,56 +29,15 @@ class ConfigTable extends Component {
           headerName: "CONFIG",
           children: [
             {
-              headerName: "ID",
-              field: "id",
-              type: "numericColumn",
-              width: 300,
-            },
-            {
               headerName: "Name",
-              field: "name",
-              type: "numericColumn",
-              width: 300,
+              field: "key",
+              width: 10,
             },
             {
-              headerName: "Time",
-              field: "time",
-              type: "numericColumn",
-              width: 300,
-            },
-            {
-              headerName: "Status",
-              field: "status",
-              type: "numericColumn",
-              cellStyle: this.setStatusColorStyle,
-            },
-            {
-              headerName: "Trade Amt",
-              field: "parameters.tradeAmt",
-              type: "numericColumn",
+              headerName: "Value",
+              field: "value",
               cellStyle: this.setColumnColorStyle,
-            },
-            {
-              headerName: "Long Only",
-              field: "parameters.longOnly",
-              type: "numericColumn",
-              cellStyle: this.setParamsColorStyle,
-            },
-            {
-              headerName: "Security",
-              field: "parameters.security",
-              type: "numericColumn",
-            },
-            {
-              headerName: "Market Order",
-              field: "parameters.marketOrderAllowed",
-              type: "numericColumn",
-              cellStyle: this.setParamsColorStyle,
-            },
-            {
-              headerName: "Frequency",
-              field: "parameters.frequency",
-              type: "numericColumn",
+              width: 100,
             },
           ],
         },
@@ -87,7 +46,7 @@ class ConfigTable extends Component {
       gridReady: false,
       defaultColDef: { resizable: true, sortable: true, suppressMovable: true },
       getRowNodeId: function (data) {
-        return data.id;
+        return data.key;
       },
     };
   }
@@ -107,37 +66,19 @@ class ConfigTable extends Component {
   };
 
   setColumnColorStyle = (params) => {
-    if (params.value > 0) {
+    if (
+      params.value > 0 ||
+      params.value === "RUNNING" ||
+      params.value === "true"
+    ) {
       return {
         color: this.state.positiveColor,
       };
-    } else if (params.value === 0) {
-      return {
-        color: "black",
-      };
-    } else {
-      return {
-        color: this.state.negativeColor,
-      };
-    }
-  };
-  setStatusColorStyle = (params) => {
-    if (params.value === "RUNNING") {
-      return {
-        color: this.state.positiveColor,
-      };
-    } else {
-      return {
-        color: this.state.negativeColor,
-      };
-    }
-  };
-  setParamsColorStyle = (params) => {
-    if (params.value === "true") {
-      return {
-        color: this.state.positiveColor,
-      };
-    } else {
+    } else if (
+      params.value < 0 ||
+      params.value === "STOP" ||
+      params.value === "false"
+    ) {
       return {
         color: this.state.negativeColor,
       };
@@ -151,32 +92,51 @@ class ConfigTable extends Component {
         this.gridApi.setRowData([]);
       }
 
-      this.props.type.forEach((item) => {
+      if (this.props.type === prevProps.type) {
+        return;
+      }
+
+      this.props.type.forEach((item, index) => {
+        // console.log(item, index);
+
         if (this.props.currentStrat === item.id) {
-          let rowNode = this.gridApi.getRowNode(item.id);
-          let storerowNode = [];
-          storerowNode.push(item);
+          Object.entries(item).forEach(([key, value]) => {
+            let objKey = key;
+            let objValue = value;
+            let obj = {
+              key,
+              value,
+            };
 
-          if (rowNode !== undefined) {
-            var data = rowNode.data;
-            data.id = storerowNode[0].id;
-            data.name = storerowNode[0].name;
-            data.time = storerowNode[0].time;
-            data.status = storerowNode[0].status;
-            data.parameters.tradeAmt = storerowNode[0].parameters.tradeAmt;
-            data.parameters.longOnly = storerowNode[0].parameters.longOnly;
-            data.parameters.security = storerowNode[0].parameters.security;
-            data.parameters.marketOrderAllowed =
-              storerowNode[0].parameters.marketOrderAllowed;
-            data.parameters.frequency = storerowNode[0].parameters.frequency;
+            if (typeof value === "object") {
+              Object.entries(value).forEach(([paramsKey, paramsvalue]) => {
+                obj = {
+                  key: paramsKey,
+                  value: paramsvalue,
+                };
 
-            this.gridApi.batchUpdateRowData({ update: [data] });
-            this.gridApi.refreshCells();
-          } else {
-            var newdata = storerowNode[0];
+                objKey = paramsKey;
+                objValue = paramsvalue;
+              });
+            }
 
-            this.gridApi.updateRowData({ add: [newdata], addIndex: 0 });
-          }
+            let rowNode = this.gridApi.getRowNode(objKey);
+            let storerowNode = [];
+            storerowNode.push(obj);
+
+            if (rowNode !== undefined) {
+              var data = rowNode.data;
+              data[objKey] = storerowNode[0].objKey;
+              data[objValue] = storerowNode[0].objValue;
+
+              this.gridApi.batchUpdateRowData({ update: [data] });
+              this.gridApi.refreshCells();
+            } else {
+              var newdata = storerowNode[0];
+
+              this.gridApi.updateRowData({ add: [newdata] });
+            }
+          });
         }
       });
     }

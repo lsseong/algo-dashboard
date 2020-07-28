@@ -2,51 +2,24 @@ import React, { Component } from "react";
 import Dashboard from "./components/dashboard/main/Dashboard";
 import {
   withStyles,
-  TextField,
   Grid,
-  Button,
   AppBar,
   Toolbar,
+  Typography,
   IconButton,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogContentText,
-  Snackbar,
 } from "@material-ui/core";
 import PropTypes from "prop-types";
-import SettingsIcon from "@material-ui/icons/Settings";
-import CloseIcon from "@material-ui/icons/Close";
-// import DoubleGraph from '../src/components/dashboard/graph/doubleCharts';
+import SnackBar from "./components/ui-components/snackBar";
+import DialogContainer from "./components/ui-components/dialog";
+import DialogWithActionContainer from "./components/ui-components/dialogWithActions";
+import CustomButton from "./components/ui-components/button";
+import WhiteTextField from "./components/ui-components/textField";
+import MenuIcon from "@material-ui/icons/Menu";
+import NativeDropdown from "./components/ui-components/nativeDropdown";
+
 const LAYOUT_MAPPING = require("../src/components/dashboard/main/layout/layout_map.json");
 
 require("dotenv").config();
-
-const CssTextField = withStyles({
-  root: {
-    "& label.Mui-focused": {
-      color: "white",
-    },
-    "& .MuiInput-underline:after": {
-      borderBottomColor: "white",
-    },
-    "& .MuiOutlinedInput-root": {
-      "& fieldset": {
-        borderColor: "white",
-      },
-
-      "&:hover fieldset": {
-        borderColor: "white",
-      },
-      "&.Mui-focused fieldset": {
-        borderColor: "white",
-      },
-    },
-    "& .MuiOutlinedInput-input": {
-      padding: "10px",
-    },
-  },
-})(TextField);
 
 const styles = (theme) => ({
   formgroup: {
@@ -56,28 +29,15 @@ const styles = (theme) => ({
   appbar: {
     backgroundColor: "#404040",
   },
-
-  textfield: {
-    minWidth: "200px",
+  title: {
+    margin: theme.spacing(1),
+    minWidth: 120,
   },
 
-  button: {
-    fontSize: "15px",
-    minWidth: "150px",
+  menuButton: {
     color: "white",
-    borderColor: "white",
-    fontFamily: "TitilliumWeb_Regular",
-  },
-  settings: {
-    color: "white",
-    borderColor: "white",
-    fontFamily: "TitilliumWeb_Regular",
   },
 
-  labelProps: {
-    color: "white",
-    fontFamily: "TitilliumWeb_Regular",
-  },
   root: {
     overflowX: "hidden",
     overflowY: "hidden",
@@ -88,31 +48,38 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      initStrat: "",
       connectstatus: "Connect",
       host: process.env.REACT_APP_URL_MAIN,
       port: process.env.REACT_APP_URL_PORT,
-      disabled: false,
-      initData: false,
+      txtDisabled: false,
+      buttonDisabled: false,
+      haveData: false,
       portfolioLayout: [2, 4, 1, 8],
       positionLayout: [5, 2, 4, 7, 3],
       signalLayout: [2, 8, 6, 9],
-      open: false,
-      snackBarOpen: false,
-      snackBarStatus: false,
+      snackBarObj: [],
+      settingsOpen: false,
+      stratSettingsOpen: false,
+      allStrategy: [],
+      currentStrategy: "",
     };
-    this.conStatus = false;
   }
 
   //when component mount fetch 1st strategy name
   initConnection = (host, port) => {
     const URL = "http://" + host + ":" + port + "/service/strategy/statuses";
-
+    let results = false;
     fetch(URL)
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("HTTP status" + response.status);
+        }
+        results = response.ok;
+        return response.json();
+      })
       .then((data) =>
-        this.setState({ initStrat: data[0].id, initData: true }, () =>
-          console.log(this.state.initStrat)
+        this.setState({ allStrategy: data, currentStrategy: data[0].id }, () =>
+          this.isConnected()
         )
       )
       .catch((err) => {
@@ -121,38 +88,133 @@ class App extends Component {
           this.errorStatus = "Error: Network Error";
         } else {
           this.errorStatus = err.response.data.message;
+          console.log(this.errorStatus);
         }
+        this.handleSnackBarMessage(false, String(err));
+        this.setState({
+          allStrategy: [],
+          currentStrategy: "",
+          connectstatus: "Connect",
+          txtDisabled: false,
+          buttonDisabled: false,
+        });
       });
+
+    console.log(results);
   };
-  handleClickOpen = () => {
-    //  console.log('open')
+
+  handleClickOpenSettings = () => {
+    let newObj = {
+      key: new Date(),
+      value: true,
+    };
+
     this.setState({
-      open: true,
+      settingsOpen: newObj,
     });
   };
 
-  handleClose = () => {
+  handleCloseSettings = () => {
     // console.log('close')
     this.setState({
-      open: false,
+      settingsOpen: false,
     });
   };
 
-  handleSBOpen = (msgstatus) => {
-    this.setState({
-      snackBarOpen: true,
-      snackBarStatus: msgstatus,
-    });
-  };
+  setConnection = () => {
+    //setstate of button and textbox
 
-  handleSBClose = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
+    if (this.state.currentStrategy.length !== 0) {
+      let stratObj = {
+        key: new Date(),
+        value: false,
+      };
+      this.setState(
+        {
+          haveData: true,
+          stratSettingsOpen: stratObj,
+          connectstatus: "Disconnect",
+          txtDisabled: true,
+          buttonDisabled: false,
+        },
+        () => this.handleSnackBarMessage(true, "Connected Successfully")
+      );
     }
+  };
+
+  handleChangeStrategy = (event) => {
+    let value = event.target.value;
+    this.setState({
+      currentStrategy: value,
+    });
+  };
+
+  handleClickOpenSelectStrategy = () => {
+    //when host and port is not empty
+    if (this.state.host !== "" && this.state.port !== "") {
+      if (this.state.connectstatus === "Connect") {
+        console.log(this.state.host, this.state.port);
+        this.initConnection(this.state.host, this.state.port);
+        this.setState({
+          connectstatus: "Connecting..",
+          txtDisabled: true,
+          buttonDisabled: true,
+        });
+      } else if (this.state.connectstatus === "Disconnect") {
+        //set state
+        this.setState({
+          connectstatus: "Connect",
+          txtDisabled: false,
+          buttonDisabled: false,
+          haveData: false,
+        });
+      }
+    } else {
+      //when fields are empty
+      alert("Please Enter the Host And Port");
+    }
+  };
+
+  isConnected = () => {
+    let newObj = {
+      key: new Date(),
+      value: true,
+    };
 
     this.setState({
-      snackBarOpen: false,
+      stratSettingsOpen: newObj,
     });
+  };
+
+  handleCloseSelectStrategy = () => {
+    // console.log('close')
+
+    let newObj = {
+      key: new Date(),
+      value: false,
+    };
+    this.setState({
+      stratSettingsOpen: newObj,
+      connectstatus: "Connect",
+      txtDisabled: false,
+      buttonDisabled: false,
+      haveData: false,
+    });
+  };
+
+  handleSnackBarMessage = (msgstatus, msg) => {
+    let newSnackBarObj = {
+      key: new Date(),
+      status: msgstatus,
+      msg: msg,
+    };
+
+    this.setState(
+      {
+        snackBarObj: newSnackBarObj,
+      },
+      () => console.log(this.state.snackBarObj)
+    );
   };
 
   getAndSetLayout = () => {
@@ -220,14 +282,12 @@ class App extends Component {
   setLocalStorage = (itemName, data) => {
     localStorage.setItem(itemName, JSON.stringify(data));
     let results = JSON.parse(localStorage.getItem(itemName));
-    console.log(results, data);
-    console.log(String(results) === String(data));
 
     if (String(results) === String(data)) {
       console.log(itemName, "was stored successfully");
-      this.handleSBOpen(true);
+      this.handleSnackBarMessage(true, "Layout changed Successfully");
     } else {
-      this.handleSBOpen(false);
+      this.handleSnackBarMessage(false, "Layout changes failed");
       console.log(itemName, "storage failed");
     }
   };
@@ -237,37 +297,7 @@ class App extends Component {
   }
 
   //when clicked connection
-  handleConnection = () => {
-    //when host and port is not empty
-    if (this.state.host !== "" && this.state.port !== "") {
-      //when the status button is connect
-      if (this.state.connectstatus === "Connect") {
-        //call initial connection
-        this.initConnection(this.state.host, this.state.port);
 
-        //setstate of button and textbox
-        this.setState({
-          connectstatus: "Disconnect",
-          disabled: true,
-        });
-        //set connect status
-        this.conStatus = true;
-        //when the status button is disconnect
-      } else if (this.state.connectstatus === "Disconnect") {
-        //set connection to false
-        this.conStatus = false;
-        //set state
-        this.setState({
-          connectstatus: "Connect",
-          disabled: false,
-          initData: false,
-        });
-      } else {
-        //when fields are empty
-        alert("Please Enter the Host And Port");
-      }
-    }
-  };
   //change the textfields state
   connectionInput = (event) => {
     this.setState({
@@ -278,7 +308,7 @@ class App extends Component {
     if (e.keyCode === 13) {
       //  console.log('value', e.target.value);
       // submit connection
-      this.handleConnection();
+      this.handleClickOpenSelectStrategy();
     }
   };
 
@@ -306,23 +336,24 @@ class App extends Component {
         () => this.setLocalStorage(name, tempArr)
       );
     }
-
-    // this.tempArr[type][id] = parseInt(event.target.value)
-
-    // console.log(this.tempArr)
-    // console.log(this.state.portfolioLayout)
   };
 
   //send first strategy to Strategy list when rendering DOM
   render() {
-    const { initStrat } = this.state;
+    const { currentStrategy } = this.state;
     const { host } = this.state;
     const { port } = this.state;
-    const { initData } = this.state;
+    const { haveData } = this.state;
     const { portfolioLayout } = this.state;
     const { positionLayout } = this.state;
     const { signalLayout } = this.state;
     const { classes } = this.props;
+
+    const dropdown = this.state.allStrategy.map((object, i) => (
+      <option key={i} value={object.id}>
+        {object.id}
+      </option>
+    ));
 
     const allComponent = Object.keys(LAYOUT_MAPPING).map((item, index) => (
       <option key={index} value={item}>
@@ -338,27 +369,25 @@ class App extends Component {
         ) {
           return (
             <Grid item xs={12} key={index}>
-              <select
-                id={index}
+              <NativeDropdown
                 name="portfolioLayout"
-                onChange={this.handleChange}
                 value={item}
+                changeAction={this.handleChange}
               >
                 {allComponent}
-              </select>
+              </NativeDropdown>
             </Grid>
           );
         } else {
           return (
             <Grid item xs={6} key={index}>
-              <select
-                id={index}
+              <NativeDropdown
                 name="portfolioLayout"
-                onChange={this.handleChange}
                 value={item}
+                changeAction={this.handleChange}
               >
                 {allComponent}
-              </select>
+              </NativeDropdown>
             </Grid>
           );
         }
@@ -373,42 +402,39 @@ class App extends Component {
         ) {
           return (
             <Grid item xs={6} key={index}>
-              <select
-                id={index}
+              <NativeDropdown
                 name="positionLayout"
-                onChange={this.handleChange}
                 value={item}
+                changeAction={this.handleChange}
               >
                 {allComponent}
-              </select>
+              </NativeDropdown>
             </Grid>
           );
         } else {
           if (index <= 1) {
             return (
               <Grid item xs={3} key={index}>
-                <select
-                  id={index}
+                <NativeDropdown
                   name="positionLayout"
-                  onChange={this.handleChange}
                   value={item}
+                  changeAction={this.handleChange}
                 >
                   {allComponent}
-                </select>
+                </NativeDropdown>
               </Grid>
             );
           }
 
           return (
             <Grid item xs={6} key={index}>
-              <select
-                id={index}
+              <NativeDropdown
                 name="positionLayout"
-                onChange={this.handleChange}
                 value={item}
+                changeAction={this.handleChange}
               >
                 {allComponent}
-              </select>
+              </NativeDropdown>
             </Grid>
           );
         }
@@ -422,27 +448,25 @@ class App extends Component {
       ) {
         return (
           <Grid item xs={12} key={index}>
-            <select
-              id={index}
+            <NativeDropdown
               name="signalLayout"
-              onChange={this.handleChange}
               value={item}
+              changeAction={this.handleChange}
             >
               {allComponent}
-            </select>
+            </NativeDropdown>
           </Grid>
         );
       } else {
         return (
           <Grid item xs={6} key={index}>
-            <select
-              id={index}
+            <NativeDropdown
               name="signalLayout"
-              onChange={this.handleChange}
               value={item}
+              changeAction={this.handleChange}
             >
               {allComponent}
-            </select>
+            </NativeDropdown>
           </Grid>
         );
       }
@@ -467,75 +491,75 @@ class App extends Component {
                   justify="flex-start"
                   alignItems="center"
                 >
+                  <IconButton
+                    edge="start"
+                    className={classes.menuButton}
+                    color="inherit"
+                    aria-label="menu"
+                  >
+                    <MenuIcon />
+                  </IconButton>
                   {/* The local host text field */}
                   <Grid item>
-                    <CssTextField
-                      required
-                      id="host-required"
+                    <WhiteTextField
+                      required={true}
                       label="Hostname"
                       variant="outlined"
                       name="host"
                       value={this.state.host}
-                      onChange={this.connectionInput}
-                      disabled={this.state.disabled}
-                      InputLabelProps={{
-                        shrink: true,
-                        className: classes.labelProps,
-                      }}
-                      onKeyDown={this.keyPress}
-                      InputProps={{
-                        style: {
-                          fontSize: 18,
-                          color: "white",
-                          padding: "0px",
-                          fontFamily: "TitilliumWeb_Regular",
-                        },
-                      }}
-                    />
+                      changeAction={this.connectionInput}
+                      disabled={this.state.txtDisabled}
+                      keydown={this.keyPress}
+                      fontsize={18}
+                    ></WhiteTextField>
                   </Grid>
 
                   {/* The port text field */}
                   <Grid item>
-                    <CssTextField
-                      required
-                      id="port-required"
+                    <WhiteTextField
+                      required={true}
                       label="Port"
-                      name="port"
                       variant="outlined"
+                      name="port"
                       value={this.state.port}
-                      onChange={this.connectionInput}
-                      disabled={this.state.disabled}
-                      InputLabelProps={{
-                        shrink: true,
-                        className: classes.labelProps,
-                      }}
-                      onKeyDown={this.keyPress}
-                      InputProps={{
-                        style: {
-                          fontSize: 18,
-                          color: "white",
-                          padding: "0px",
-                          fontFamily: "TitilliumWeb_Regular",
-                        },
-                      }}
-                    />
+                      changeAction={this.connectionInput}
+                      disabled={this.state.txtDisabled}
+                      keydown={this.keyPress}
+                      fontsize={18}
+                    ></WhiteTextField>
                   </Grid>
 
                   {/* Connect Button */}
                   <Grid item>
-                    <Button
-                      fullWidth
-                      size="large"
-                      className={classes.button}
-                      variant="outlined"
-                      color="inherit"
-                      onClick={this.handleConnection}
-                    >
-                      {this.state.connectstatus}
-                    </Button>
+                    <CustomButton
+                      id="connect-button"
+                      buttonName={this.state.connectstatus}
+                      clickAction={this.handleClickOpenSelectStrategy}
+                      disabled={this.state.buttonDisabled}
+                    ></CustomButton>
                   </Grid>
                 </Grid>
-
+                {/* start of connect dialog */}
+                <DialogWithActionContainer
+                  dialogContextText="Choose the Strategy to connect to :"
+                  title="Settings"
+                  actionObj={this.state.stratSettingsOpen}
+                  fullWidth={true}
+                  maxWidth="xs"
+                  cancelName="Cancel"
+                  cancelAction={this.handleCloseSelectStrategy}
+                  submitName="Connect"
+                  submitAction={this.setConnection}
+                >
+                  <NativeDropdown
+                    name="strategy"
+                    value={this.state.currentStrategy}
+                    changeAction={this.handleChangeStrategy}
+                  >
+                    {dropdown}
+                  </NativeDropdown>
+                </DialogWithActionContainer>
+                {/* end of connect dialog */}
                 <Grid
                   container
                   spacing={2}
@@ -545,40 +569,51 @@ class App extends Component {
                 >
                   <Grid item>
                     {/* settings buttons */}
-                    <IconButton
-                      className={classes.settings}
-                      aria-label="settings"
-                      component="span"
-                      onClick={this.handleClickOpen}
+
+                    <CustomButton
+                      buttonName="LAYOUT SETTINGS"
+                      id="settings"
+                      clickAction={this.handleClickOpenSettings}
+                    ></CustomButton>
+
+                    <DialogContainer
+                      dialogContextText="Change the layout of the dashboard"
+                      title="Settings"
+                      actionObj={this.state.settingsOpen}
+                      fullWidth={true}
+                      maxWidth="md"
                     >
-                      <SettingsIcon disabled={this.state.disabled} />
-                    </IconButton>
-                    {/* pop up dialog box with the form */}
-                    <Dialog
-                      open={this.state.open}
-                      onClose={this.handleClose}
-                      aria-labelledby="form-dialog-title"
-                    >
-                      <DialogTitle id="form-dialog-title">Settings</DialogTitle>
-                      <DialogContent>
-                        <DialogContentText>
-                          Change the layout of the dashboard ,empty spaces are
-                          collapsed.
-                        </DialogContentText>
+                      <Typography
+                        className={classes.title}
+                        variant="h6"
+                        gutterBottom
+                      >
                         Portfolio
-                        <Grid container spacing={4}>
-                          {currentPortfolioLayout}
-                        </Grid>
+                      </Typography>
+                      <Grid container spacing={4}>
+                        {currentPortfolioLayout}
+                      </Grid>
+                      <Typography
+                        className={classes.title}
+                        variant="h6"
+                        gutterBottom
+                      >
                         Position
-                        <Grid container spacing={4}>
-                          {currentPositionLayout}
-                        </Grid>
+                      </Typography>
+                      <Grid container spacing={4}>
+                        {currentPositionLayout}
+                      </Grid>
+                      <Typography
+                        className={classes.title}
+                        variant="h6"
+                        gutterBottom
+                      >
                         Signal
-                        <Grid container spacing={4}>
-                          {currentSignalLayout}
-                        </Grid>
-                      </DialogContent>
-                    </Dialog>
+                      </Typography>
+                      <Grid container spacing={4}>
+                        {currentSignalLayout}
+                      </Grid>
+                    </DialogContainer>
                   </Grid>
                 </Grid>
               </Toolbar>
@@ -588,12 +623,12 @@ class App extends Component {
           {/* Second Row - Main Body */}
           <Grid item xs={12}>
             <div>
-              {initData ? (
+              {haveData ? (
                 <Dashboard
                   portfolioLayout={portfolioLayout}
                   positionLayout={positionLayout}
                   signalLayout={signalLayout}
-                  url={initStrat}
+                  url={currentStrategy}
                   host={host}
                   port={port}
                 />
@@ -601,32 +636,7 @@ class App extends Component {
             </div>
           </Grid>
         </Grid>
-        <Snackbar
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "left",
-          }}
-          message={
-            this.state.snackBarStatus
-              ? "Sucessfully edited layout"
-              : "Failed to edit layout"
-          }
-          open={this.state.snackBarOpen}
-          autoHideDuration={6000}
-          onClose={this.handleSBClose}
-          action={
-            <React.Fragment>
-              <IconButton
-                size="small"
-                aria-label="close"
-                color="inherit"
-                onClick={this.handleSBClose}
-              >
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            </React.Fragment>
-          }
-        ></Snackbar>
+        <SnackBar snackBarObj={this.state.snackBarObj}></SnackBar>
       </div>
     );
   }
