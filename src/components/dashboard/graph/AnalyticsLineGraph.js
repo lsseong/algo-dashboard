@@ -579,6 +579,12 @@ class AnalyticsChart extends Component {
       return;
     }
 
+    this.maxDate.clear();
+    this.minDate.clear();
+    this.maxY.clear();
+    this.minY.clear();
+    this.maxItem.clear();
+
     const allSignalKeys = [...this.props.analytics.keys()];
 
     allSignalKeys.forEach((key, index) => {

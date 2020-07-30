@@ -53,7 +53,7 @@ class DialogWithActionContainer extends Component {
     return (
       <Dialog
         open={this.state.settingsOpen}
-        onClose={this.handleCloseSettings}
+        onClose={this.props.cancelAction}
         aria-labelledby="form-dialog-title"
         fullWidth={this.props.fullWidth}
         maxWidth={this.props.maxWidth}

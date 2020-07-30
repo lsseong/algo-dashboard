@@ -31,7 +31,7 @@ class ConfigTable extends Component {
             {
               headerName: "Name",
               field: "key",
-              width: 10,
+              width: 20,
             },
             {
               headerName: "Value",
@@ -117,24 +117,41 @@ class ConfigTable extends Component {
 
                 objKey = paramsKey;
                 objValue = paramsvalue;
+
+                let rowNode = this.gridApi.getRowNode(objKey);
+                let storerowNode = [];
+                storerowNode.push(obj);
+
+                if (rowNode !== undefined) {
+                  var data = rowNode.data;
+                  data[objKey] = storerowNode[0].objKey;
+                  data[objValue] = storerowNode[0].objValue;
+
+                  this.gridApi.batchUpdateRowData({ update: [data] });
+                  this.gridApi.refreshCells();
+                } else {
+                  var newdata = storerowNode[0];
+
+                  this.gridApi.updateRowData({ add: [newdata] });
+                }
               });
-            }
-
-            let rowNode = this.gridApi.getRowNode(objKey);
-            let storerowNode = [];
-            storerowNode.push(obj);
-
-            if (rowNode !== undefined) {
-              var data = rowNode.data;
-              data[objKey] = storerowNode[0].objKey;
-              data[objValue] = storerowNode[0].objValue;
-
-              this.gridApi.batchUpdateRowData({ update: [data] });
-              this.gridApi.refreshCells();
             } else {
-              var newdata = storerowNode[0];
+              let rowNode = this.gridApi.getRowNode(objKey);
+              let storerowNode = [];
+              storerowNode.push(obj);
 
-              this.gridApi.updateRowData({ add: [newdata] });
+              if (rowNode !== undefined) {
+                var data = rowNode.data;
+                data[objKey] = storerowNode[0].objKey;
+                data[objValue] = storerowNode[0].objValue;
+
+                this.gridApi.batchUpdateRowData({ update: [data] });
+                this.gridApi.refreshCells();
+              } else {
+                var newdata = storerowNode[0];
+
+                this.gridApi.updateRowData({ add: [newdata] });
+              }
             }
           });
         }

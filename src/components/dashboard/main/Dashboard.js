@@ -12,9 +12,12 @@ import PnLPanel from "./Panel/PnlPanel";
 import AnalyticsLineChart from "../graph/AnalyticsLineGraph";
 import AnalyticsTable from "../table/analyticsTable";
 import ConfigTable from "../table/configTable";
+import DialogContainer from "../../ui-components/dialog";
+import NativeDropdown from "../../ui-components/nativeDropdown";
 // import Draggable from "../main/Draggable/draggable";
 // import Droppable from "../main/Droppable/droppable";
 // import DoubleGraph from '../graph/doubleCharts';
+
 import BarChart from "../graph/BarChart";
 import {
   withStyles,
@@ -24,8 +27,14 @@ import {
   AppBar,
   Typography,
   Collapse,
+  Toolbar,
+  IconButton,
+  FormControlLabel,
+  Checkbox,
 } from "@material-ui/core";
+import ShowChartIcon from "@material-ui/icons/ShowChart";
 import PropTypes from "prop-types";
+
 const LAYOUT_MAPPING = require("../main/layout/layout_map.json");
 
 const styles = (theme) => ({
@@ -48,6 +57,12 @@ const styles = (theme) => ({
   },
   tab: {
     backgroundColor: "#383838",
+  },
+  tabGroup: {
+    flexGrow: 1,
+  },
+  configButton: {
+    maxwidth: "150px",
   },
   typography: {
     fontFamily: "TitilliumWeb_Regular",
@@ -73,7 +88,7 @@ class Dashboard extends Component {
       commentary: [],
       signal: [],
       analytic: [],
-      bar: [],
+
       perfdata: [],
       statsdata: [],
       order: [],
@@ -93,7 +108,9 @@ class Dashboard extends Component {
       currentBar: [],
       currentSignal: [],
       currentAnalytic: [],
-
+      currentAnalyticsView: [],
+      securityAnalyticsConfigSelection: null,
+      analyticsIsOpen: false,
       portfolioTabLayout: this.props.portfolioLayout,
       positionTabLayout: this.props.positionLayout,
       signalTabLayout: this.props.signalLayout,
@@ -108,7 +125,7 @@ class Dashboard extends Component {
         "/service/" +
         this.props.url
     );
-    console.log(this.eventSource);
+
     this.tabVariant = "standard";
     this.isMobile = false;
     this.COMPONENT_HEIGHT = "400px";
@@ -118,6 +135,7 @@ class Dashboard extends Component {
     this.allBars = new Map();
     this.allSignals = new Map();
     this.allAnalytics = new Map();
+    this.analyticsView = new Map();
   }
 
   getOrCreateRef(id, ref = null) {
@@ -137,7 +155,7 @@ class Dashboard extends Component {
       position: [],
       commentary: [],
       signal: [],
-      bar: [],
+
       order: [],
       portfolio: {},
       analytic: [],
@@ -221,11 +239,10 @@ class Dashboard extends Component {
     this.eventSource.addEventListener("order", (order) =>
       this.setState({ order: JSON.parse(order.data) })
     );
-    this.eventSource.addEventListener("bar", (bar) =>
-      this.setState({ bar: JSON.parse(bar.data) }, () =>
-        this.securityBuffer(this.state.bar)
-      )
-    );
+    this.eventSource.addEventListener("bar", (bar) => {
+      let newBar = JSON.parse(bar.data);
+      this.securityBuffer(newBar);
+    });
 
     this.eventSource.addEventListener("signal", (signal) =>
       this.setState({ signal: JSON.parse(signal.data) }, () =>
@@ -283,19 +300,27 @@ class Dashboard extends Component {
       // console.log(data.time)
       if (hasKey === false) {
         let newAnalytic = new Map();
+        let analyticsView = new Map();
+
         newAnalytic.set(data.name, [analytic]);
+        analyticsView.set(data.name, true);
         this.allAnalytics.set(symbol, newAnalytic);
+        //controller to control which analytics to display on the chart
+        this.analyticsView.set(symbol, analyticsView);
 
         if (this.allAnalytics.size === 1) {
           this.setState({
             currentAnalytic: newAnalytic,
+            currentAnalyticsView: analyticsView,
           });
         }
       } else {
         let currentAnalytics = this.allAnalytics.get(symbol);
+        let currentAnalyticsView = this.analyticsView.get(symbol);
         let hasAnalytics = currentAnalytics.has(data.name);
         if (hasAnalytics === false) {
           currentAnalytics.set(data.name, [analytic]);
+          currentAnalyticsView.set(data.name, true);
         } else {
           let singleAnalytics = currentAnalytics.get(data.name);
           let tempAnalytics = [].concat(singleAnalytics);
@@ -313,15 +338,65 @@ class Dashboard extends Component {
 
       if (symbol === this.selectedSecurity) {
         let newobj = this.allAnalytics.get(this.selectedSecurity);
+        let showableAnalytics = this.analyticsView.get(this.selectedSecurity);
+        // console.log(showableAnalytics);
+        let tempArray = [];
+        showableAnalytics.forEach((item, key) => {
+          if (item === true) {
+            tempArray.push(key);
+          }
+        });
+        let finalobj = new Map();
+        tempArray.forEach((analytics) => {
+          let tempObj = newobj.get(analytics);
+
+          finalobj.set(analytics, tempObj);
+        });
+
         this.setState(
           {
-            currentAnalytic: newobj,
-          }
-          // () => console.log(this.state.currentAnalytic)
+            currentAnalytic: finalobj,
+          },
+          () => console.log(this.state.currentAnalytic)
         );
       }
-      // console.log(this.allAnalytics);
+      // console.log(this.state.currentAnalyticsView);
     }
+  };
+  handleCheckBoxChanges = (event) => {
+    let value = event.target.checked;
+    let name = event.target.name;
+    let security = this.state.securityAnalyticsConfigSelection;
+
+    let tempAnalyticsConfig = this.analyticsView.get(security);
+    console.log(value, name, security, tempAnalyticsConfig);
+    tempAnalyticsConfig.set(name, value);
+    this.analyticsView.set(security, tempAnalyticsConfig);
+  };
+  handleOpenAnalyticsSettings = () => {
+    let newObj = {
+      key: new Date(),
+      value: true,
+    };
+    this.setState({
+      analyticsIsOpen: newObj,
+    });
+  };
+
+  handleCloseAnalyticsSettings = () => {
+    let newObj = {
+      key: new Date(),
+      value: false,
+    };
+    this.setState({
+      analyticsIsOpen: newObj,
+    });
+  };
+  handleChangeSecurityAnalyticsConfigSelection = (event) => {
+    let value = event.target.value;
+    this.setState({
+      securityAnalyticsConfigSelection: value,
+    });
   };
 
   signalBuffer = (data) => {
@@ -345,12 +420,9 @@ class Dashboard extends Component {
         this.allSignals.set(symbol, [signal]);
 
         if (this.allSignals.size === 1) {
-          this.setState(
-            {
-              currentSignal: [signal],
-            },
-            () => console.log(this.state.currentSignal)
-          );
+          this.setState({
+            currentSignal: [signal],
+          });
         }
       } else {
         let currentSignals = this.allSignals.get(symbol);
@@ -423,6 +495,9 @@ class Dashboard extends Component {
 
       if (this.state.securityList.length === 1) {
         this.selectedSecurity = this.state.securityList[0];
+        this.setState({
+          securityAnalyticsConfigSelection: this.state.securityList[0],
+        });
       }
     }
   };
@@ -678,6 +753,20 @@ class Dashboard extends Component {
         {object}
       </option>
     ));
+    const analyticsViewKeys = [...this.state.currentAnalyticsView.keys()];
+    const analyticsList = analyticsViewKeys.map((key) => (
+      <FormControlLabel
+        key={key}
+        control={
+          <Checkbox
+            checked={this.state.currentAnalyticsView.get(key)}
+            onChange={this.handleCheckBoxChanges}
+            name={key}
+          />
+        }
+        label={key.toUpperCase()}
+      />
+    ));
 
     const portfolioLayout = this.state.portfolioTabLayout.map((item, index) => {
       return (
@@ -767,7 +856,6 @@ class Dashboard extends Component {
                   </Grid>
                   <Grid item xs={4}>
                     <select onChange={this.changeSecurity}>
-                      {" "}
                       {secdropdown}
                     </select>
                   </Grid>
@@ -807,19 +895,64 @@ class Dashboard extends Component {
         <br />
         {/* Tabs */}
         <AppBar position="static" className={classes.appbar}>
-          <Tabs
-            value={currenttab}
-            onChange={this.checkSelectedTab}
-            textColor="inherit"
-            centered={this.isMobile}
-            variant={this.tabVariant}
-          >
-            <Tab label="portfolio" value="portfolioTab" />
-            <Tab label="position" value="positionTab" />
-            <Tab label="signal" value="signalTab" />
-            <Tab label="config" value="configTab" />
-          </Tabs>
+          <Toolbar variant="dense">
+            <Tabs
+              value={currenttab}
+              onChange={this.checkSelectedTab}
+              textColor="inherit"
+              centered={this.isMobile}
+              variant={this.tabVariant}
+              className={classes.tabGroup}
+            >
+              <Tab label="portfolio" value="portfolioTab" />
+              <Tab label="position" value="positionTab" />
+              <Tab label="signal" value="signalTab" />
+              <Tab label="config" value="configTab" />
+            </Tabs>
+            <Grid item>
+              <IconButton
+                color="inherit"
+                aria-label="analytics config"
+                onClick={this.handleOpenAnalyticsSettings}
+              >
+                <ShowChartIcon />
+              </IconButton>
+            </Grid>
+          </Toolbar>
         </AppBar>
+
+        <DialogContainer
+          dialogContextText="Choose the Analytics to show"
+          title="Analytics Settings"
+          actionObj={this.state.analyticsIsOpen}
+          fullWidth={true}
+          maxWidth="md"
+        >
+          {this.state.securityAnalyticsConfigSelection !== null ? (
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <NativeDropdown
+                  name="Security"
+                  value={this.state.securityAnalyticsConfigSelection}
+                  changeAction={
+                    this.handleChangeSecurityAnalyticsConfigSelection
+                  }
+                >
+                  {secdropdown}
+                </NativeDropdown>
+              </Grid>
+              {this.state.currentAnalyticsView.length !== 0 ? (
+                <Grid item>{analyticsList}</Grid>
+              ) : (
+                <Grid item>
+                  <Typography variant="overline" className={classes.typography}>
+                    No Analytics
+                  </Typography>
+                </Grid>
+              )}
+            </Grid>
+          ) : null}
+        </DialogContainer>
 
         {/* First portfolio tab */}
         <Collapse in={portfolioTab}>

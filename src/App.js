@@ -68,13 +68,13 @@ class App extends Component {
   //when component mount fetch 1st strategy name
   initConnection = (host, port) => {
     const URL = "http://" + host + ":" + port + "/service/strategy/statuses";
-    let results = false;
+
     fetch(URL)
       .then((response) => {
         if (!response.ok) {
           throw new Error("HTTP status" + response.status);
         }
-        results = response.ok;
+
         return response.json();
       })
       .then((data) =>
@@ -99,8 +99,6 @@ class App extends Component {
           buttonDisabled: false,
         });
       });
-
-    console.log(results);
   };
 
   handleClickOpenSettings = () => {
@@ -111,13 +109,6 @@ class App extends Component {
 
     this.setState({
       settingsOpen: newObj,
-    });
-  };
-
-  handleCloseSettings = () => {
-    // console.log('close')
-    this.setState({
-      settingsOpen: false,
     });
   };
 
@@ -153,7 +144,6 @@ class App extends Component {
     //when host and port is not empty
     if (this.state.host !== "" && this.state.port !== "") {
       if (this.state.connectstatus === "Connect") {
-        console.log(this.state.host, this.state.port);
         this.initConnection(this.state.host, this.state.port);
         this.setState({
           connectstatus: "Connecting..",
@@ -541,8 +531,8 @@ class App extends Component {
                 </Grid>
                 {/* start of connect dialog */}
                 <DialogWithActionContainer
-                  dialogContextText="Choose the Strategy to connect to :"
                   title="Settings"
+                  dialogContextText="Choose the Strategy to connect to :"
                   actionObj={this.state.stratSettingsOpen}
                   fullWidth={true}
                   maxWidth="xs"
