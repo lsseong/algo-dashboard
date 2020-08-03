@@ -7,6 +7,13 @@ import {
   Toolbar,
   Typography,
   IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Button,
+  TextField,
 } from "@material-ui/core";
 import PropTypes from "prop-types";
 import SnackBar from "./components/ui-components/snackBar";
@@ -16,7 +23,8 @@ import CustomButton from "./components/ui-components/button";
 import WhiteTextField from "./components/ui-components/textField";
 import MenuIcon from "@material-ui/icons/Menu";
 import NativeDropdown from "./components/ui-components/nativeDropdown";
-
+import PermDataSettingIcon from "@material-ui/icons/PermDataSetting";
+import SchemaTable from "../src/components/dashboard/table/schemaTable";
 const LAYOUT_MAPPING = require("../src/components/dashboard/main/layout/layout_map.json");
 
 require("dotenv").config();
@@ -42,6 +50,12 @@ const styles = (theme) => ({
     overflowX: "hidden",
     overflowY: "hidden",
   },
+  list: {
+    width: 250,
+    maxWidth: 360,
+
+    backgroundColor: theme.palette.background.paper,
+  },
 });
 
 class App extends Component {
@@ -62,6 +76,13 @@ class App extends Component {
       stratSettingsOpen: false,
       allStrategy: [],
       currentStrategy: "",
+      drawerIsOpen: false,
+      schemaDialogOpen: [],
+      schemaHost: process.env.REACT_APP_URL_MAIN,
+      schemaPort: process.env.REACT_APP_URL_PORT,
+      schemaData: [],
+      currentSchema: [],
+      currentSchemaStrategy: "",
     };
   }
 
@@ -78,8 +99,56 @@ class App extends Component {
         return response.json();
       })
       .then((data) =>
-        this.setState({ allStrategy: data, currentStrategy: data[0].id }, () =>
-          this.isConnected()
+        this.setState(
+          {
+            allStrategy: data,
+            currentStrategy: data[0].id,
+          },
+          () => this.isConnected()
+        )
+      )
+      .catch((err) => {
+        if (!err.response) {
+          // network error
+          this.errorStatus = "Error: Network Error";
+        } else {
+          this.errorStatus = err.response.data.message;
+          console.log(this.errorStatus);
+        }
+        this.handleSnackBarMessage(
+          false,
+          host + ":" + port + " " + String(err)
+        );
+        this.setState({
+          allStrategy: [],
+          currentStrategy: "",
+          connectstatus: "Connect",
+          txtDisabled: false,
+          buttonDisabled: false,
+        });
+      });
+  };
+
+  schemaConnection = (host, port) => {
+    const URL = "http://" + host + ":" + port + "/service/strategy/schemas";
+
+    fetch(URL)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("HTTP status" + response.status);
+        }
+
+        return response.json();
+      })
+      .then((data) =>
+        this.setState(
+          {
+            schemaData: data,
+            currentSchemaStrategy: data[0].type,
+            currentSchema: [data[0]],
+          },
+          // () => this.setInitSchema(this.state.schemaData[0])
+          () => console.log(this.state.currentSchema[0].type)
         )
       )
       .catch((err) => {
@@ -91,14 +160,43 @@ class App extends Component {
           console.log(this.errorStatus);
         }
         this.handleSnackBarMessage(false, String(err));
-        this.setState({
-          allStrategy: [],
-          currentStrategy: "",
-          connectstatus: "Connect",
-          txtDisabled: false,
-          buttonDisabled: false,
-        });
       });
+  };
+  handleChangeSchemaType = (event) => {
+    console.log(event.target.value);
+
+    let obj = null;
+    this.state.schemaData.forEach((item) => {
+      if (item.type === event.target.value) {
+        obj = item;
+      }
+    });
+
+    this.setState(
+      {
+        currentSchema: [obj],
+        currentSchemaStrategy: event.target.value,
+      },
+      () => console.log(this.state.currentSchemaStrategy)
+    );
+  };
+
+  setInitSchema = (schema) => {
+    if (schema.length !== 0) {
+      this.handleSnackBarMessage(true, "Schema Retrieved");
+    } else {
+      console.log("schema empty");
+    }
+  };
+
+  handleSubmitSchema = () => {
+    //when host and port is not empty
+    if (this.state.schemaHost !== "" && this.state.schemaPort !== "") {
+      this.schemaConnection(this.state.schemaHost, this.state.schemaPort);
+    } else {
+      //when fields are empty
+      alert("Please Enter the Host And Port");
+    }
   };
 
   handleClickOpenSettings = () => {
@@ -133,13 +231,6 @@ class App extends Component {
     }
   };
 
-  handleChangeStrategy = (event) => {
-    let value = event.target.value;
-    this.setState({
-      currentStrategy: value,
-    });
-  };
-
   handleClickOpenSelectStrategy = () => {
     //when host and port is not empty
     if (this.state.host !== "" && this.state.port !== "") {
@@ -152,12 +243,15 @@ class App extends Component {
         });
       } else if (this.state.connectstatus === "Disconnect") {
         //set state
-        this.setState({
-          connectstatus: "Connect",
-          txtDisabled: false,
-          buttonDisabled: false,
-          haveData: false,
-        });
+        this.setState(
+          {
+            connectstatus: "Connect",
+            txtDisabled: false,
+            buttonDisabled: false,
+            haveData: false,
+          },
+          () => this.handleSnackBarMessage(false, "Disconnected")
+        );
       }
     } else {
       //when fields are empty
@@ -191,6 +285,16 @@ class App extends Component {
       haveData: false,
     });
   };
+  handleCloseLayoutDialog = () => {
+    let newObj = {
+      key: new Date(),
+      value: false,
+    };
+
+    this.setState({
+      settingsOpen: newObj,
+    });
+  };
 
   handleSnackBarMessage = (msgstatus, msg) => {
     let newSnackBarObj = {
@@ -199,11 +303,37 @@ class App extends Component {
       msg: msg,
     };
 
+    this.setState({
+      snackBarObj: newSnackBarObj,
+    });
+  };
+  handleDrawerToggle = (e, open) => {
+    this.setState({
+      drawerIsOpen: open,
+    });
+  };
+  handleOpenSchemaConfig = () => {
+    let newobj = {
+      key: new Date(),
+      value: true,
+    };
+
+    this.setState({
+      schemaDialogOpen: newobj,
+    });
+  };
+
+  handleCloseSchemaConfig = () => {
+    let newobj = {
+      key: new Date(),
+      value: false,
+    };
+
     this.setState(
       {
-        snackBarObj: newSnackBarObj,
+        schemaDialogOpen: newobj,
       },
-      () => console.log(this.state.snackBarObj)
+      () => this.handleResetTextField()
     );
   };
 
@@ -289,9 +419,10 @@ class App extends Component {
   //when clicked connection
 
   //change the textfields state
-  connectionInput = (event) => {
+  handleChangeState = (event) => {
+    console.log(event.target.id);
     this.setState({
-      [event.target.name]: event.target.value,
+      [event.target.id]: event.target.value,
     });
   };
   keyPress = (e) => {
@@ -302,7 +433,17 @@ class App extends Component {
     }
   };
 
-  handleChange = (event) => {
+  handleResetTextField = () => {
+    this.setState({
+      schemaHost: "",
+      schemaPort: "",
+      schemaData: [],
+      currentSchema: [],
+      currentSchemaStrategy: "",
+    });
+  };
+
+  handleChangeTab = (event) => {
     const id = event.target.id;
     const name = event.target.name;
     let tempArr = [];
@@ -351,6 +492,12 @@ class App extends Component {
       </option>
     ));
 
+    const strategySchema = this.state.schemaData.map((object, i) => (
+      <option key={i} value={object.type} id={i}>
+        {object.type}
+      </option>
+    ));
+
     const currentPortfolioLayout = this.state.portfolioLayout.map(
       (item, index) => {
         if (
@@ -362,7 +509,7 @@ class App extends Component {
               <NativeDropdown
                 name="portfolioLayout"
                 value={item}
-                changeAction={this.handleChange}
+                changeAction={this.handleChangeTab}
               >
                 {allComponent}
               </NativeDropdown>
@@ -374,7 +521,7 @@ class App extends Component {
               <NativeDropdown
                 name="portfolioLayout"
                 value={item}
-                changeAction={this.handleChange}
+                changeAction={this.handleChangeTab}
               >
                 {allComponent}
               </NativeDropdown>
@@ -395,7 +542,7 @@ class App extends Component {
               <NativeDropdown
                 name="positionLayout"
                 value={item}
-                changeAction={this.handleChange}
+                changeAction={this.handleChangeTab}
               >
                 {allComponent}
               </NativeDropdown>
@@ -408,7 +555,7 @@ class App extends Component {
                 <NativeDropdown
                   name="positionLayout"
                   value={item}
-                  changeAction={this.handleChange}
+                  changeAction={this.handleChangeTab}
                 >
                   {allComponent}
                 </NativeDropdown>
@@ -421,7 +568,7 @@ class App extends Component {
               <NativeDropdown
                 name="positionLayout"
                 value={item}
-                changeAction={this.handleChange}
+                changeAction={this.handleChangeTab}
               >
                 {allComponent}
               </NativeDropdown>
@@ -441,7 +588,7 @@ class App extends Component {
             <NativeDropdown
               name="signalLayout"
               value={item}
-              changeAction={this.handleChange}
+              changeAction={this.handleChangeTab}
             >
               {allComponent}
             </NativeDropdown>
@@ -453,7 +600,7 @@ class App extends Component {
             <NativeDropdown
               name="signalLayout"
               value={item}
-              changeAction={this.handleChange}
+              changeAction={this.handleChangeTab}
             >
               {allComponent}
             </NativeDropdown>
@@ -486,9 +633,132 @@ class App extends Component {
                     className={classes.menuButton}
                     color="inherit"
                     aria-label="menu"
+                    onClick={(e) => this.handleDrawerToggle(e, true)}
                   >
                     <MenuIcon />
                   </IconButton>
+                  <Drawer
+                    anchor="left"
+                    open={this.state.drawerIsOpen}
+                    onClose={(e) => this.handleDrawerToggle(e, false)}
+                  >
+                    <div className={classes.list}>
+                      <List component="nav" aria-label="Settings">
+                        <ListItem button onClick={this.handleOpenSchemaConfig}>
+                          <ListItemIcon>
+                            <PermDataSettingIcon />
+                          </ListItemIcon>
+                          <ListItemText primary="Start Stop Strategy" />
+                        </ListItem>
+                      </List>
+                    </div>
+                  </Drawer>
+                  <DialogContainer
+                    dialogContextText="Change the parameters of each strategy"
+                    title="Strategy Schema"
+                    actionObj={this.state.schemaDialogOpen}
+                    fullWidth={true}
+                    maxWidth="lg"
+                    cancelAction={this.handleCloseSchemaConfig}
+                  >
+                    <Grid container spacing={2}>
+                      <Grid item>
+                        <TextField
+                          required={true}
+                          label="Hostname"
+                          variant="outlined"
+                          name="schemaHost"
+                          id="schemaHost"
+                          value={this.state.schemaHost}
+                          onChange={this.handleChangeState}
+                          fontSize={18}
+                          size="small"
+                        ></TextField>
+                      </Grid>
+                      <Grid item>
+                        <TextField
+                          required={true}
+                          label="Port"
+                          variant="outlined"
+                          name="schemaPort"
+                          id="schemaPort"
+                          value={this.state.schemaPort}
+                          onChange={this.handleChangeState}
+                          fontSize={18}
+                          size="small"
+                        ></TextField>
+                      </Grid>
+                      <Grid item>
+                        <Button
+                          variant="outlined"
+                          color="primary"
+                          size="large"
+                          onClick={this.handleSubmitSchema}
+                        >
+                          Submit
+                        </Button>
+                      </Grid>
+                      <Grid item>
+                        <Button
+                          variant="outlined"
+                          color="secondary"
+                          size="large"
+                          onClick={this.handleResetTextField}
+                        >
+                          Reset
+                        </Button>
+                      </Grid>
+                      {this.state.currentSchema.length !== 0 ? (
+                        <Grid item xs={12}>
+                          <NativeDropdown
+                            name="Strategy"
+                            id="StrategySchema"
+                            value={this.state.currentSchemaStrategy}
+                            changeAction={this.handleChangeSchemaType}
+                          >
+                            {strategySchema}
+                          </NativeDropdown>
+                        </Grid>
+                      ) : null}
+                      {this.state.currentSchema.length !== 0 ? (
+                        <Grid item xs={12}>
+                          <Typography
+                            className={classes.title}
+                            variant="body1"
+                            display="block"
+                          >
+                            Type : {this.state.currentSchema[0].type}
+                          </Typography>
+
+                          <Typography
+                            className={classes.title}
+                            variant="body1"
+                            display="block"
+                          >
+                            Version: {this.state.currentSchema[0].version}
+                          </Typography>
+                          <Typography
+                            className={classes.title}
+                            variant="body1"
+                            display="block"
+                          >
+                            Description:{" "}
+                            {this.state.currentSchema[0].description}
+                          </Typography>
+                        </Grid>
+                      ) : null}
+
+                      <Grid item xs={12}>
+                        <SchemaTable
+                          currentStrat={this.state.currentSchemaStrategy}
+                          height="300px"
+                          isMobile={false}
+                          type={this.state.currentSchema}
+                        />
+                      </Grid>
+                    </Grid>
+                  </DialogContainer>
+
                   {/* The local host text field */}
                   <Grid item>
                     <WhiteTextField
@@ -496,8 +766,9 @@ class App extends Component {
                       label="Hostname"
                       variant="outlined"
                       name="host"
+                      id="host"
                       value={this.state.host}
-                      changeAction={this.connectionInput}
+                      changeAction={this.handleChangeState}
                       disabled={this.state.txtDisabled}
                       keydown={this.keyPress}
                       fontsize={18}
@@ -511,8 +782,9 @@ class App extends Component {
                       label="Port"
                       variant="outlined"
                       name="port"
+                      id="port"
                       value={this.state.port}
-                      changeAction={this.connectionInput}
+                      changeAction={this.handleChangeState}
                       disabled={this.state.txtDisabled}
                       keydown={this.keyPress}
                       fontsize={18}
@@ -542,9 +814,10 @@ class App extends Component {
                   submitAction={this.setConnection}
                 >
                   <NativeDropdown
-                    name="strategy"
+                    name="Strategy"
+                    id="currentStrategy"
                     value={this.state.currentStrategy}
-                    changeAction={this.handleChangeStrategy}
+                    changeAction={this.handleChangeState}
                   >
                     {dropdown}
                   </NativeDropdown>
@@ -572,6 +845,7 @@ class App extends Component {
                       actionObj={this.state.settingsOpen}
                       fullWidth={true}
                       maxWidth="md"
+                      cancelAction={this.handleCloseLayoutDialog}
                     >
                       <Typography
                         className={classes.title}

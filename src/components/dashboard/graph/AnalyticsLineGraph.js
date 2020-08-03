@@ -568,7 +568,7 @@ class AnalyticsChart extends Component {
     this.initChart(this.graphID, this.props.analytics);
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate() {
     //TODO clear Map when strategy change or security change
 
     if (

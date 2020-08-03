@@ -52,6 +52,7 @@ class CustomTextField extends Component {
         label={this.props.label}
         variant={this.props.variant}
         name={this.props.name}
+        id={this.props.id}
         value={this.props.value}
         onChange={this.props.changeAction}
         disabled={this.props.disabled}

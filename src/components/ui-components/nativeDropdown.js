@@ -26,10 +26,11 @@ class NativeDropdown extends Component {
           native
           value={this.props.value}
           onChange={this.props.changeAction}
+          id={this.props.id}
           required
           inputProps={{
             name: `${this.props.name}`,
-            id: `${this.props.name}-native-simple`,
+            id: `${this.props.id}`,
           }}
         >
           {this.props.children}

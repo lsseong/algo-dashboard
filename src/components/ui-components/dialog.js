@@ -41,7 +41,11 @@ class DialogContainer extends Component {
     }
 
     if (this.props.actionObj.value === true) {
+      console.log(this.props.actionObj);
       this.handleClickOpenSettings();
+    } else if (this.props.actionObj.value === false) {
+      console.log(this.props.actionObj);
+      this.handleCloseSettings();
     }
   }
 
@@ -49,7 +53,7 @@ class DialogContainer extends Component {
     return (
       <Dialog
         open={this.state.settingsOpen}
-        onClose={this.handleCloseSettings}
+        onClose={this.props.cancelAction}
         aria-labelledby="form-dialog-title"
         fullWidth={this.props.fullWidth}
         maxWidth={this.props.maxWidth}
