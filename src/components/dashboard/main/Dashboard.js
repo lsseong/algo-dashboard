@@ -927,6 +927,7 @@ class Dashboard extends Component {
           actionObj={this.state.analyticsIsOpen}
           fullWidth={true}
           maxWidth="md"
+          cancelAction={this.handleCloseAnalyticsSettings}
         >
           {this.state.securityAnalyticsConfigSelection !== null ? (
             <Grid container spacing={2}>
