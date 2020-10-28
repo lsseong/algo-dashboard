@@ -12,19 +12,18 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  Button,
-  TextField,
 } from "@material-ui/core";
 import PropTypes from "prop-types";
-import SnackBar from "./components/ui-components/snackBar";
-import DialogContainer from "./components/ui-components/dialog";
-import DialogWithActionContainer from "./components/ui-components/dialogWithActions";
-import CustomButton from "./components/ui-components/button";
-import WhiteTextField from "./components/ui-components/textField";
+import SnackBar from "./components/ui-components/commons/snackBar";
+import DialogContainer from "./components/ui-components/commons/dialog";
+import DialogWithActionContainer from "./components/ui-components/commons/dialogWithActions";
+import CustomButton from "./components/ui-components/commons/button";
+import WhiteTextField from "./components/ui-components/commons/customTextField";
 import MenuIcon from "@material-ui/icons/Menu";
-import NativeDropdown from "./components/ui-components/nativeDropdown";
+import NativeDropdown from "./components/ui-components/commons/nativeDropdown";
+import CreateStrategyForm from "./components/ui-components/complex/form/createNewStrategyForm";
 import PermDataSettingIcon from "@material-ui/icons/PermDataSetting";
-import SchemaTable from "../src/components/dashboard/table/schemaTable";
+
 const LAYOUT_MAPPING = require("../src/components/dashboard/main/layout/layout_map.json");
 
 require("dotenv").config();
@@ -78,11 +77,6 @@ class App extends Component {
       currentStrategy: "",
       drawerIsOpen: false,
       schemaDialogOpen: [],
-      schemaHost: process.env.REACT_APP_URL_MAIN,
-      schemaPort: process.env.REACT_APP_URL_PORT,
-      schemaData: [],
-      currentSchema: [],
-      currentSchemaStrategy: "",
     };
   }
 
@@ -127,76 +121,6 @@ class App extends Component {
           buttonDisabled: false,
         });
       });
-  };
-
-  schemaConnection = (host, port) => {
-    const URL = "http://" + host + ":" + port + "/service/strategy/schemas";
-
-    fetch(URL)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("HTTP status" + response.status);
-        }
-
-        return response.json();
-      })
-      .then((data) =>
-        this.setState(
-          {
-            schemaData: data,
-            currentSchemaStrategy: data[0].type,
-            currentSchema: [data[0]],
-          },
-          // () => this.setInitSchema(this.state.schemaData[0])
-          () => console.log(this.state.currentSchema[0].type)
-        )
-      )
-      .catch((err) => {
-        if (!err.response) {
-          // network error
-          this.errorStatus = "Error: Network Error";
-        } else {
-          this.errorStatus = err.response.data.message;
-          console.log(this.errorStatus);
-        }
-        this.handleSnackBarMessage(false, String(err));
-      });
-  };
-  handleChangeSchemaType = (event) => {
-    console.log(event.target.value);
-
-    let obj = null;
-    this.state.schemaData.forEach((item) => {
-      if (item.type === event.target.value) {
-        obj = item;
-      }
-    });
-
-    this.setState(
-      {
-        currentSchema: [obj],
-        currentSchemaStrategy: event.target.value,
-      },
-      () => console.log(this.state.currentSchemaStrategy)
-    );
-  };
-
-  setInitSchema = (schema) => {
-    if (schema.length !== 0) {
-      this.handleSnackBarMessage(true, "Schema Retrieved");
-    } else {
-      console.log("schema empty");
-    }
-  };
-
-  handleSubmitSchema = () => {
-    //when host and port is not empty
-    if (this.state.schemaHost !== "" && this.state.schemaPort !== "") {
-      this.schemaConnection(this.state.schemaHost, this.state.schemaPort);
-    } else {
-      //when fields are empty
-      alert("Please Enter the Host And Port");
-    }
   };
 
   handleClickOpenSettings = () => {
@@ -312,6 +236,7 @@ class App extends Component {
       drawerIsOpen: open,
     });
   };
+
   handleOpenSchemaConfig = () => {
     let newobj = {
       key: new Date(),
@@ -321,20 +246,6 @@ class App extends Component {
     this.setState({
       schemaDialogOpen: newobj,
     });
-  };
-
-  handleCloseSchemaConfig = () => {
-    let newobj = {
-      key: new Date(),
-      value: false,
-    };
-
-    this.setState(
-      {
-        schemaDialogOpen: newobj,
-      },
-      () => this.handleResetTextField()
-    );
   };
 
   getAndSetLayout = () => {
@@ -433,16 +344,6 @@ class App extends Component {
     }
   };
 
-  handleResetTextField = () => {
-    this.setState({
-      schemaHost: "",
-      schemaPort: "",
-      schemaData: [],
-      currentSchema: [],
-      currentSchemaStrategy: "",
-    });
-  };
-
   handleChangeTab = (event) => {
     const id = event.target.id;
     const name = event.target.name;
@@ -489,12 +390,6 @@ class App extends Component {
     const allComponent = Object.keys(LAYOUT_MAPPING).map((item, index) => (
       <option key={index} value={item}>
         {LAYOUT_MAPPING[item]}
-      </option>
-    ));
-
-    const strategySchema = this.state.schemaData.map((object, i) => (
-      <option key={i} value={object.type} id={i}>
-        {object.type}
       </option>
     ));
 
@@ -648,116 +543,15 @@ class App extends Component {
                           <ListItemIcon>
                             <PermDataSettingIcon />
                           </ListItemIcon>
-                          <ListItemText primary="Start Stop Strategy" />
+                          <ListItemText primary="Create Strategy" />
                         </ListItem>
                       </List>
                     </div>
                   </Drawer>
-                  <DialogContainer
-                    dialogContextText="Change the parameters of each strategy"
-                    title="Strategy Schema"
-                    actionObj={this.state.schemaDialogOpen}
-                    fullWidth={true}
-                    maxWidth="lg"
-                    cancelAction={this.handleCloseSchemaConfig}
-                  >
-                    <Grid container spacing={2}>
-                      <Grid item>
-                        <TextField
-                          required={true}
-                          label="Hostname"
-                          variant="outlined"
-                          name="schemaHost"
-                          id="schemaHost"
-                          value={this.state.schemaHost}
-                          onChange={this.handleChangeState}
-                          fontSize={18}
-                          size="small"
-                        ></TextField>
-                      </Grid>
-                      <Grid item>
-                        <TextField
-                          required={true}
-                          label="Port"
-                          variant="outlined"
-                          name="schemaPort"
-                          id="schemaPort"
-                          value={this.state.schemaPort}
-                          onChange={this.handleChangeState}
-                          fontSize={18}
-                          size="small"
-                        ></TextField>
-                      </Grid>
-                      <Grid item>
-                        <Button
-                          variant="outlined"
-                          color="primary"
-                          size="large"
-                          onClick={this.handleSubmitSchema}
-                        >
-                          Submit
-                        </Button>
-                      </Grid>
-                      <Grid item>
-                        <Button
-                          variant="outlined"
-                          color="secondary"
-                          size="large"
-                          onClick={this.handleResetTextField}
-                        >
-                          Reset
-                        </Button>
-                      </Grid>
-                      {this.state.currentSchema.length !== 0 ? (
-                        <Grid item xs={12}>
-                          <NativeDropdown
-                            name="Strategy"
-                            id="StrategySchema"
-                            value={this.state.currentSchemaStrategy}
-                            changeAction={this.handleChangeSchemaType}
-                          >
-                            {strategySchema}
-                          </NativeDropdown>
-                        </Grid>
-                      ) : null}
-                      {this.state.currentSchema.length !== 0 ? (
-                        <Grid item xs={12}>
-                          <Typography
-                            className={classes.title}
-                            variant="body1"
-                            display="block"
-                          >
-                            Type : {this.state.currentSchema[0].type}
-                          </Typography>
 
-                          <Typography
-                            className={classes.title}
-                            variant="body1"
-                            display="block"
-                          >
-                            Version: {this.state.currentSchema[0].version}
-                          </Typography>
-                          <Typography
-                            className={classes.title}
-                            variant="body1"
-                            display="block"
-                          >
-                            Description:{" "}
-                            {this.state.currentSchema[0].description}
-                          </Typography>
-                        </Grid>
-                      ) : null}
-
-                      <Grid item xs={12}>
-                        <SchemaTable
-                          currentStrat={this.state.currentSchemaStrategy}
-                          height="300px"
-                          isMobile={false}
-                          type={this.state.currentSchema}
-                        />
-                      </Grid>
-                    </Grid>
-                  </DialogContainer>
+                  <CreateStrategyForm
+                    schemaDialogOpen={this.state.schemaDialogOpen}
+                  ></CreateStrategyForm>
 
                   {/* The local host text field */}
                   <Grid item>

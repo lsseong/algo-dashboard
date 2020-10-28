@@ -6,26 +6,25 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-    background-color: black;
-    overflow-y: scroll;
-    height:100%;
+  background-color: black;
+  overflow-y: scroll;
+  height: 100%;
 }
 input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus, 
-input:-webkit-autofill:active  {
-    -webkit-box-shadow: 0 0 0 30px #484848 inset !important;
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #484848 inset !important;
 }
 input:-webkit-autofill {
-    -webkit-text-fill-color: white !important;
+  -webkit-text-fill-color: white !important;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
-@font-face{
+@font-face {
   font-family: TitilliumWeb_Regular;
-  src:url("../src/components/dashboard/styling/fonts/Titillium_Web/TitilliumWeb-Regular.ttf");
+  src: url("../src/components/dashboard/styling/fonts/Titillium_Web/TitilliumWeb-Regular.ttf");
 }
-

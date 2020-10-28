@@ -9,8 +9,11 @@ import {
 import CloseIcon from "@material-ui/icons/Close";
 
 const styles = (theme) => ({
-  root: {
-    background: "red",
+  multiline: {
+    height: "auto",
+    lineHeight: "28px",
+    padding: 24,
+    whiteSpace: "pre-line",
   },
 });
 class SnackBar extends Component {
@@ -53,6 +56,7 @@ class SnackBar extends Component {
   }
 
   render() {
+    const { classes } = this.props;
     return (
       <div>
         <Snackbar
@@ -64,6 +68,7 @@ class SnackBar extends Component {
           autoHideDuration={6000}
           onClose={this.handleSBClose}
           key={this.props.snackBarObj.key}
+          className={classes.multiline}
         >
           <SnackbarContent
             style={{
