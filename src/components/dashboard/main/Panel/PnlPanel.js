@@ -21,6 +21,7 @@ class PnLPanel extends React.Component {
   render() {
     const {classes} = this.props;
     let totalValue = this.props.data.totalValue;
+    let principal = this.props.data.openCost;
     let unrealizedPnl = this.props.data.unrealizedPnl;
     let realizedPnl = this.props.data.realizedPnl;
 
@@ -28,41 +29,39 @@ class PnLPanel extends React.Component {
       <div className={classes.root}>
       <Grid container spacing={4}>
        
-        <Grid item sm={4} xs={12}>
+        <Grid item sm={3} xs={12}>
           <Typography fontWeight="fontWeightBold" variant="h5"style={this.getNumberStyle(totalValue)} className={classes.typography}>
           {totalValue}
           </Typography>
 
-          <Typography variant="body2">
-            Total
-          </Typography>
+          <Typography variant="body2">Total</Typography>
         </Grid>
 
-        <Grid item sm={4} xs={12}>
+        <Grid item sm={3} xs={12}>
+          <Typography fontWeight="fontWeightBold" variant="h5"style={this.getNumberStyle(principal)} className={classes.typography}>
+          {principal}
+          </Typography>
 
-        <Typography fontWeight="fontWeightBold" variant="h5"style={this.getNumberStyle(realizedPnl)} className={classes.typography}>
+          <Typography variant="body2">Principal</Typography>
+        </Grid>        
+
+        <Grid item sm={3} xs={12}>
+          <Typography fontWeight="fontWeightBold" variant="h5"style={this.getNumberStyle(unrealizedPnl)} className={classes.typography}>
+          {unrealizedPnl}
+          </Typography>
+
+          <Typography variant="body2">Unreal PnL</Typography>
+        </Grid>
+
+        <Grid item sm={3} xs={12}>
+          <Typography fontWeight="fontWeightBold" variant="h5"style={this.getNumberStyle(realizedPnl)} className={classes.typography}>
           {realizedPnl}
           </Typography>
 
-          <Typography variant="body2">
-            Realized PnL
-          </Typography>
-
+          <Typography variant="body2">Realized PnL</Typography>
         </Grid>
 
-        <Grid item sm={4} xs={12}>
-
-        <Typography fontWeight="fontWeightBold" variant="h5"style={this.getNumberStyle(unrealizedPnl)} className={classes.typography}>
-          {unrealizedPnl}
-        </Typography>
-
-        <Typography variant="body2">
-            Unreal PnL
-          </Typography>
-
-        </Grid>
-        </Grid>
-       
+        </Grid>       
       </div>
     );
   }

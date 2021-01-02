@@ -34,6 +34,7 @@ class PositionTable extends Component {
         {headerName: 'Time', field: 'time',type:'numericColumn'},
         {headerName: 'Symbol', field: 'symbol',type:'numericColumn'},
         {headerName: 'Position', field: 'position',type:'numericColumn',cellStyle:this.setColumnColorStyle},
+        {headerName: 'Principal', field: 'principal',type:'numericColumn',cellStyle:this.setColumnColorStyle},
         {headerName: 'Unrealized Pnl', field: 'unrealizedPnl',type:'numericColumn',cellStyle:this.setColumnColorStyle},
         {headerName: 'Realized Pnl', field: 'realizedPnl',type:'numericColumn',cellStyle:this.setColumnColorStyle},
           ]
@@ -65,6 +66,7 @@ class PositionTable extends Component {
               data.time = storerowNode[0].time;
               data.symbol = storerowNode[0].symbol;
               data.position = storerowNode[0].position;
+              data.principal = storerowNode[0].principal;
               data.realizedPnl = storerowNode[0].realizedPnl;
               data.unrealizedPnl = storerowNode[0].unrealizedPnl;
               this.gridApi.batchUpdateRowData({update:[data]});

@@ -25,7 +25,7 @@ class CommentTable extends Component {
       columnDefs: [
         { headerName:"COMMENTS", 
           children:[
-        {headerName: 'Time', field: 'time',width:100},
+        {headerName: 'Time', field: 'time',width:60},
         {headerName: 'Comment', field: 'comment',},
           ]
         }
