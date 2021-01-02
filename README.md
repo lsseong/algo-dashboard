@@ -102,11 +102,11 @@ data: {"time":"19:31:08.536","symbol":"EURUSD","signal":0.0,"commentary":"","ana
 event: order
 data: {"time":"19:31:08.535","uuid":"b8649781-eecb-42be-a01b-50d5ff31bd10","clientOrderId":"sim.1.183","state":"COMPLETE","order":{"symbol":"EURUSD","side":"BUY","qty":100000,"type":"MARKET","limitPrice":0.0,"tif":"DAY"},"totalFill":100000,"avgPrice":1.06088}
 
-event: portfolio
-data: {"id":"AlterBuySell-EURUSD","time":"18-11-19 19:39:52","totalValue":69.0,"cash":76.0,"unrealizedPnl":-7.0,"realizedPnl":76.0}
+event:portfolio
+data:{"id":"AlterBuySell-IBM","time":"02-01-21 14:15:30","totalValue":1508.6,"openCost":1504.7,"unrealizedPnl":0.4,"realizedPnl":3.5}
 
-event: position
-data: {"time":"19:39:52.513","symbol":"EURUSD","position":100000,"unrealizedPnl":-7.0,"realizedPnl":76.0}
+event:position
+data:{"time":"14:15:30.086","symbol":"IBM","position":10,"principal":1504.7,"unrealizedPnl":0.4,"realizedPnl":3.5}
 
 event: analytic
 data:{"time":"18:29:13.303","key":"EURUSD","name":"sma20","value":1.059927}
