@@ -9,6 +9,10 @@ import {
 } from "@material-ui/core";
 import PropTypes from "prop-types";
 import { util } from "../../util";
+import Fab from "@material-ui/core/Fab";
+import AddIcon from "@material-ui/icons/Add";
+import RemoveIcon from "@material-ui/icons/Remove";
+import SecurityField from "../complex/field/securityField";
 
 const styles = (theme) => ({
   title: {
@@ -171,6 +175,18 @@ class ListForm extends Component {
     const { name, value } = e.target;
     let list = util.getDeepCopy(this.state.formData);
     list[index][name] = value;
+
+    this.setState(
+      {
+        formData: list,
+      },
+      () => this.validator(this.state.formData)
+    );
+  };
+
+  securityChange = (name, index, value) => {
+    let list = util.getDeepCopy(this.state.formData);
+    list[index][name] = value;
     this.setState(
       {
         formData: list,
@@ -310,60 +326,106 @@ class ListForm extends Component {
 
         return tempObj.push(
           <Grid item key={objKey} xs={3}>
-            <TextField
-              className={
-                this.state.afterValidation ? null : classes.orangeTextField
-              }
-              required={this.state.mandatory.get(innerkey)}
-              id={objId}
-              name={innerkey}
-              label={`${innerkey} ${index + 1}`}
-              value={innervalue}
-              error={
-                this.props.fieldMandatory
-                  ? !this.checkValue(
+            {innerkey !== "Security" ? (
+              <TextField
+                className={
+                  this.state.afterValidation ? null : classes.orangeTextField
+                }
+                required={this.state.mandatory.get(innerkey)}
+                id={objId}
+                name={innerkey}
+                label={`${innerkey} ${index + 1}`}
+                value={innervalue}
+                error={
+                  this.props.fieldMandatory
+                    ? !this.checkValue(
+                        this.state.min.get(innerkey),
+                        this.state.max.get(innerkey),
+                        innervalue,
+                        this.state.type.get(innerkey)
+                      )
+                    : null
+                }
+                margin={"dense"}
+                onBlur={(e) => this.handleBlur(e, index)}
+                autoComplete={"off"}
+                fullWidth={true}
+                type={this.getInputType(this.state.type.get(innerkey))}
+                variant="outlined"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                InputProps={{
+                  inputProps: {
+                    min: this.state.min.get(innerkey),
+                    max: this.state.max.get(innerkey),
+                  },
+                }}
+                helperText={
+                  <React.Fragment>
+                    <br />
+                    Description:{this.state.description.get(innerkey)}
+                    <br />
+                    Type:{this.state.type.get(innerkey)}
+                    <br />
+                    {this.getMinMaxText(
                       this.state.min.get(innerkey),
-                      this.state.max.get(innerkey),
-                      innervalue,
-                      this.state.type.get(innerkey)
-                    )
-                  : null
-              }
-              onBlur={(e) => this.handleBlur(e, index)}
-              autoComplete={"off"}
-              fullWidth={true}
-              type={this.getInputType(this.state.type.get(innerkey))}
-              variant="outlined"
-              InputLabelProps={{
-                shrink: true,
-              }}
-              InputProps={{
-                inputProps: {
-                  min: this.state.min.get(innerkey),
-                  max: this.state.max.get(innerkey),
-                },
-              }}
-              helperText={
-                <React.Fragment>
-                  <br />
-                  Description:{this.state.description.get(innerkey)}
-                  <br />
-                  Type:{this.state.type.get(innerkey)}
-                  <br />
-                  {this.getMinMaxText(
-                    this.state.min.get(innerkey),
-                    this.state.max.get(innerkey)
-                  )}
-                  <br />
-                  {this.state.decimalPlaces.get(innerkey) !== undefined
-                    ? ` Decimal Places:${this.state.decimalPlaces.get(
-                        innerkey
-                      )}`
-                    : null}
-                </React.Fragment>
-              }
-              onChange={(e) => this.handleChange(e, index)}
-            />
+                      this.state.max.get(innerkey)
+                    )}
+                    <br />
+                    {this.state.decimalPlaces.get(innerkey) !== undefined
+                      ? ` Decimal Places:${this.state.decimalPlaces.get(
+                          innerkey
+                        )}`
+                      : null}
+                  </React.Fragment>
+                }
+                onChange={(e) => this.handleChange(e, index)}
+              />
+            ) : (
+              <SecurityField
+                className={
+                  this.state.afterValidation ? null : classes.orangeTextField
+                }
+                formType={this.props.formType}
+                required={this.state.mandatory.get(innerkey)}
+                id={objId}
+                name={innerkey}
+                label={`${innerkey} ${innerindex + 1}`}
+                type={this.getInputType(this.state.type.get(innerkey))}
+                index={innerindex}
+                error={
+                  this.props.fieldMandatory
+                    ? !this.checkValue(
+                        this.state.min.get(innerkey),
+                        this.state.max.get(innerkey),
+                        innervalue,
+                        this.state.type.get(innerkey)
+                      )
+                    : null
+                }
+                helperText={
+                  <React.Fragment>
+                    <br />
+                    Description:{this.state.description.get(innerkey)}
+                    <br />
+                    Type:{this.state.type.get(innerkey)}
+                    <br />
+                    {this.getMinMaxText(
+                      this.state.min.get(innerkey),
+                      this.state.max.get(innerkey)
+                    )}
+                    <br />
+                    {this.state.decimalPlaces.get(innerkey) !== undefined
+                      ? ` Decimal Places:${this.state.decimalPlaces.get(
+                          innerkey
+                        )}`
+                      : null}
+                  </React.Fragment>
+                }
+                securityChange={this.securityChange}
+              ></SecurityField>
+            )}
           </Grid>
         );
       });
@@ -380,28 +442,26 @@ class ListForm extends Component {
           >
             {this.state.formData.length > 1 ? (
               <Grid item>
-                <Button
-                  variant="outlined"
+                <Fab
                   color="secondary"
-                  size="small"
+                  aria-label="remove"
                   onClick={() => this.handleRemoveClick(index)}
                 >
-                  Remove
-                </Button>
+                  <RemoveIcon />
+                </Fab>
               </Grid>
             ) : null}
 
             {this.state.formData.length - 1 === index &&
             this.state.formData.length < this.props.max ? (
               <Grid item>
-                <Button
-                  size="small"
-                  variant="outlined"
+                <Fab
                   color="primary"
+                  aria-label="add"
                   onClick={() => this.handleAddClick(index)}
                 >
-                  Add
-                </Button>
+                  <AddIcon />
+                </Fab>
               </Grid>
             ) : null}
           </Grid>

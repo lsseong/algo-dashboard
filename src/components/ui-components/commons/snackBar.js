@@ -12,7 +12,6 @@ const styles = (theme) => ({
   multiline: {
     height: "auto",
     lineHeight: "28px",
-    padding: 24,
     whiteSpace: "pre-line",
   },
 });

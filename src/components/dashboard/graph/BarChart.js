@@ -241,7 +241,11 @@ class BarChart extends Component {
       .attr("x", (d, i) =>
         this.get_X_Position(this.scaler(max, d.position), X_UNIT_LENGTH)
       )
-      .attr("y", (d, i) => i * Y_UNIT_LENGTH + Y_UNIT_LENGTH * YBuffer)
+      .attr(
+        "y",
+        (d, i) =>
+          (data.length - i - 1) * Y_UNIT_LENGTH + Y_UNIT_LENGTH * YBuffer
+      )
       .attr("height", Y_UNIT_LENGTH * heightBuffer)
       .attr(
         "width",
@@ -266,7 +270,10 @@ class BarChart extends Component {
           this.get_X_Position(this.scaler(max, d.position), X_UNIT_LENGTH) +
           (Math.abs(this.scaler(max, d.position)) * X_UNIT_LENGTH) / 2
       )
-      .attr("y", (d, i) => i * Y_UNIT_LENGTH + Y_UNIT_LENGTH / 2)
+      .attr(
+        "y",
+        (d, i) => (data.length - i - 1) * Y_UNIT_LENGTH + Y_UNIT_LENGTH / 2
+      )
       .style("text-anchor", "middle") // move x axis anchor point to middle
       .style("dominant-baseline", "middle") // move y axis anchor point to middle
       .style("font-size", FONT_SIZE)

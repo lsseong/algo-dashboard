@@ -3,9 +3,6 @@ import PropTypes from "prop-types";
 import { withStyles, TextField } from "@material-ui/core";
 
 const styles = (theme) => ({
-  textfield: {
-    minWidth: "200px",
-  },
   labelProps: {
     color: "white",
     fontFamily: "TitilliumWeb_Regular",

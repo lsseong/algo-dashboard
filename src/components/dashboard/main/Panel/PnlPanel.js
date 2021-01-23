@@ -1,25 +1,25 @@
 import React from "react";
-import {withStyles,Grid,Typography} from '@material-ui/core';
-import PropTypes from 'prop-types';
+import { withStyles, Grid, Typography } from "@material-ui/core";
+import PropTypes from "prop-types";
 
-const styles = theme => ({
-  root:{
-   textAlign:"center",
-   color:"white",
+const styles = (theme) => ({
+  root: {
+    textAlign: "center",
+    color: "white",
   },
-  typography:{
-    fontFamily:"TitilliumWeb_Regular",
+  typography: {
+    fontFamily: "TitilliumWeb_Regular",
   },
-  paper:{
-    color:"white",
-    backgroundColor:"grey",
-    borderColor:"white",
-  }
- });
+  paper: {
+    color: "white",
+    backgroundColor: "grey",
+    borderColor: "white",
+  },
+});
 
 class PnLPanel extends React.Component {
   render() {
-    const {classes} = this.props;
+    const { classes } = this.props;
     let totalValue = this.props.data.totalValue;
     let principal = this.props.data.openCost;
     let unrealizedPnl = this.props.data.unrealizedPnl;
@@ -27,62 +27,79 @@ class PnLPanel extends React.Component {
 
     return (
       <div className={classes.root}>
-      <Grid container spacing={4}>
-       
-        <Grid item sm={3} xs={12}>
-          <Typography fontWeight="fontWeightBold" variant="h5"style={this.getNumberStyle(totalValue)} className={classes.typography}>
-          {totalValue}
-          </Typography>
+        <Grid container spacing={1}>
+          <Grid item sm={3} xs={12}>
+            <Typography
+              fontWeight="fontWeightBold"
+              variant="h5"
+              style={this.getNumberStyle(totalValue)}
+              className={classes.typography}
+            >
+              {totalValue}
+            </Typography>
 
-          <Typography variant="body2">Total</Typography>
+            <Typography variant="body2">Total</Typography>
+          </Grid>
+
+          <Grid item sm={3} xs={12}>
+            <Typography
+              fontWeight="fontWeightBold"
+              variant="h5"
+              style={this.getNumberStyle(principal)}
+              className={classes.typography}
+            >
+              {principal}
+            </Typography>
+
+            <Typography variant="body2">Principal</Typography>
+          </Grid>
+
+          <Grid item sm={3} xs={12}>
+            <Typography
+              fontWeight="fontWeightBold"
+              variant="h5"
+              style={this.getNumberStyle(unrealizedPnl)}
+              className={classes.typography}
+            >
+              {unrealizedPnl}
+            </Typography>
+
+            <Typography variant="body2">Unreal PnL</Typography>
+          </Grid>
+
+          <Grid item sm={3} xs={12}>
+            <Typography
+              fontWeight="fontWeightBold"
+              variant="h5"
+              style={this.getNumberStyle(realizedPnl)}
+              className={classes.typography}
+            >
+              {realizedPnl}
+            </Typography>
+
+            <Typography variant="body2">Realized PnL</Typography>
+          </Grid>
         </Grid>
-
-        <Grid item sm={3} xs={12}>
-          <Typography fontWeight="fontWeightBold" variant="h5"style={this.getNumberStyle(principal)} className={classes.typography}>
-          {principal}
-          </Typography>
-
-          <Typography variant="body2">Principal</Typography>
-        </Grid>        
-
-        <Grid item sm={3} xs={12}>
-          <Typography fontWeight="fontWeightBold" variant="h5"style={this.getNumberStyle(unrealizedPnl)} className={classes.typography}>
-          {unrealizedPnl}
-          </Typography>
-
-          <Typography variant="body2">Unreal PnL</Typography>
-        </Grid>
-
-        <Grid item sm={3} xs={12}>
-          <Typography fontWeight="fontWeightBold" variant="h5"style={this.getNumberStyle(realizedPnl)} className={classes.typography}>
-          {realizedPnl}
-          </Typography>
-
-          <Typography variant="body2">Realized PnL</Typography>
-        </Grid>
-
-        </Grid>       
       </div>
     );
   }
 
-  getNumberStyle=(number)=>{
+  getNumberStyle = (number) => {
     let num = Number(number);
-    if(num>0){
+    if (num > 0) {
       return {
-        color:"#00FF00"
+        color: "#00FF00",
       };
-    }else if(num===0){
+    } else if (num === 0) {
       return {
-        color:"grey"
+        color: "grey",
       };
-    }else{
+    } else {
       return {
-        color: "#ff0000"
+        color: "#ff0000",
       };
     }
-
-  }
+  };
 }
 
 PnLPanel.propTypes = {
@@ -90,4 +107,3 @@ PnLPanel.propTypes = {
 };
 
 export default withStyles(styles)(PnLPanel);
-

@@ -11,9 +11,11 @@ import PropTypes from "prop-types";
 import ListForm from "../../commons/listForm";
 import { util } from "../../../util";
 import SnackBar from "../../commons/snackBar";
+import SecurityField from "../field/securityField";
+
 const styles = (theme) => ({
   title: {
-    margin: theme.spacing(1),
+    marginBottom: theme.spacing(1),
     minWidth: 120,
   },
   root: {
@@ -125,7 +127,7 @@ class StrategyForm extends Component {
   componentDidUpdate(prevProps) {
     if (this.props.parameters !== prevProps.parameters) {
       console.log(this.props.parameters);
-      console.log(this.props.type);
+      console.log("type", this.props.type);
       this.init();
     }
   }
@@ -171,10 +173,31 @@ class StrategyForm extends Component {
     }
   };
 
+  securityChange = (name, index, value) => {
+    let list = util.getDeepCopy(this.state.formData);
+    let listKeys = Object.keys(list[0]);
+    this.state.name.forEach((objKey, objValue) => {
+      if (listKeys.includes(objKey) === false) {
+        list[0][objKey] = undefined;
+      }
+    });
+
+    list[index][name] = value;
+    let finalObj = this.state.finalObj;
+    finalObj.set(name, value);
+    this.setState(
+      {
+        formData: list,
+        finalObj: finalObj,
+      },
+      () => this.valuesValidator(this.state.formData)
+    );
+  };
+
   handleChange = (e, index) => {
     const { id, value } = e.target;
     // console.log(this.state.formData);
-    console.log([...this.state.name]);
+    // console.log([...this.state.name]);
 
     let list = util.getDeepCopy(this.state.formData);
     let listKeys = Object.keys(list[0]);
@@ -187,6 +210,7 @@ class StrategyForm extends Component {
     list[index][id] = value;
     let finalObj = this.state.finalObj;
     finalObj.set(id, value);
+
     this.setState(
       {
         formData: list,
@@ -348,6 +372,7 @@ class StrategyForm extends Component {
       Object.entries(item).map(([innerkey, innervalue], innerindex) => {
         let objKey = `data-${innerindex}`;
         let listkey = `level1-item-${innerindex}`;
+        // console.log("inner key", innerkey);
         return tempObj.push(
           this.state.type.get(innerkey) !== "list" &&
             this.state.type.get(innerkey) !== "complex" ? (
@@ -363,62 +388,110 @@ class StrategyForm extends Component {
                   {this.state.mandatory.get(innerkey) ? "*" : null}
                 </b>
               </Typography>
-
-              <TextField
-                className={
-                  this.state.validated.get(innerkey)
-                    ? null
-                    : classes.orangeTextField
-                }
-                required={this.state.mandatory.get(innerkey)}
-                id={innerkey}
-                label={`${innerkey} ${index + 1}`}
-                value={innervalue}
-                autoComplete={"off"}
-                fullWidth={true}
-                type={this.getInputType(this.state.type.get(innerkey))}
-                variant="outlined"
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                onBlur={(e) => this.handleBlur(e, index)}
-                error={
-                  this.state.mandatory.get(innerkey)
-                    ? !this.checkValue(
+              {innerkey !== "Security" ? (
+                <TextField
+                  className={
+                    this.state.validated.get(innerkey)
+                      ? null
+                      : classes.orangeTextField
+                  }
+                  required={this.state.mandatory.get(innerkey)}
+                  id={innerkey}
+                  name={innerkey}
+                  label={`${innerkey} ${index + 1}`}
+                  value={innervalue}
+                  autoComplete={"off"}
+                  fullWidth={true}
+                  type={this.getInputType(this.state.type.get(innerkey))}
+                  variant="outlined"
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  margin={"dense"}
+                  onBlur={(e) => this.handleBlur(e, index)}
+                  error={
+                    this.state.mandatory.get(innerkey)
+                      ? !this.checkValue(
+                          this.state.min.get(innerkey),
+                          this.state.max.get(innerkey),
+                          innervalue,
+                          this.state.type.get(innerkey)
+                        )
+                      : null
+                  }
+                  InputProps={{
+                    inputProps: {
+                      min: this.state.min.get(innerkey),
+                      max: this.state.max.get(innerkey),
+                    },
+                  }}
+                  helperText={
+                    <React.Fragment>
+                      <br />
+                      Description:{this.state.description.get(innerkey)}
+                      <br />
+                      Type:{this.state.type.get(innerkey)}
+                      <br />
+                      {this.getMinMaxText(
                         this.state.min.get(innerkey),
-                        this.state.max.get(innerkey),
-                        innervalue,
-                        this.state.type.get(innerkey)
-                      )
-                    : null
-                }
-                InputProps={{
-                  inputProps: {
-                    min: this.state.min.get(innerkey),
-                    max: this.state.max.get(innerkey),
-                  },
-                }}
-                helperText={
-                  <React.Fragment>
-                    <br />
-                    Description:{this.state.description.get(innerkey)}
-                    <br />
-                    Type:{this.state.type.get(innerkey)}
-                    <br />
-                    {this.getMinMaxText(
-                      this.state.min.get(innerkey),
-                      this.state.max.get(innerkey)
-                    )}
-                    <br />
-                    {this.state.decimalPlaces.get(innerkey) !== undefined
-                      ? ` Decimal Places:${this.state.decimalPlaces.get(
-                          innerkey
-                        )}`
-                      : null}
-                  </React.Fragment>
-                }
-                onChange={(e) => this.handleChange(e, index)}
-              />
+                        this.state.max.get(innerkey)
+                      )}
+                      <br />
+                      {this.state.decimalPlaces.get(innerkey) !== undefined
+                        ? ` Decimal Places:${this.state.decimalPlaces.get(
+                            innerkey
+                          )}`
+                        : null}
+                    </React.Fragment>
+                  }
+                  onChange={(e) => this.handleChange(e, index)}
+                />
+              ) : (
+                <SecurityField
+                  className={
+                    this.state.validated.get(innerkey)
+                      ? null
+                      : classes.orangeTextField
+                  }
+                  formType={this.props.type}
+                  required={this.state.mandatory.get(innerkey)}
+                  id={innerkey}
+                  name={innerkey}
+                  label={`${innerkey} ${index + 1}`}
+                  type={this.getInputType(this.state.type.get(innerkey))}
+                  index={index}
+                  error={
+                    this.state.mandatory.get(innerkey)
+                      ? !this.checkValue(
+                          this.state.min.get(innerkey),
+                          this.state.max.get(innerkey),
+                          innervalue,
+                          this.state.type.get(innerkey)
+                        )
+                      : null
+                  }
+                  helperText={
+                    <React.Fragment>
+                      <br />
+                      Description:{this.state.description.get(innerkey)}
+                      <br />
+                      Type:{this.state.type.get(innerkey)}
+                      <br />
+                      {this.getMinMaxText(
+                        this.state.min.get(innerkey),
+                        this.state.max.get(innerkey)
+                      )}
+                      <br />
+                      {this.state.decimalPlaces.get(innerkey) !== undefined
+                        ? ` Decimal Places:${this.state.decimalPlaces.get(
+                            innerkey
+                          )}`
+                        : null}
+                    </React.Fragment>
+                  }
+                  securityChange={this.securityChange}
+                ></SecurityField>
+              )}
             </Grid>
           ) : this.state.type.get(innerkey) === "complex" ? (
             <React.Fragment key={objKey}>

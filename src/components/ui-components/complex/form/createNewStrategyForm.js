@@ -8,7 +8,8 @@ import {
 } from "@material-ui/core";
 import NativeDropdown from "../../commons/nativeDropdown";
 import DialogContainer from "../../commons/dialog";
-import SchemaTable from "../../../dashboard/table/schemaTable";
+// import SchemaTable from "../../../dashboard/table/schemaTable";
+
 import StrategyForm from "./StrategyForm";
 
 import SnackBar from "../../commons/snackBar";
