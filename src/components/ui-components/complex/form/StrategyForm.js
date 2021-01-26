@@ -51,6 +51,7 @@ class StrategyForm extends Component {
       validated: new Map(),
       isBlank: new Map(),
       finalObj: new Map(),
+      strategyName: "",
     };
   }
   componentDidMount() {
@@ -58,8 +59,7 @@ class StrategyForm extends Component {
   }
 
   init = () => {
-    console.log(this.props.parameters);
-    console.log(this.props.type);
+    console.log(this.props.type, this.props.parameters);
 
     let minMap = new Map();
     let maxMap = new Map();
@@ -95,7 +95,7 @@ class StrategyForm extends Component {
         decimalPlacesMap.set(item.name, item.decimalPlaces);
       }
     });
-    console.log(obj);
+    console.log("Default Value", obj);
     template.push(obj);
 
     this.setState(
@@ -128,6 +128,9 @@ class StrategyForm extends Component {
     if (this.props.parameters !== prevProps.parameters) {
       console.log(this.props.parameters);
       console.log("type", this.props.type);
+      this.setState({
+        strategyName: "",
+      });
       this.init();
     }
   }
@@ -153,7 +156,7 @@ class StrategyForm extends Component {
       let value = parseFloat(min).toFixed(decimalPlaces);
       return value;
     } else if (type === "complex") {
-      console.log(min, type, decimalPlaces);
+      // console.log(min, type, decimalPlaces);
     }
     return undefined;
   };
@@ -194,7 +197,7 @@ class StrategyForm extends Component {
     );
   };
 
-  handleChange = (e, index) => {
+  handleParamsChange = (e, index) => {
     const { id, value } = e.target;
     // console.log(this.state.formData);
     // console.log([...this.state.name]);
@@ -220,7 +223,15 @@ class StrategyForm extends Component {
     );
   };
 
-  handleBlur = (e, index) => {
+  handleChange = (e) => {
+    const { id, value } = e.target;
+
+    this.setState({
+      [id]: value,
+    });
+  };
+
+  handleParamsBlur = (e, index) => {
     const { id, value } = e.target;
     let decimalPlaces = this.state.decimalPlaces.get(id);
     if (decimalPlaces === undefined || value === "") {
@@ -246,13 +257,8 @@ class StrategyForm extends Component {
     );
   };
 
-  checkValue = (min, max, value, type, mandatory) => {
+  checkValue = (min, max, value, type) => {
     let valid = false;
-
-    if (mandatory === false && value === "") {
-      valid = true;
-    }
-
     if (type === "security") {
       if (value.length >= min) {
         valid = true;
@@ -262,6 +268,7 @@ class StrategyForm extends Component {
         valid = true;
       }
     }
+    console.log(type, valid);
     return valid;
   };
 
@@ -334,18 +341,43 @@ class StrategyForm extends Component {
         validated: tempValidated,
         finalObj: tempFinal,
         isBlank: tempBlank,
-      },
-      () => console.log(this.state)
+      }
+      // () => console.log(this.state.finalObj, this.state.validated)
     );
+  };
+
+  removeEmptyIfNotMandatory = (values) => {
+    let tempValues = values;
+    values.forEach((value, key) => {
+      if (this.state.mandatory.get(key) === false && value === "") {
+        tempValues.delete(key);
+      }
+    });
+    return tempValues;
   };
 
   handleSubmit = (e) => {
     e.preventDefault();
-    let finalObj = Object.fromEntries(this.state.finalObj);
+    const finalValues = this.removeEmptyIfNotMandatory(this.state.finalObj);
+    let paramsFinalObject = Object.fromEntries(finalValues);
+
+    const finalObj = {
+      type: this.props.type,
+      version: this.props.version,
+      name: this.state.strategyName.trim(),
+      parameters: paramsFinalObject,
+    };
+    console.log(finalObj);
     let invalidObj = [];
     let allValues = [];
+    let nameIsInvalid = true;
+    if (this.state.strategyName.trim() === "") {
+      invalidObj.push("Strategy Name");
+    } else {
+      nameIsInvalid = false;
+    }
+    console.log("validity", this.state.validated);
     this.state.validated.forEach((value, key) => {
-      console.log(key, value);
       if (value === false) {
         invalidObj.push(key);
       }
@@ -353,11 +385,10 @@ class StrategyForm extends Component {
     });
     let message = "Invalid Field(s): " + invalidObj.toString();
     let isInvalid = allValues.some((item) => item === false);
-    if (isInvalid) {
+    if (isInvalid || nameIsInvalid) {
       console.log(message);
       this.props.handleSnackBarMessage(false, message);
     } else {
-      console.log(finalObj);
       this.props.handleSnackBarMessage(
         true,
         "Success \n" + JSON.stringify(finalObj)
@@ -408,7 +439,7 @@ class StrategyForm extends Component {
                     shrink: true,
                   }}
                   margin={"dense"}
-                  onBlur={(e) => this.handleBlur(e, index)}
+                  onBlur={(e) => this.handleParamsBlur(e, index)}
                   error={
                     this.state.mandatory.get(innerkey)
                       ? !this.checkValue(
@@ -444,7 +475,7 @@ class StrategyForm extends Component {
                         : null}
                     </React.Fragment>
                   }
-                  onChange={(e) => this.handleChange(e, index)}
+                  onChange={(e) => this.handleParamsChange(e, index)}
                 />
               ) : (
                 <SecurityField
@@ -582,33 +613,63 @@ class StrategyForm extends Component {
     });
 
     return (
-      <Grid container spacing={2} className={classes.root}>
-        <Grid item xs={12}>
-          <Typography
-            className={classes.title}
-            variant="subtitle1"
-            display="block"
-          >
-            Parameters
-          </Typography>
-        </Grid>
-        {parameters}
-        <br />
-        <Grid item xs={12}>
-          <Grid container spacing={2} justify="flex-end">
-            <Grid item>
-              <Button
-                size="large"
-                variant="contained"
-                color="primary"
-                onClick={this.handleSubmit}
+      <React.Fragment>
+        {parameters ? (
+          <Grid container spacing={2} className={classes.root}>
+            <Grid item xs={12}>
+              <Typography
+                className={classes.title}
+                variant="subtitle1"
+                display="block"
               >
-                Submit
-              </Button>
+                Parameters
+              </Typography>
+            </Grid>
+
+            <Grid item xs={12}>
+              <Typography
+                className={classes.title}
+                variant="subtitle1"
+                display="block"
+              >
+                Strategy Name
+                <b className={classes.mandatory}>*</b>
+              </Typography>
+              <TextField
+                id="strategyName"
+                label="Strategy Name"
+                type="text"
+                required
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                onChange={this.handleChange}
+                value={this.state.strategyName}
+                margin={"dense"}
+                variant="outlined"
+                error={this.state.strategyName.trim() === ""}
+              />
+            </Grid>
+
+            {parameters}
+            <br />
+            <Grid item xs={12}>
+              <Grid container spacing={2} justify="flex-end">
+                <Grid item>
+                  <Button
+                    size="large"
+                    variant="contained"
+                    color="primary"
+                    onClick={this.handleSubmit}
+                  >
+                    Submit
+                  </Button>
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
-        </Grid>
-      </Grid>
+        ) : null}
+      </React.Fragment>
     );
   }
 }

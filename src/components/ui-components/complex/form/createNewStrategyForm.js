@@ -130,7 +130,7 @@ class CreateNewStrategyForm extends Component {
   };
 
   setInitSchema = (schema) => {
-    console.log(schema);
+    // console.log(schema);
     if (schema.length !== 0) {
       this.handleSnackBarMessage(true, "Schema Retrieved");
     } else {
@@ -280,6 +280,7 @@ class CreateNewStrategyForm extends Component {
                   <StrategyForm
                     parameters={this.state.currentSchema[0].parameters}
                     type={this.state.currentSchema[0].type}
+                    version={this.state.currentSchema[0].version}
                     handleSnackBarMessage={this.handleSnackBarMessage}
                   ></StrategyForm>
                 </Grid>

@@ -50,7 +50,7 @@ class ListForm extends Component {
     };
   }
   componentDidMount() {
-    console.log(this.props.data);
+    // console.log(this.props.data);
     console.log(this.props.headerName, this.props.fieldMandatory);
     this.init();
   }
@@ -146,28 +146,43 @@ class ListForm extends Component {
   };
 
   countDecimals = (value) => {
-    if (Math.floor(value) !== value)
+    if (Math.round(value) !== value)
       return value.toString().split(".")[1].length || 0;
     return 0;
   };
 
   //check value
   checkValue = (min, max, value, type, mandatory) => {
-    let valid = false;
-
-    if (mandatory === false && value === "") {
-      valid = true;
+    // console.log(min, max, value, type, mandatory);
+    //check if value is empty
+    if (value === "") {
+      if (mandatory) {
+        return false;
+      }
+      return true;
     }
-
+    // if value is not empty do the proper checks
+    let valid = false;
     if (type === "security") {
-      if (value.length >= min) {
+      let spiltValue = value.split("|")[0];
+      let noLimit = false;
+      if (min === 1 && max === 1) {
+        noLimit = true;
+      }
+
+      if (noLimit) {
         valid = true;
+      } else {
+        if (spiltValue.length >= min && spiltValue.length <= max) {
+          valid = true;
+        }
       }
     } else if (type === "integer" || type === "decimal") {
       if (value <= max && value >= min) {
         valid = true;
       }
     }
+    // console.log(type, "isValid", valid);
     return valid;
   };
 
@@ -196,24 +211,29 @@ class ListForm extends Component {
   };
 
   validator = (values) => {
+    console.log(this.props.headerName, "values", values);
     let tempArray = [];
     let tempBlank = [];
     values.forEach((item, index) => {
       let tempObj = {};
+      let tempBlankObj = {};
       Object.entries(item).forEach(([key, value], index) => {
         let checked = this.checkValue(
           this.state.min.get(key),
           this.state.max.get(key),
           value,
-          this.state.type.get(key)
+          this.state.type.get(key),
+          this.state.mandatory.get(key)
         );
         tempObj[key] = checked;
+
         if (value === "") {
-          tempBlank.push(true);
+          tempBlankObj[key] = true;
         } else {
-          tempBlank.push(false);
+          tempBlankObj[key] = false;
         }
       });
+      tempBlank.push(tempBlankObj);
       tempArray.push(tempObj);
     });
     this.setState(
@@ -226,15 +246,26 @@ class ListForm extends Component {
   };
 
   validateAll = (validated, blanks) => {
-    let tempMandatory = [];
-
+    // console.log(this.props.headerName, "blanks", blanks);
+    // console.log(this.props.headerName, "validated", validated);
+    let tempValidated = [];
+    let tempBlanks = [];
     validated.forEach((item) => {
       Object.entries(item).forEach(([key, value], index) => {
-        tempMandatory.push(value);
+        tempValidated.push(value);
       });
     });
-    let isAllTrue = tempMandatory.every((e) => e === true);
-    let isAllBlank = blanks.every((e) => e === true);
+
+    blanks.forEach((item) => {
+      Object.entries(item).forEach(([key, value], index) => {
+        tempBlanks.push(value);
+      });
+    });
+
+    // console.log(this.props.headerName, "tempBlanks", tempBlanks);
+    // console.log(this.props.headerName, "tempValidated", tempValidated);
+    let isAllTrue = tempValidated.every((e) => e === true);
+    let isAllBlank = tempBlanks.every((e) => e === true);
     let allValid = false;
     if (this.props.fieldMandatory === true) {
       if (isAllTrue === true) {
@@ -246,6 +277,13 @@ class ListForm extends Component {
       }
     }
 
+    //set values as empty if all are empty
+    let finalData = this.state.formData;
+
+    if (isAllBlank) {
+      finalData = "";
+    }
+
     this.setState(
       {
         afterValidation: allValid,
@@ -253,7 +291,7 @@ class ListForm extends Component {
       () =>
         this.props.valuesValidator(
           this.props.headerName,
-          this.state.formData,
+          finalData,
           this.state.afterValidation
         )
     );
@@ -266,7 +304,9 @@ class ListForm extends Component {
       return;
     }
     let list = util.getDeepCopy(this.state.formData);
+    console.log(value);
     let newValue = parseFloat(value).toFixed(decimalPlaces);
+
     list[index][name] = newValue;
     this.setState(
       {
@@ -342,7 +382,8 @@ class ListForm extends Component {
                         this.state.min.get(innerkey),
                         this.state.max.get(innerkey),
                         innervalue,
-                        this.state.type.get(innerkey)
+                        this.state.type.get(innerkey),
+                        this.state.mandatory.get(innerkey)
                       )
                     : null
                 }
@@ -393,14 +434,15 @@ class ListForm extends Component {
                 name={innerkey}
                 label={`${innerkey} ${innerindex + 1}`}
                 type={this.getInputType(this.state.type.get(innerkey))}
-                index={innerindex}
+                index={index}
                 error={
                   this.props.fieldMandatory
                     ? !this.checkValue(
                         this.state.min.get(innerkey),
                         this.state.max.get(innerkey),
                         innervalue,
-                        this.state.type.get(innerkey)
+                        this.state.type.get(innerkey),
+                        this.state.mandatory.get(innerkey)
                       )
                     : null
                 }

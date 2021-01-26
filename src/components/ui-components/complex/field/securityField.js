@@ -59,7 +59,7 @@ class SecurityField extends Component {
     }
   };
   handleSecurityChange = (e) => {
-    const value = e.target.value.toUpperCase();
+    const value = e.target.value.toUpperCase().trim();
     // const patt = /[A-Za-z0-9]/gi;
     this.setState({ security: value }, () => this.valueformatter());
   };
