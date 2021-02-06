@@ -23,7 +23,7 @@ class OrderTable extends Component {
     super(props);
     this.state = {
       columnDefs: [
-        { headerName:"HISTORICAL ORDERS", marryChildren:true,
+        { headerName:"ALL ORDERS", marryChildren:true,
           children:[
         {headerName: 'Time', field: 'time',width:120},
         {headerName: 'Order ID', field: 'clientOrderId',width:100,},
@@ -83,29 +83,29 @@ class OrderTable extends Component {
         let storerowNode = [];
         storerowNode.push(this.props.type);
      
-            if(rowNode!==undefined){
-              var data = rowNode.data;
-              data.time = storerowNode[0].time;
-              data.clientOrderId = storerowNode[0].clientOrderId;
-              data.state = storerowNode[0].state;
-              data.order.symbol = storerowNode[0].order.symbol;
-              data.order.side = storerowNode[0].order.side;
-              data.order.qty = storerowNode[0].order.qty;
-              data.order.limitPrice = storerowNode[0].order.limitPrice;
-              data.avgPrice = storerowNode[0].avgPrice;
+        if(rowNode!==undefined){
+          var data = rowNode.data;
+          data.time = storerowNode[0].time;
+          data.clientOrderId = storerowNode[0].clientOrderId;
+          data.state = storerowNode[0].state;
+          data.order.symbol = storerowNode[0].order.symbol;
+          data.order.side = storerowNode[0].order.side;
+          data.order.qty = storerowNode[0].order.qty;
+          data.order.limitPrice = storerowNode[0].order.limitPrice;
+          data.avgPrice = storerowNode[0].avgPrice;
   
-              this.gridApi.batchUpdateRowData({update:[data]});
-              this.gridApi.refreshCells();
-            }else{
-              var newdata = storerowNode[0];
-              this.gridApi.updateRowData({ add: [newdata],addIndex: 0 });
-              if(this.gridApi.getDisplayedRowCount()>this.MAX_ORDER_COUNT){
-                this.gridApi.updateRowData({remove :[this.gridApi.getDisplayedRowAtIndex(this.gridApi.getDisplayedRowCount()-1).data]});
-              }
-            }
+          this.gridApi.batchUpdateRowData({update:[data]});
+          this.gridApi.refreshCells();
+        }
+        else{
+          var newdata = storerowNode[0];
+          this.gridApi.updateRowData({ add: [newdata],addIndex: 0 });
+          if(this.gridApi.getDisplayedRowCount()>this.MAX_ORDER_COUNT){
+            this.gridApi.updateRowData({remove :[this.gridApi.getDisplayedRowAtIndex(this.gridApi.getDisplayedRowCount()-1).data]});
+          }
+        }
       }
-    }
-    
+    }    
   }
 
   render() {
