@@ -216,9 +216,9 @@ class Dashboard extends Component {
     };
 
     //all the eventlisteners for current events
-    this.eventSource.addEventListener("quote", (quote) =>
-      this.setState({ quote: JSON.parse(quote.data) })
-    );
+    // this.eventSource.addEventListener("quote", (quote) =>
+    //   this.setState({ quote: JSON.parse(quote.data) })
+    // );
     this.eventSource.addEventListener("commentary", (commentary) =>
       this.setState({ commentary: JSON.parse(commentary.data) })
     );
@@ -356,8 +356,8 @@ class Dashboard extends Component {
         this.setState(
           {
             currentAnalytic: finalobj,
-          },
-          () => console.log(this.state.currentAnalytic)
+          }
+          // () => console.log(this.state.currentAnalytic)
         );
       }
       // console.log(this.state.currentAnalyticsView);

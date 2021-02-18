@@ -9,12 +9,13 @@ import {
 import NativeDropdown from "../../commons/nativeDropdown";
 import DialogContainer from "../../commons/dialog";
 // import SchemaTable from "../../../dashboard/table/schemaTable";
-
+// import ListApp from "../../../ListApp";
 import StrategyForm from "./StrategyForm";
 
 import SnackBar from "../../commons/snackBar";
 import PropTypes from "prop-types";
-
+import { connect } from "react-redux";
+import { setSchemaHost, setSchemaPort } from "../../../actions";
 require("dotenv").config();
 
 const styles = (theme) => ({
@@ -142,6 +143,9 @@ class CreateNewStrategyForm extends Component {
     //when host and port is not empty
     if (this.state.schemaHost !== "" && this.state.schemaPort !== "") {
       this.schemaConnection(this.state.schemaHost, this.state.schemaPort);
+      //set host and port in redux store
+      this.props.setSchemaHost(this.state.schemaHost);
+      this.props.setSchemaPort(this.state.schemaPort);
     } else {
       //when fields are empty
       alert("Please Enter the Host And Port");
@@ -203,6 +207,7 @@ class CreateNewStrategyForm extends Component {
                 fontSize={18}
                 size="small"
                 disabled={this.state.disabled}
+                autoComplete="off"
               ></TextField>
             </Grid>
             <Grid item>
@@ -217,6 +222,7 @@ class CreateNewStrategyForm extends Component {
                 fontSize={18}
                 size="small"
                 disabled={this.state.disabled}
+                autoComplete="off"
               ></TextField>
             </Grid>
             <Grid item>
@@ -298,5 +304,13 @@ class CreateNewStrategyForm extends Component {
 CreateNewStrategyForm.propTypes = {
   classes: PropTypes.object.isRequired,
 };
+function mapDispatchToProps(dispatch) {
+  return {
+    setSchemaHost: (host) => dispatch(setSchemaHost(host)),
+    setSchemaPort: (host) => dispatch(setSchemaPort(host)),
+  };
+}
 
-export default withStyles(styles)(CreateNewStrategyForm);
+const NewForm = connect(null, mapDispatchToProps)(CreateNewStrategyForm);
+
+export default withStyles(styles)(NewForm);

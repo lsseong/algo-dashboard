@@ -1,4 +1,13 @@
-export const ADD_ARTICLE = "ADD_ARTICLE";
+//ENDPOINTS
+export const PERFORMANCE_ENDPOINT = "service/strategy/performances";
+export const STATUSES_ENDPOINT = "service/strategy/statuses";
+export const SCHEMA_ENDPOINT = "service/strategy/schemas";
+export const STRATEGY_CREATION_ENDPOINT = "service/strategy/create";
+
+// COMMENTS BUFFER LIMIT
+export const COMMENTARIES_LIMIT = 50;
+
+//SCHEMA CONSTANTS FOR SECURITY_CLASS
 export const SECURITY_CLASS = [
   "Cash",
   "Forex",
@@ -10,4 +19,6 @@ export const SECURITY_CLASS = [
   "Option",
   "Crypto",
 ];
+
+// SCHEMA CONSTANTS FOR CURRENCIES
 export const CURRENCIES = ["USD", "EUR", "SGD"];

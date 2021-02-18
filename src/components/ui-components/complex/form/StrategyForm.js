@@ -7,12 +7,17 @@ import {
   withStyles,
   Paper,
 } from "@material-ui/core";
+
 import PropTypes from "prop-types";
 import ListForm from "../../commons/listForm";
 import { util } from "../../../util";
 import SnackBar from "../../commons/snackBar";
 import SecurityField from "../field/securityField";
+import { URL } from "../../../util";
 
+import { connect } from "react-redux";
+import { storeFormData } from "../../../actions";
+const axios = require("axios");
 const styles = (theme) => ({
   title: {
     marginBottom: theme.spacing(1),
@@ -56,6 +61,7 @@ class StrategyForm extends Component {
   }
   componentDidMount() {
     this.init();
+    console.log(this.props);
   }
 
   init = () => {
@@ -97,7 +103,7 @@ class StrategyForm extends Component {
     });
     console.log("Default Value", obj);
     template.push(obj);
-
+    this.props.storeFormData(Object.fromEntries(finalObj));
     this.setState(
       {
         formSchema: formSchemaMap,
@@ -116,14 +122,6 @@ class StrategyForm extends Component {
     );
   };
 
-  mapData = (data) => {
-    data.map((item, index) => {
-      return Object.entries(item).map(([innerkey, innervalue], innerindex) => {
-        console.log(innerkey, innervalue);
-      });
-    });
-  };
-
   componentDidUpdate(prevProps) {
     if (this.props.parameters !== prevProps.parameters) {
       console.log(this.props.parameters);
@@ -134,18 +132,6 @@ class StrategyForm extends Component {
       this.init();
     }
   }
-
-  addObjectToForm = (name, value) => {
-    console.log(name, value);
-    let tempObj = this.state.formData;
-    tempObj.set(name, value);
-    this.setState(
-      {
-        formData: tempObj,
-      },
-      () => console.log(this.state.formData)
-    );
-  };
 
   getDefaultValue = (min, type, decimalPlaces = 0) => {
     if (type === "integer") {
@@ -188,6 +174,7 @@ class StrategyForm extends Component {
     list[index][name] = value;
     let finalObj = this.state.finalObj;
     finalObj.set(name, value);
+    this.props.storeFormData(Object.fromEntries(finalObj));
     this.setState(
       {
         formData: list,
@@ -213,7 +200,7 @@ class StrategyForm extends Component {
     list[index][id] = value;
     let finalObj = this.state.finalObj;
     finalObj.set(id, value);
-
+    this.props.storeFormData(Object.fromEntries(finalObj));
     this.setState(
       {
         formData: list,
@@ -248,6 +235,7 @@ class StrategyForm extends Component {
     list[index][id] = newValue;
     let finalObj = this.state.finalObj;
     finalObj.set(id, newValue);
+    this.props.storeFormData(Object.fromEntries(finalObj));
     this.setState(
       {
         formData: list,
@@ -268,7 +256,7 @@ class StrategyForm extends Component {
         valid = true;
       }
     }
-    console.log(type, valid);
+
     return valid;
   };
 
@@ -336,13 +324,15 @@ class StrategyForm extends Component {
       tempFinal.set(headerName, null);
       tempBlank.set(headerName, true);
     }
+
+    this.props.storeFormData(Object.fromEntries(tempFinal));
     this.setState(
       {
         validated: tempValidated,
         finalObj: tempFinal,
         isBlank: tempBlank,
-      }
-      // () => console.log(this.state.finalObj, this.state.validated)
+      },
+      () => console.log(this.state.finalObj, this.state.validated)
     );
   };
 
@@ -389,11 +379,41 @@ class StrategyForm extends Component {
       console.log(message);
       this.props.handleSnackBarMessage(false, message);
     } else {
-      this.props.handleSnackBarMessage(
-        true,
-        "Success \n" + JSON.stringify(finalObj)
-      );
+      this.sendForStrategyCreation(finalObj);
     }
+  };
+
+  sendForStrategyCreation = (finalObj) => {
+    const STRATEGY_CREATION_URL = URL.getStrategyCreation(
+      this.props.schemaHost,
+      "2222"
+    );
+
+    const requestOptions = {
+      headers: { "Content-Type": "application/json" },
+      mode: "no-cors",
+
+      body: JSON.stringify(finalObj),
+      method: "POST",
+    };
+    console.log(requestOptions);
+
+    axios({
+      method: "post",
+      url: STRATEGY_CREATION_URL,
+      data: JSON.stringify(finalObj),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => {
+        console.log(res);
+        this.props.handleSnackBarMessage(true, "Form Submitted");
+      })
+      .catch((err) => {
+        console.log(err);
+        this.props.handleSnackBarMessage(false, err.name + ": " + err.message);
+      });
   };
 
   render() {
@@ -635,20 +655,25 @@ class StrategyForm extends Component {
                 Strategy Name
                 <b className={classes.mandatory}>*</b>
               </Typography>
-              <TextField
-                id="strategyName"
-                label="Strategy Name"
-                type="text"
-                required
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                onChange={this.handleChange}
-                value={this.state.strategyName}
-                margin={"dense"}
-                variant="outlined"
-                error={this.state.strategyName.trim() === ""}
-              />
+              <Grid container spacing={2}>
+                <Grid item xs={3}>
+                  <TextField
+                    id="strategyName"
+                    label="Strategy Name"
+                    type="text"
+                    required
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    onChange={this.handleChange}
+                    value={this.state.strategyName}
+                    margin={"dense"}
+                    variant="outlined"
+                    error={this.state.strategyName.trim() === ""}
+                    fullWidth={true}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
 
             {parameters}
@@ -677,5 +702,16 @@ class StrategyForm extends Component {
 StrategyForm.propTypes = {
   classes: PropTypes.object.isRequired,
 };
+const mapStateToProps = (state) => {
+  return { schemaHost: state.schemaHost, schemaPort: state.schemaPort };
+};
 
-export default withStyles(styles)(StrategyForm);
+function mapDispatchToProps(dispatch) {
+  return {
+    storeFormData: (article) => dispatch(storeFormData(article)),
+  };
+}
+
+const Form = connect(mapStateToProps, mapDispatchToProps)(StrategyForm);
+
+export default withStyles(styles)(Form);

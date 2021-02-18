@@ -304,16 +304,19 @@ class App extends Component {
         JSON.stringify(this.state.signalLayout)
       );
     } else {
-      this.setState({
-        signalLayout: tempSignalLayout,
-      });
+      this.setState(
+        {
+          signalLayout: tempSignalLayout,
+        },
+        () => console.log(this.state.signalLayout)
+      );
     }
   };
 
   setLocalStorage = (itemName, data) => {
     localStorage.setItem(itemName, JSON.stringify(data));
     let results = JSON.parse(localStorage.getItem(itemName));
-
+    console.log(results);
     if (String(results) === String(data)) {
       console.log(itemName, "was stored successfully");
       this.handleSnackBarMessage(true, "Layout changed Successfully");
@@ -344,22 +347,22 @@ class App extends Component {
     }
   };
 
-  handleChangeTab = (event) => {
-    const id = event.target.id;
+  handleChangeTab = (event, index) => {
     const name = event.target.name;
     let tempArr = [];
-
+    console.log(event.target);
+    console.log(index, name, event.target.value);
     if (name === "portfolioLayout") {
       tempArr = this.state.portfolioLayout;
-      tempArr[id] = parseInt(event.target.value);
+      tempArr[index] = parseInt(event.target.value);
     } else if (name === "positionLayout") {
       tempArr = this.state.positionLayout;
-      tempArr[id] = parseInt(event.target.value);
+      tempArr[index] = parseInt(event.target.value);
     } else if (name === "signalLayout") {
       tempArr = this.state.signalLayout;
-      tempArr[id] = parseInt(event.target.value);
+      tempArr[index] = parseInt(event.target.value);
     }
-
+    console.log(this.state);
     if (tempArr.length > 0) {
       this.setState(
         {
@@ -404,7 +407,7 @@ class App extends Component {
               <NativeDropdown
                 name="portfolioLayout"
                 value={item}
-                changeAction={this.handleChangeTab}
+                changeAction={(e) => this.handleChangeTab(e, index)}
               >
                 {allComponent}
               </NativeDropdown>
@@ -416,7 +419,7 @@ class App extends Component {
               <NativeDropdown
                 name="portfolioLayout"
                 value={item}
-                changeAction={this.handleChangeTab}
+                changeAction={(e) => this.handleChangeTab(e, index)}
               >
                 {allComponent}
               </NativeDropdown>
@@ -437,7 +440,7 @@ class App extends Component {
               <NativeDropdown
                 name="positionLayout"
                 value={item}
-                changeAction={this.handleChangeTab}
+                changeAction={(e) => this.handleChangeTab(e, index)}
               >
                 {allComponent}
               </NativeDropdown>
@@ -450,7 +453,7 @@ class App extends Component {
                 <NativeDropdown
                   name="positionLayout"
                   value={item}
-                  changeAction={this.handleChangeTab}
+                  changeAction={(e) => this.handleChangeTab(e, index)}
                 >
                   {allComponent}
                 </NativeDropdown>
@@ -463,7 +466,7 @@ class App extends Component {
               <NativeDropdown
                 name="positionLayout"
                 value={item}
-                changeAction={this.handleChangeTab}
+                changeAction={(e) => this.handleChangeTab(e, index)}
               >
                 {allComponent}
               </NativeDropdown>
@@ -483,7 +486,7 @@ class App extends Component {
             <NativeDropdown
               name="signalLayout"
               value={item}
-              changeAction={this.handleChangeTab}
+              changeAction={(e) => this.handleChangeTab(e, index)}
             >
               {allComponent}
             </NativeDropdown>
@@ -495,7 +498,7 @@ class App extends Component {
             <NativeDropdown
               name="signalLayout"
               value={item}
-              changeAction={this.handleChangeTab}
+              changeAction={(e) => this.handleChangeTab(e, index)}
             >
               {allComponent}
             </NativeDropdown>
